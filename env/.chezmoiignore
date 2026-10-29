@@ -13,7 +13,16 @@ omarchy/**
 .config/fish/**
 {{ end }}
 
-# Omarchy: manage nothing until the Omarchy plan is approved (decision 23)
+# Omarchy (ADR 0012): only the Umbra theme folder until ADR 0011 is implemented.
+# Everywhere else the Omarchy theme folder is not deployed.
 {{ if eq .os "omarchy" }}
 **
+!.config
+!.config/omarchy
+!.config/omarchy/themes
+!.config/omarchy/themes/umbra
+!.config/omarchy/themes/umbra/**
+{{ else }}
+.config/omarchy
+.config/omarchy/**
 {{ end }}

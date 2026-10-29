@@ -108,7 +108,7 @@ Everything is interactive on a terminal; every prompt has an env-var override. W
 | Variable | Values | Default |
 | --- | --- | --- |
 | `UM_SHELL` | `zsh` · `fish` | `zsh` |
-| `UM_THEME` | `default` · `tron` · `cyber` · `eva01` · `minimal` | `default` |
+| `UM_THEME` | `umbra` · `default` · `tron` · `cyber` · `eva01` · `minimal` | `umbra` (generated from the brand tokens) |
 | `UM_MODE` (`--profile`) | `personal` · `work` — work skips the AI standard and opencode | `personal` |
 | `UM_COMPONENTS` (`--components`) · `UM_SKIP` (`--skip`) | comma-separated phase names | all phases |
 | `UM_ENABLE_K8S` | `0` · `1` | prompt on a terminal; `1` otherwise |

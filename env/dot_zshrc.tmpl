@@ -36,7 +36,7 @@ export UM_ENV_DIR="${UM_ENV_DIR:-{{ joinPath .chezmoi.workingTree "env" "wsl" }}
 # =========================================================
 
 ZSH_MODULE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
-for _zsh_module in core fzf aliases git bindings plugins prompt dev wsl; do
+for _zsh_module in core fzf colors aliases git bindings plugins prompt dev wsl; do
   [ -f "$ZSH_MODULE_DIR/${_zsh_module}.zsh" ] && source "$ZSH_MODULE_DIR/${_zsh_module}.zsh"
 done
 unset _zsh_module

@@ -191,24 +191,27 @@ select_theme() {
   if [ -n "$UM_THEME" ]; then
     return 0
   fi
+  # Phase 1 (ADR 0013): umbra, generated from brand/tokens, is the default theme.
   if [ "$UM_NONINTERACTIVE" = "1" ] || ! is_tty; then
-    UM_THEME="default"
+    UM_THEME="umbra"
     return 0
   fi
   log_info "Choose a Starship theme:"
-  echo "1) default"
-  echo "2) tron"
-  echo "3) cyber"
-  echo "4) eva01"
-  echo "5) minimal"
-  read -r -p "Select [1-5] (default 1): " choice </dev/tty
+  echo "1) umbra"
+  echo "2) default"
+  echo "3) tron"
+  echo "4) cyber"
+  echo "5) eva01"
+  echo "6) minimal"
+  read -r -p "Select [1-6] (default 1): " choice </dev/tty
   case "$choice" in
-    1|"") UM_THEME="default" ;;
-    2) UM_THEME="tron" ;;
-    3) UM_THEME="cyber" ;;
-    4) UM_THEME="eva01" ;;
-    5) UM_THEME="minimal" ;;
-    *) UM_THEME="default" ;;
+    1|"") UM_THEME="umbra" ;;
+    2) UM_THEME="default" ;;
+    3) UM_THEME="tron" ;;
+    4) UM_THEME="cyber" ;;
+    5) UM_THEME="eva01" ;;
+    6) UM_THEME="minimal" ;;
+    *) UM_THEME="umbra" ;;
   esac
 }
 

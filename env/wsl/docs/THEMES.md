@@ -1,5 +1,7 @@
 # Themes
 
+> Since Phase 1 the default theme is **umbra**, generated from `brand/tokens/umbra.json` by `themes/generate.py` (ADR 0013). The themes below are the lux-dotfiles originals, still selectable with `UM_THEME`.
+
 Five prompt themes. Each one is a [Starship](https://starship.rs) config,
 and four of them ship a matching Windows Terminal colour scheme so the
 terminal and the prompt agree.

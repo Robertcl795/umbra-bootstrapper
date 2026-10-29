@@ -14,7 +14,7 @@
 {{-   $profile = promptChoiceOnce . "profile" "Umbra profile" (list "personal" "work") "personal" -}}
 {{- end -}}
 {{- $shell := env "UM_SHELL" | default (get . "shell") | default "zsh" -}}
-{{- $theme := env "UM_THEME" | default (get . "theme") | default "default" -}}
+{{- $theme := env "UM_THEME" | default (get . "theme") | default "umbra" -}}
 {{- /* The selection of bootstrap.sh (it sets UM_CHEZMOI_INIT=1) is stored, so a plain
        `chezmoi apply` later sees the same selection and re-runs nothing. */ -}}
 {{- $fromBootstrap := eq (env "UM_CHEZMOI_INIT") "1" -}}
