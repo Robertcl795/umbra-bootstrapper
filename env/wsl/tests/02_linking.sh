@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-check_link() {
-  if [ ! -L "$1" ]; then
-    echo "Expected symlink: $1" >&2
+# chezmoi-layout (ADR 0006): the configs are files deployed by chezmoi, not symlinks.
+check_managed() {
+  if [ ! -e "$1" ] || [ -L "$1" ]; then
+    echo "Expected a chezmoi-managed file or directory (not a symlink): $1" >&2
     exit 1
   fi
 }
 
-check_link "$HOME/.config/nvim"
-# ADR 0004: fish config is linked only when fish is the chosen shell.
+check_managed "$HOME/.config/nvim"
+# ADR 0004: fish config is deployed only when fish is the chosen shell.
 if [ "${UM_SHELL:-zsh}" = "fish" ]; then
-  check_link "$HOME/.config/fish/config.fish"
+  check_managed "$HOME/.config/fish/config.fish"
 fi
-check_link "$HOME/.zshrc"
-check_link "$HOME/.config/starship.toml"
-check_link "$HOME/.config/zellij/config.kdl"
+check_managed "$HOME/.zshrc"
+check_managed "$HOME/.config/starship.toml"
+check_managed "$HOME/.config/zellij/config.kdl"
+
+chezmoi verify || { echo "chezmoi verify: the managed files differ from the source." >&2; exit 1; }

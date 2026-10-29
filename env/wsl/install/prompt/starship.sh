@@ -16,20 +16,10 @@ install_starship() {
     curl -fsSL https://starship.rs/install.sh | sh -s -- -y
   fi
 
-  select_theme
-  local theme_file
-  if [ "$UM_THEME" = "default" ]; then
-    theme_file="$UM_ENV_DIR/config/starship/starship.toml"
-  else
-    theme_file="$UM_ENV_DIR/themes/$UM_THEME/starship.toml"
-    if [ ! -f "$theme_file" ]; then
-      log_warn "Theme $UM_THEME not found, falling back to the default config."
-      theme_file="$UM_ENV_DIR/config/starship/starship.toml"
-    fi
-  fi
-
-  symlink_with_backup "$theme_file" "$HOME/.config/starship.toml"
-  log_info "Starship config linked: $theme_file (theme: $UM_THEME)"
+  # chezmoi-unlink (ADR 0006): ~/.config/starship.toml is rendered by chezmoi from the
+  # `theme` value (env/dot_config/starship.toml.tmpl); switch with
+  # `UM_THEME=<name> chezmoi init --apply`.
+  log_info "Starship installed (theme: ${UM_THEME:-default}, managed by chezmoi)."
 }
 
 if [ "${1:-}" = "--run" ]; then

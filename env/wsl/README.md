@@ -50,7 +50,7 @@ bash bootstrap.sh --yes --components packages,link,shell,prompt
 bash bootstrap.sh --yes --skip k8s,ai-cli
 ```
 
-Phase names: `packages link shell prompt nvim k8s zellij lang ai-cli wsl ai-standard fastfetch`.
+Phase names: `packages shell prompt nvim k8s zellij lang ai-cli wsl ai-standard fastfetch`. The dotfiles themselves are always deployed by chezmoi (ADR 0006).
 
 **Fresh Arch WSL** starts as `root` with no user. Run the same command: it
 updates the system, enables sudo for `wheel`, creates your user, sets it as
@@ -71,7 +71,7 @@ Details: [docs/os/arch.md](docs/os/arch.md).
 flowchart LR
     A["bootstrap.sh"] --> B["0 · preflight<br/>detect OS"]
     B --> C["1 · packages<br/>CLI stack"]
-    C --> D["2 · link<br/>symlinks"]
+    C --> D["2 · chezmoi<br/>dotfiles"]
     D --> E["3 · shell<br/>zsh / fish"]
     E --> F["4 · prompt<br/>starship"]
     F --> G["5-9 · nvim, k8s,<br/>zellij, langs, AI"]
@@ -130,9 +130,10 @@ reopen your terminal.
 From `env/wsl/` in the umbra checkout:
 
 ```bash
-bash install/run.sh                                   # re-run the full bootstrap
+bash bootstrap.sh --yes                               # re-run the full bootstrap (chezmoi re-runs only what changed)
 bash tests/99_smoke.sh                                # run every checkpoint
-UM_THEME=tron bash install/prompt/starship.sh --run   # switch prompt theme, no re-bootstrap
+UM_THEME=tron chezmoi init --apply                    # switch prompt theme, no re-bootstrap
+chezmoi diff && chezmoi apply                         # after editing a dotfile in env/
 bash install/fastfetch.sh --run                       # reinstall/relink the greeting
 bash ../../toolkit/ai-standard/scaffold.sh ~/p        # drop the AI standard into a repo
 ```
@@ -142,11 +143,11 @@ bash ../../toolkit/ai-standard/scaffold.sh ~/p        # drop the AI standard int
 | Path | Contents |
 | --- | --- |
 | `bootstrap.sh` · `install.sh` | Entry points (`install.sh` runs the phases of an existing checkout) |
-| `install/` | Bootstrap phases, one script per phase |
-| `config/` | Configs: [`zsh/`](config/zsh), [`fastfetch/`](config/fastfetch), `starship/` and `zellij/` get symlinked; `git/` and `alacritty/` are kept but not linked by any phase |
-| `shells/` | Shell entry points (`zshrc`, fish `config.fish` + `conf.d/`) |
-| `themes/` | Starship themes (Windows Terminal schemes moved to `themes/terminals/windows-terminal/` at the repo root) |
-| `nvim/` | Neovim configuration |
+| `install/` | Bootstrap phases, one script per phase; chezmoi runs them from `env/.chezmoiscripts/`. `run.sh` runs them without chezmoi (fallback, no dotfiles) |
+| `config/` | `git/` and `alacritty/`, kept but not deployed. The deployed dotfiles live in [`env/`](..) under chezmoi names (`dot_zshrc.tmpl`, `dot_config/…`, ADR 0006) |
+| `env/dot_config/fish/` | Shell entry points (`zshrc`, fish `config.fish` + `conf.d/`) |
+| `env/.chezmoitemplates/starship` | Starship themes (Windows Terminal schemes moved to `themes/terminals/windows-terminal/` at the repo root) |
+| `env/dot_config/nvim/` | Neovim configuration |
 | `tests/` | One checkpoint script per phase |
 | `docs/` | [Documentation](docs/README.md) |
 

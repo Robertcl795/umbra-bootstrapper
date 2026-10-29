@@ -1,5 +1,5 @@
-# ~/.zshrc — entrypoint (symlinked from shells/zsh/zshrc)
-# The configuration itself is split into modules under config/zsh/;
+# ~/.zshrc — entrypoint, managed by chezmoi (source: env/dot_zshrc.tmpl in the umbra checkout)
+# The configuration itself is split into modules under ~/.config/zsh/;
 # machine-local overrides go in ~/.zshrc.local.
 
 # =========================================================
@@ -22,16 +22,11 @@ if [ -d "$HOME/.local/bin" ]; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Resolve the repo root by following the ~/.zshrc symlink
-# (shells/zsh/zshrc -> repo root is three levels up).
-if [ -z "${UM_ENV_DIR:-}" ]; then
-  _zshrc_real="$(readlink -f "${ZDOTDIR:-$HOME}/.zshrc" 2>/dev/null)"
-  UM_ENV_DIR="${_zshrc_real:h:h:h}"
-  unset _zshrc_real
-fi
+# chezmoi-paths: the umbra checkout's env/wsl, filled in by chezmoi (ADR 0006).
+export UM_ENV_DIR="${UM_ENV_DIR:-{{ joinPath .chezmoi.workingTree "env" "wsl" }}}"
 
 # =========================================================
-# Modules (config/zsh/*.zsh)
+# Modules (~/.config/zsh/*.zsh)
 #
 # Order matters:
 #   core     compinit — must run before git.zsh registers completions
@@ -40,7 +35,7 @@ fi
 #   dev/wsl  after the aliases they may override
 # =========================================================
 
-ZSH_MODULE_DIR="$UM_ENV_DIR/config/zsh"
+ZSH_MODULE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 for _zsh_module in core fzf aliases git bindings plugins prompt dev wsl; do
   [ -f "$ZSH_MODULE_DIR/${_zsh_module}.zsh" ] && source "$ZSH_MODULE_DIR/${_zsh_module}.zsh"
 done
@@ -58,6 +53,6 @@ unset _zsh_module
 # editors/multiplexer panes, and when UM_NO_FASTFETCH=1.
 # =========================================================
 
-if [ -f "$UM_ENV_DIR/config/zsh/greeting.zsh" ]; then
-  source "$UM_ENV_DIR/config/zsh/greeting.zsh"
+if [ -f "$ZSH_MODULE_DIR/greeting.zsh" ]; then
+  source "$ZSH_MODULE_DIR/greeting.zsh"
 fi

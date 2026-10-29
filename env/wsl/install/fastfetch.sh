@@ -35,8 +35,10 @@ install_fastfetch() {
   if ! ensure_cmd fastfetch; then
     local arch
     arch="$(detect_arch)"
-    install_release_bin fastfetch \
-      "https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-${arch}.tar.gz" \
+    # pin-downloads (ADR 0006): pinned version, sha256 from install/checksums.sha256;
+    # the arm64 asset is named aarch64.
+    local url="https://github.com/fastfetch-cli/fastfetch/releases/download/${UM_FASTFETCH_VERSION:-2.70.0}/fastfetch-linux-${arch/arm64/aarch64}.tar.gz"
+    install_release_bin fastfetch "$url" "$(pinned_sha256 "$url")" \
       || log_warn "fastfetch could not be installed; shells will start without a greeting."
   fi
 
@@ -44,9 +46,7 @@ install_fastfetch() {
     return 0
   fi
 
-  # ~/.config/fastfetch is symlinked in phase 2; if this phase runs on its
-  # own (make fastfetch) the link may not exist yet.
-  symlink_with_backup "$UM_ENV_DIR/config/fastfetch" "$HOME/.config/fastfetch"
+  # chezmoi-unlink (ADR 0006): ~/.config/fastfetch is deployed by chezmoi.
 
   log_info "fastfetch installed. Every new interactive shell now opens with:"
   echo "" >&2

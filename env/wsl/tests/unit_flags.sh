@@ -27,8 +27,8 @@ check "--profile rejects other values (exit 2)" '[ "$(bash "$ENV_DIR/bootstrap.s
 check "profile defaults to personal" '[ "$(env -u UM_MODE bash -c "source \"$ENV_DIR/install/common.sh\"; echo \$UM_MODE")" = personal ]'
 
 echo "# UM_IS_WSL"
-check "wsl.zsh active with UM_IS_WSL=1" 'UM_IS_WSL=1 zsh -c "source \"$ENV_DIR/config/zsh/wsl.zsh\"; alias explorer"'
-check "wsl.zsh inert with UM_IS_WSL=0" '! UM_IS_WSL=0 zsh -c "source \"$ENV_DIR/config/zsh/wsl.zsh\"; alias explorer"'
+check "wsl.zsh active with UM_IS_WSL=1" 'UM_IS_WSL=1 zsh -c "source \"$ENV_DIR/../dot_config/zsh/wsl.zsh\"; alias explorer"'
+check "wsl.zsh inert with UM_IS_WSL=0" '! UM_IS_WSL=0 zsh -c "source \"$ENV_DIR/../dot_config/zsh/wsl.zsh\"; alias explorer"'
 check "00_preflight refuses non-WSL (UM_IS_WSL=0)" '! UM_IS_WSL=0 bash "$ENV_DIR/tests/00_preflight.sh"'
 check "08_wsl skips outside WSL (UM_IS_WSL=0)" 'UM_IS_WSL=0 bash "$ENV_DIR/tests/08_wsl.sh"'
 

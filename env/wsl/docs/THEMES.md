@@ -7,10 +7,10 @@ terminal and the prompt agree.
 Set at install time (`UM_THEME=<name>`) or switched any time afterwards:
 
 ```bash
-UM_THEME=tron bash install/prompt/starship.sh --run
+UM_THEME=tron chezmoi init --apply
 ```
 
-The change is a symlink swap on `~/.config/starship.toml` — it takes effect
+chezmoi stores the theme and re-renders `~/.config/starship.toml` — it takes effect
 in the next shell, no re-bootstrap needed.
 
 ## Gallery
@@ -33,7 +33,7 @@ the language modules.
 ╰─➜
 ```
 
-File: [`config/starship/starship.toml`](../config/starship/starship.toml) ·
+File: [`env/.chezmoitemplates/starship/default.toml`](../../.chezmoitemplates/starship/default.toml) ·
 no Windows Terminal scheme (keeps your terminal's current colours).
 
 ### `tron`
@@ -53,7 +53,7 @@ the work. Two-line prompt with `>>` / `➜`; modules are labelled in text
 ➜
 ```
 
-Files: [`themes/tron/`](../themes/tron) · scheme `dotfiles-tron`
+Files: [`env/.chezmoitemplates/starship/tron.toml`](../../.chezmoitemplates/starship/tron.toml) · scheme `dotfiles-tron`
 
 ### `cyber`
 
@@ -73,7 +73,7 @@ you don't control.
 $ >
 ```
 
-Files: [`themes/cyber/`](../themes/cyber) · scheme `dotfiles-cyber`
+Files: [`env/.chezmoitemplates/starship/cyber.toml`](../../.chezmoitemplates/starship/cyber.toml) · scheme `dotfiles-cyber`
 
 ### `eva01`
 
@@ -91,7 +91,7 @@ Same ASCII-safe module labels as `cyber`, with `::` / `:]` prompt brackets.
 :] >
 ```
 
-Files: [`themes/eva01/`](../themes/eva01) · scheme `dotfiles-eva01`
+Files: [`env/.chezmoitemplates/starship/eva01.toml`](../../.chezmoitemplates/starship/eva01.toml) · scheme `dotfiles-eva01`
 
 ### `minimal`
 
@@ -109,14 +109,14 @@ the current project. The quietest of the five — everything else is dropped.
 ~/projects/app 󰣇  main +2 ●1 ❯
 ```
 
-Files: [`themes/minimal/`](../themes/minimal) · scheme `dotfiles-minimal`
+Files: [`env/.chezmoitemplates/starship/minimal.toml`](../../.chezmoitemplates/starship/minimal.toml) · scheme `dotfiles-minimal`
 
 ## What's in a theme
 
 | File | Used by | Applied how |
 | --- | --- | --- |
-| `themes/<name>/starship.toml` | WSL + native Windows | Symlinked to `~/.config/starship.toml` (WSL); `$env:STARSHIP_CONFIG` points at it directly on Windows |
-| `themes/<name>/windows-terminal.json` | Windows Terminal only | Merged into `settings.json` as `dotfiles-<name>`, applied to PowerShell profiles only |
+| `env/.chezmoitemplates/starship/<theme>.toml` | WSL + native Windows | Rendered by chezmoi into `~/.config/starship.toml` (WSL); `$env:STARSHIP_CONFIG` points at it directly on Windows |
+| `env/.chezmoitemplates/starship/` | Windows Terminal only | Merged into `settings.json` as `dotfiles-<name>`, applied to PowerShell profiles only |
 
 `default` has no Windows Terminal scheme — on the native-Windows path,
 `UM_THEME` defaults to `cyber` instead.

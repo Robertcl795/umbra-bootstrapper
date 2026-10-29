@@ -8,9 +8,9 @@ login shell; both get installed either way so you can try the other.
 
 ## zsh (default)
 
-`~/.zshrc` is a symlink to [`shells/zsh/zshrc`](../../shells/zsh/zshrc),
+`~/.zshrc` is a symlink to [`env/dot_zshrc.tmpl`](../../../dot_zshrc.tmpl),
 which does nothing but set a few environment variables and source the
-modules in [`config/zsh/`](../../config/zsh) in a fixed order:
+modules in [`env/dot_config/zsh/`](../../../dot_config/zsh) in a fixed order:
 
 | Module | What it sets up |
 | --- | --- |
@@ -56,7 +56,7 @@ from it.
 ## fish
 
 `~/.config/fish/config.fish` and `conf.d/` are symlinked from
-[`shells/fish/`](../../shells/fish). The `conf.d` drop-ins mirror the zsh
+[`env/dot_config/fish/`](../../../dot_config/fish). The `conf.d` drop-ins mirror the zsh
 modules: `aliases.fish`, `git.fish` (same alias names, completions inherited
 via `complete -w`), `greeting.fish`, `fzf.fish`.
 
@@ -82,7 +82,7 @@ history predictions and fzf bindings in pwsh instead — see
 ## Test
 
 [`tests/03_shell.sh`](../../tests/03_shell.sh) — non-interactive `fish -lc`
-and `zsh -lic` startup must not error, the `config/zsh` modules must be
+and `zsh -lic` startup must not error, the `env/dot_config/zsh` modules must be
 loaded (aliases, plugin loader, and every git alias the cheatsheet
 documents), `compdef` must be available for the completions, the four
 plugins must be on disk, and (when `UM_SHELL=zsh`) the login shell must

@@ -2,7 +2,7 @@
 
 Script: [`install/summary.sh`](../../install/summary.sh)
 
-Runs automatically as the last step of `install/run.sh`, after phase 12
+Runs automatically as the last chezmoi script (or the last step of `install/run.sh`), after phase 12
 succeeds — and *only* then: `install/run.sh` has `set -euo pipefail`, so if
 any earlier phase's script exits non-zero the whole run stops before this
 point is ever reached. There's no separate "did it work" flag to check;

@@ -1,0 +1,27 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+# Runs once per machine, before chezmoi writes its files (ADR 0006, plan §7):
+# remove v0.2.0 symlinks that point into the umbra checkout; back up any other
+# existing target to <path>.backup.<timestamp>, so nothing is overwritten silently.
+set -euo pipefail
+repo={{ .chezmoi.workingTree | quote }}
+ts="$(date +%Y%m%d_%H%M%S)"
+targets=(
+  "$HOME/.zshrc" "$HOME/.config/zsh" "$HOME/.config/nvim" "$HOME/.config/fastfetch"
+  "$HOME/.config/zellij/config.kdl" "$HOME/.config/starship.toml"
+{{- if eq .shell "fish" }}
+  "$HOME/.config/fish/config.fish" "$HOME/.config/fish/conf.d" "$HOME/.config/fish/functions"
+{{- end }}
+)
+for t in "${targets[@]}"; do
+  if [ -L "$t" ]; then
+    case "$(readlink -f "$t" 2>/dev/null || true)" in
+      "$repo"/*) rm "$t"; echo "[INFO] removed v0.2.0 link: $t" >&2; continue ;;
+    esac
+  fi
+  if [ -e "$t" ] || [ -L "$t" ]; then
+    mv "$t" "$t.backup.$ts"
+    echo "[WARN] backed up existing $t -> $t.backup.$ts" >&2
+  fi
+done
+{{- end }}

@@ -1,0 +1,7 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/prompt/starship.sh" | sha256sum }} prompt/starship.sh
+component_enabled prompt || exit 0
+bash "$UM_ENV_DIR/install/prompt/starship.sh" --run
+{{- end }}

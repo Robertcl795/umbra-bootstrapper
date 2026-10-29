@@ -10,10 +10,8 @@ if test -d "$HOME/.fzf/bin"
   fish_add_path "$HOME/.fzf/bin"
 end
 
-set -l this_file (status --current-filename)
-if test -n "$this_file"
-  set -gx UM_ENV_DIR (dirname (dirname $this_file))
-end
+# chezmoi-paths: the umbra checkout's env/wsl, filled in by chezmoi (ADR 0006).
+set -gx UM_ENV_DIR {{ joinPath .chezmoi.workingTree "env" "wsl" | quote }}
 
 if type -q starship
   starship init fish | source

@@ -1,40 +1,30 @@
-# Phase 2 — Clone + link Umbra configs
+# Phase 2 — Dotfiles deployed by chezmoi
 
-Script: [`install/link.sh`](../../install/link.sh)
+Since ADR 0006 there is no linking phase. `bootstrap.sh` installs chezmoi
+([`install/chezmoi.sh`](../../install/chezmoi.sh)) and runs
+`chezmoi init --apply --source <checkout>`. chezmoi copies the dotfiles from
+[`env/`](../../..) (the repo's `.chezmoiroot`) into `$HOME` and runs the install
+phases as scripts in `env/.chezmoiscripts/`.
 
-Symlinks repo config into place using `symlink_with_backup` (from
-`install/common.sh`), which never overwrites silently: if the destination
-already exists and isn't already the correct symlink, it's moved to
-`<path>.backup.<timestamp>` first.
-
-| Source | Destination |
+| Source (in `env/`) | Destination |
 | --- | --- |
-| `shells/fish/config.fish` (fish only) | `~/.config/fish/config.fish` |
-| `shells/fish/conf.d` (fish only) | `~/.config/fish/conf.d` |
-| `shells/fish/functions` (fish only) | `~/.config/fish/functions` |
-| `shells/zsh/zshrc` | `~/.zshrc` |
-| `shells/zsh` | `~/.config/zsh` |
-| `nvim` | `~/.config/nvim` |
-| `config/fastfetch` | `~/.config/fastfetch` |
+| `dot_zshrc.tmpl` | `~/.zshrc` |
+| `dot_config/zsh/*.zsh` | `~/.config/zsh/` |
+| `dot_config/nvim/` | `~/.config/nvim` |
+| `dot_config/fastfetch/` | `~/.config/fastfetch` |
+| `dot_config/zellij/config.kdl` | `~/.config/zellij/config.kdl` |
+| `dot_config/starship.toml.tmpl` (theme from `.chezmoitemplates/starship/`) | `~/.config/starship.toml` |
+| `dot_config/fish/` (fish only, ADR 0004) | `~/.config/fish/` |
 
-`~/.config/starship.toml` is linked separately in
-[phase 4](04-prompt.md), since which file it points at depends on
-`UM_THEME`.
+The choices (profile, shell, theme, phases) are stored once in
+`~/.config/chezmoi/chezmoi.toml`, never in the repo.
 
-Re-running the bootstrap is safe: if the symlink already points at the
-repo, `symlink_with_backup` is a no-op; nothing is re-backed-up on every
-run.
+Day to day: edit the file in the checkout, then `chezmoi diff` and
+`chezmoi apply`. Switch theme: `UM_THEME=tron chezmoi init --apply`.
 
-## OS notes
+First apply on a machine set up with v0.2.0: a one-time script removes the old
+symlinks into the checkout and backs up any other existing file to
+`<path>.backup.<timestamp>`. Rollback steps are in [env/README.md](../../../README.md).
 
-Symlinks work the same way on Ubuntu and Arch (same filesystem semantics
-under WSL). There is no equivalent phase on native Windows — creating
-real symlinks there needs admin rights or Developer Mode, so
-`windows/profile.ps1` points `$env:STARSHIP_CONFIG` and friends directly at
-files inside the cloned repo instead of symlinking; see
-[os/windows.md](../os/windows.md).
-
-## Test
-
-[`tests/02_linking.sh`](../../tests/02_linking.sh) checks each destination
-resolves back into the repo.
+Checkpoint: [`tests/02_linking.sh`](../../tests/02_linking.sh) — the targets are
+chezmoi-managed files and `chezmoi verify` passes.

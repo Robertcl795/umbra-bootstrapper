@@ -1,0 +1,6 @@
+{{- /* Theme chosen by the `theme` value (default, tron, cyber, eva01, minimal). */ -}}
+{{- $theme := .theme -}}
+{{- if not (stat (joinPath .chezmoi.sourceDir ".chezmoitemplates" "starship" (printf "%s.toml" $theme))) -}}
+{{-   $theme = "default" -}}
+{{- end -}}
+{{ include (printf ".chezmoitemplates/starship/%s.toml" $theme) -}}

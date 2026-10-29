@@ -20,7 +20,9 @@ install_zellij() {
           arm64) rust_arch="aarch64" ;;
           *) rust_arch="x86_64" ;;
         esac
-        install_release_bin zellij "https://github.com/zellij-org/zellij/releases/latest/download/zellij-${rust_arch}-unknown-linux-musl.tar.gz"
+        # pin-downloads (ADR 0006): pinned version, sha256 from install/checksums.sha256.
+        local url="https://github.com/zellij-org/zellij/releases/download/v${UM_ZELLIJ_VERSION:-0.45.1}/zellij-${rust_arch}-unknown-linux-musl.tar.gz"
+        install_release_bin zellij "$url" "$(pinned_sha256 "$url")"
         ;;
       *)
         if ensure_cmd cargo; then
@@ -32,8 +34,8 @@ install_zellij() {
     esac
   fi
 
-  symlink_with_backup "$UM_ENV_DIR/config/zellij/config.kdl" "$HOME/.config/zellij/config.kdl"
-  log_info "Zellij configured (config: ~/.config/zellij/config.kdl)."
+  # chezmoi-unlink (ADR 0006): ~/.config/zellij/config.kdl is deployed by chezmoi.
+  log_info "Zellij installed (config: ~/.config/zellij/config.kdl, managed by chezmoi)."
 }
 
 if [ "${1:-}" = "--run" ]; then

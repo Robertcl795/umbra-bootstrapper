@@ -1,0 +1,7 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/wsl.sh" | sha256sum }} wsl.sh
+component_enabled wsl || exit 0
+bash "$UM_ENV_DIR/install/wsl.sh" --run
+{{- end }}

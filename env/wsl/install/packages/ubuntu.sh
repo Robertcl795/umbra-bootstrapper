@@ -64,7 +64,9 @@ install_packages_ubuntu() {
 }
 
 # Core CLI extras. Ubuntu's apt archive lags behind Arch, so tools missing
-# from apt come from GitHub release binaries (versions overridable via env).
+# from apt come from GitHub release binaries. pin-downloads (ADR 0006): every URL
+# is pinned to a version and its sha256 in install/checksums.sha256; a version
+# override (UM_<TOOL>_VERSION) needs its hash added there or the install is refused.
 install_cli_extras_ubuntu() {
   log_step "Core CLI extras (lazygit, glow, duf, lazydocker, yazi, sshs, lnav, just, zellij)"
 
@@ -86,22 +88,38 @@ install_cli_extras_ubuntu() {
     *) goarch_suffix="Linux_x86_64" ;;
   esac
 
-  install_release_bin lazygit "https://github.com/jesseduffield/lazygit/releases/download/v${lazygit_ver}/lazygit_${lazygit_ver}_${goarch_suffix}.tar.gz"
-  install_release_bin glow "https://github.com/charmbracelet/glow/releases/download/v${glow_ver}/glow_${glow_ver}_${goarch_suffix}.tar.gz"
-  install_release_bin lazydocker "https://github.com/jesseduffield/lazydocker/releases/download/v${lazydocker_ver}/lazydocker_${lazydocker_ver}_${goarch_suffix}.tar.gz"
-  install_release_bin zellij "https://github.com/zellij-org/zellij/releases/latest/download/zellij-${rust_arch}-unknown-linux-musl.tar.gz"
-  install_release_bin yazi "https://github.com/sxyazi/yazi/releases/latest/download/yazi-${rust_arch}-unknown-linux-gnu.zip"
-  install_release_bin sshs "https://github.com/quantumsheep/sshs/releases/latest/download/sshs-linux-${arch}"
+  local zellij_ver="${UM_ZELLIJ_VERSION:-0.45.1}" yazi_ver="${UM_YAZI_VERSION:-26.9.1}"
+  local sshs_ver="${UM_SSHS_VERSION:-4.8.0}" fastfetch_ver="${UM_FASTFETCH_VERSION:-2.70.0}"
+  local url
+  for url in \
+    "https://github.com/jesseduffield/lazygit/releases/download/v${lazygit_ver}/lazygit_${lazygit_ver}_${goarch_suffix}.tar.gz" \
+    "https://github.com/charmbracelet/glow/releases/download/v${glow_ver}/glow_${glow_ver}_${goarch_suffix}.tar.gz" \
+    "https://github.com/jesseduffield/lazydocker/releases/download/v${lazydocker_ver}/lazydocker_${lazydocker_ver}_${goarch_suffix}.tar.gz" \
+    "https://github.com/zellij-org/zellij/releases/download/v${zellij_ver}/zellij-${rust_arch}-unknown-linux-musl.tar.gz" \
+    "https://github.com/sxyazi/yazi/releases/download/v${yazi_ver}/yazi-${rust_arch}-unknown-linux-gnu.zip" \
+    "https://github.com/quantumsheep/sshs/releases/download/${sshs_ver}/sshs-linux-${arch}"; do
+    case "$url" in
+      */lazygit_*) install_release_bin lazygit "$url" "$(pinned_sha256 "$url")" ;;
+      */glow_*) install_release_bin glow "$url" "$(pinned_sha256 "$url")" ;;
+      */lazydocker_*) install_release_bin lazydocker "$url" "$(pinned_sha256 "$url")" ;;
+      */zellij-*) install_release_bin zellij "$url" "$(pinned_sha256 "$url")" ;;
+      */yazi-*) install_release_bin yazi "$url" "$(pinned_sha256 "$url")" ;;
+      */sshs-*) install_release_bin sshs "$url" "$(pinned_sha256 "$url")" ;;
+    esac
+  done
 
   # fastfetch entered the Ubuntu archive in 24.10; older releases (and the
-  # LTS) need the upstream build.
+  # LTS) need the upstream build. Its arm64 asset is named aarch64.
   if ! ensure_cmd fastfetch && ! sudo apt-get install -y fastfetch 2>/dev/null; then
-    install_release_bin fastfetch "https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-${arch}.tar.gz"
+    url="https://github.com/fastfetch-cli/fastfetch/releases/download/${fastfetch_ver}/fastfetch-linux-${rust_arch/x86_64/amd64}.tar.gz"
+    install_release_bin fastfetch "$url" "$(pinned_sha256 "$url")"
   fi
 
+  # duf's release assets are named x86_64/arm64.
   if ! ensure_cmd duf; then
     local duf_ver="${UM_DUF_VERSION:-0.8.1}"
-    install_release_bin duf "https://github.com/muesli/duf/releases/download/v${duf_ver}/duf_${duf_ver}_linux_${arch}.tar.gz"
+    url="https://github.com/muesli/duf/releases/download/v${duf_ver}/duf_${duf_ver}_linux_${goarch_suffix#Linux_}.tar.gz"
+    install_release_bin duf "$url" "$(pinned_sha256 "$url")"
   fi
 }
 

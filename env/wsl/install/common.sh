@@ -105,26 +105,48 @@ detect_arch() {
   esac
 }
 
+# pin-downloads (ADR 0006): sha256 of a pinned URL, from install/checksums.sha256; empty if absent.
+pinned_sha256() {
+  awk -v url="$1" '$2 == url { print $1; exit }' "$UM_ENV_DIR/install/checksums.sha256" 2>/dev/null
+}
+
+# verify_sha256 <file> <expected>: true only when the file's sha256 is the expected one.
+verify_sha256() {
+  [ -n "$2" ] && [ "$(sha256sum "$1" | cut -d' ' -f1)" = "$2" ]
+}
+
 # Install a single binary from a GitHub release asset into ~/.local/bin.
-# Handles .tar.gz/.tgz, .zip and raw binary assets.
-# Usage: install_release_bin <binary-name> <asset-url>
+# Handles .tar.gz/.tgz, .zip and raw binary assets. The download is checked against the
+# expected sha256 before it is unpacked; a missing or wrong hash refuses the install.
+# Usage: install_release_bin <binary-name> <asset-url> <sha256>
 install_release_bin() {
-  local name="$1" url="$2" tmp bin
+  local name="$1" url="$2" sha="${3:-}" tmp bin
   if ensure_cmd "$name"; then
     return 0
   fi
+  if [ -z "$sha" ]; then
+    log_warn "No pinned sha256 for $url; refusing to install $name."
+    return 1
+  fi
   log_info "Installing $name from $url"
   tmp="$(mktemp -d)"
+  curl -fsSL -o "$tmp/asset" "$url" || { rm -rf "$tmp"; log_warn "Download failed for $name"; return 1; }
+  if ! verify_sha256 "$tmp/asset" "$sha"; then
+    rm -rf "$tmp"
+    log_warn "sha256 mismatch for $url; refusing to install $name."
+    return 1
+  fi
   case "$url" in
     *.tar.gz|*.tgz)
-      curl -fsSL "$url" | tar -xz -C "$tmp" || { rm -rf "$tmp"; log_warn "Download failed for $name"; return 1; }
+      tar -xz -C "$tmp" -f "$tmp/asset" || { rm -rf "$tmp"; log_warn "Unpacking failed for $name"; return 1; }
+      rm -f "$tmp/asset"
       ;;
     *.zip)
-      curl -fsSL -o "$tmp/pkg.zip" "$url" && unzip -q "$tmp/pkg.zip" -d "$tmp" || { rm -rf "$tmp"; log_warn "Download failed for $name"; return 1; }
-      rm -f "$tmp/pkg.zip"
+      unzip -q "$tmp/asset" -d "$tmp" || { rm -rf "$tmp"; log_warn "Unpacking failed for $name"; return 1; }
+      rm -f "$tmp/asset"
       ;;
     *)
-      curl -fsSL -o "$tmp/$name" "$url" || { rm -rf "$tmp"; log_warn "Download failed for $name"; return 1; }
+      mv "$tmp/asset" "$tmp/$name"
       ;;
   esac
   # Release tarballs frequently ship a shell-completion file named after the

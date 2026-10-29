@@ -3,9 +3,9 @@
 Script: [`install/prompt/starship.sh`](../../install/prompt/starship.sh)
 
 Installs [Starship](https://starship.rs) if it isn't already on `PATH`
-(official installer script), then symlinks
-`themes/<UM_THEME>/starship.toml` to `~/.config/starship.toml` with a
-timestamped backup of anything already there.
+(official installer script). `~/.config/starship.toml` is rendered by chezmoi
+from `env/.chezmoitemplates/starship/<theme>.toml`, using the stored `theme` value
+(ADR 0006).
 
 ## Themes
 
@@ -14,11 +14,11 @@ requirements: **[THEMES.md](../THEMES.md)**.
 
 | Theme | Accent | File | Nerd Font |
 | --- | --- | --- | --- |
-| `default` | green, two-line box | `config/starship/starship.toml` | yes |
-| `tron` | electric cyan | `themes/tron/starship.toml` | no |
-| `cyber` | terminal green | `themes/cyber/starship.toml` | no |
-| `eva01` | violet | `themes/eva01/starship.toml` | no |
-| `minimal` | blue/purple, single line | `themes/minimal/starship.toml` | yes |
+| `default` | green, two-line box | `env/.chezmoitemplates/starship/default.toml` | yes |
+| `tron` | electric cyan | `env/.chezmoitemplates/starship/tron.toml` | no |
+| `cyber` | terminal green | `env/.chezmoitemplates/starship/cyber.toml` | no |
+| `eva01` | violet | `env/.chezmoitemplates/starship/eva01.toml` | no |
+| `minimal` | blue/purple, single line | `env/.chezmoitemplates/starship/minimal.toml` | yes |
 
 `default` is the interactive default on the WSL path; the native-Windows
 path defaults to `cyber` (it's the only one of the two with a matching
@@ -28,18 +28,18 @@ terminal colour scheme). Falls back to the default config with a warning if
 Switch themes any time without re-running the whole bootstrap:
 
 ```bash
-UM_THEME=tron bash install/prompt/starship.sh --run
+UM_THEME=tron chezmoi init --apply
 # same thing:
-UM_THEME=tron bash install/prompt/starship.sh --run
+UM_THEME=tron chezmoi init --apply
 ```
 
 ## OS notes
 
 Identical on Ubuntu and Arch — starship itself is a single static binary,
 no OS-specific packaging quirks. On native Windows, the *same*
-`themes/<name>/starship.toml` files are reused (via `$env:STARSHIP_CONFIG`
+`env/.chezmoitemplates/starship/<theme>.toml` files are reused (via `$env:STARSHIP_CONFIG`
 rather than a symlink) — see [os/windows.md](../os/windows.md) — plus each
-theme also has a matching `themes/<name>/windows-terminal.json` color
+theme also has a matching `env/.chezmoitemplates/starship/` color
 scheme for the terminal itself, which has no bash-side equivalent.
 
 ## Test

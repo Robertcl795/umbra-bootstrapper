@@ -17,28 +17,28 @@ is the map of everything else.
 
 ## Config map
 
-Where each piece of behaviour actually lives. Everything under `config/` and
-`shells/` is symlinked into place by [phase 2](sections/02-linking.md).
+Where each piece of behaviour actually lives. Everything under `env/dot_config/`
+and `env/dot_zshrc.tmpl` is deployed by chezmoi ([phase 2](sections/02-linking.md)).
 
 | Config | Repo path | Linked to | Notes |
 | --- | --- | --- | --- |
-| zsh entry point | `shells/zsh/zshrc` | `~/.zshrc` | Sources the modules below, in order |
-| ├ history, options, completion | `config/zsh/core.zsh` | — | `compinit` runs here |
-| ├ fzf defaults + `Ctrl+F` picker | `config/zsh/fzf.zsh` | — | |
-| ├ general aliases | `config/zsh/aliases.zsh` | — | ls / cat / grep / yazi |
-| ├ **git aliases** | `config/zsh/git.zsh` | — | [reference](CHEATSHEET.md#git) |
-| ├ keybindings | `config/zsh/bindings.zsh` | — | Registered from `zvm_after_init` |
-| ├ plugins | `config/zsh/plugins.zsh` | — | Clones into `~/.local/share/zsh/plugins` |
-| ├ prompt | `config/zsh/prompt.zsh` | — | Starship init |
-| ├ dev toolchains | `config/zsh/dev.zsh` | — | rustup / fnm / uv / pnpm / AI CLIs |
-| ├ WSL helpers | `config/zsh/wsl.zsh` | — | NTFS guard, interop aliases |
-| └ greeting | `config/zsh/greeting.zsh` | — | fastfetch, runs last |
-| fish entry point | `shells/fish/config.fish` | `~/.config/fish/config.fish` | only when fish is the chosen shell (ADR 0004) |
-| fish drop-ins | `shells/fish/conf.d/` | `~/.config/fish/conf.d` | `aliases` · `git` · `greeting` · `fzf`; only with fish |
-| Starship prompt | `themes/<theme>/starship.toml` | `~/.config/starship.toml` | or `config/starship/` for `default` |
-| fastfetch greeting | `config/fastfetch/` | `~/.config/fastfetch` | `config.jsonc` + `logo/` |
-| Neovim | `nvim/` | `~/.config/nvim` | lazy.nvim |
-| Zellij | `config/zellij/config.kdl` | `~/.config/zellij/config.kdl` | |
+| zsh entry point | `env/dot_zshrc.tmpl` | `~/.zshrc` | Sources the modules below, in order |
+| ├ history, options, completion | `env/dot_config/zsh/core.zsh` | — | `compinit` runs here |
+| ├ fzf defaults + `Ctrl+F` picker | `env/dot_config/zsh/fzf.zsh` | — | |
+| ├ general aliases | `env/dot_config/zsh/aliases.zsh` | — | ls / cat / grep / yazi |
+| ├ **git aliases** | `env/dot_config/zsh/git.zsh` | — | [reference](CHEATSHEET.md#git) |
+| ├ keybindings | `env/dot_config/zsh/bindings.zsh` | — | Registered from `zvm_after_init` |
+| ├ plugins | `env/dot_config/zsh/plugins.zsh` | — | Clones into `~/.local/share/zsh/plugins` |
+| ├ prompt | `env/dot_config/zsh/prompt.zsh` | — | Starship init |
+| ├ dev toolchains | `env/dot_config/zsh/dev.zsh` | — | rustup / fnm / uv / pnpm / AI CLIs |
+| ├ WSL helpers | `env/dot_config/zsh/wsl.zsh` | — | NTFS guard, interop aliases |
+| └ greeting | `env/dot_config/zsh/greeting.zsh` | — | fastfetch, runs last |
+| fish entry point | `env/dot_config/fish/config.fish.tmpl` | `~/.config/fish/config.fish` | only when fish is the chosen shell (ADR 0004) |
+| fish drop-ins | `env/dot_config/fish/conf.d/` | `~/.config/fish/conf.d` | `aliases` · `git` · `greeting` · `fzf`; only with fish |
+| Starship prompt | `env/.chezmoitemplates/starship/<theme>.toml` | `~/.config/starship.toml` | or `env/.chezmoitemplates/starship/` for `default` |
+| fastfetch greeting | `env/dot_config/fastfetch/` | `~/.config/fastfetch` | `config.jsonc` + `logo/` |
+| Neovim | `env/dot_config/nvim/` | `~/.config/nvim` | lazy.nvim |
+| Zellij | `env/dot_config/zellij/config.kdl` | `~/.config/zellij/config.kdl` | |
 | Git | `config/git/.gitconfig` | `~/.gitconfig` | |
 | Alacritty | `config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | |
 
@@ -47,7 +47,7 @@ by the bootstrap.
 
 ## Bootstrap phases
 
-Phases run in this order ([`install/run.sh`](../install/run.sh)). The number
+Phases run in this order (chezmoi scripts in `env/.chezmoiscripts/`; [`install/run.sh`](../install/run.sh) is the fallback without chezmoi). The number
 is what `log_step` prints during a run and what each `tests/NN_*.sh`
 checkpoint validates.
 
@@ -55,7 +55,7 @@ checkpoint validates.
 | --- | --- | --- | --- |
 | 0 | `install/detect_os.sh` | OS detection, network + sudo preflight | [00](sections/00-preflight.md) |
 | 1 | `install/packages/{ubuntu,arch}.sh` | System update, CLI stack | [01](sections/01-packages.md) |
-| 2 | `install/link.sh` | Symlinks (with timestamped backups) | [02](sections/02-linking.md) |
+| 2 | chezmoi (`install/chezmoi.sh`, `env/.chezmoiscripts/`) | Dotfiles copied into `$HOME`; phases run as scripts | [02](sections/02-linking.md) |
 | 3 | `install/shell/{fish,zsh}.sh` | Shell, plugins, login shell | [03](sections/03-shell.md) |
 | 4 | `install/prompt/starship.sh` | Starship + theme selection | [04](sections/04-prompt.md) |
 | 5 | `install/nvim.sh` | Neovim + lazy.nvim | [05](sections/05-nvim.md) |
@@ -71,7 +71,7 @@ checkpoint validates.
 Every phase is idempotent and re-runnable on its own:
 
 ```bash
-bash install/prompt/starship.sh --run     # just this phase
+bash install/prompt/starship.sh --run     # just this phase (installs starship)
 bash tests/04_prompt.sh                   # just this checkpoint
 bash tests/99_smoke.sh                    # all checkpoints
 ```

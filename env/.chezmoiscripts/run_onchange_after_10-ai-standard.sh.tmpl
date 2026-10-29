@@ -1,0 +1,7 @@
+{{- if and (hasPrefix "wsl-" .os) (eq .profile "personal") -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/ai.sh" | sha256sum }} ai.sh
+component_enabled ai-standard || exit 0
+bash "$UM_ENV_DIR/install/ai.sh" --run
+{{- end }}

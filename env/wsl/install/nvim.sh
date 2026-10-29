@@ -19,8 +19,8 @@ install_nvim() {
     esac
   fi
 
-  symlink_with_backup "$UM_ENV_DIR/nvim" "$HOME/.config/nvim"
-  log_info "Neovim config linked."
+  # chezmoi-unlink (ADR 0006): ~/.config/nvim is deployed by chezmoi.
+  log_info "Neovim installed (config: ~/.config/nvim, managed by chezmoi)."
 }
 
 if [ "${1:-}" = "--run" ]; then

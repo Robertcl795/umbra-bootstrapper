@@ -7,7 +7,7 @@ Zellij replaces tmux as the terminal multiplexer in this repo (the
 only so old commands don't hard-fail). Installs via pacman on Arch, a
 GitHub release binary on Ubuntu (same `install_release_bin` mechanism as
 phase 1), or `cargo install zellij` as a last resort — then symlinks
-[`config/zellij/config.kdl`](../../config/zellij/config.kdl) to
+[`env/dot_config/zellij/config.kdl`](../../../dot_config/zellij/config.kdl) to
 `~/.config/zellij/config.kdl`.
 
 ## OS notes

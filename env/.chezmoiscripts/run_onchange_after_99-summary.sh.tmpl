@@ -1,0 +1,9 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/summary.sh" | sha256sum }} summary.sh
+export UM_THEME={{ .theme | quote }}
+log_step "Bootstrap complete."
+bash "$UM_ENV_DIR/install/summary.sh" --run
+log_info "Run tests with: bash $UM_ENV_DIR/tests/99_smoke.sh"
+{{- end }}

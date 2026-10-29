@@ -1,0 +1,12 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/shell/zsh.sh" | sha256sum }} shell/zsh.sh
+# phase: {{ include "wsl/install/shell/fish.sh" | sha256sum }} shell/fish.sh
+component_enabled shell || exit 0
+# ADR 0004: fish is set up only when it is the chosen shell.
+if [ "$UM_SHELL" = "fish" ]; then
+  bash "$UM_ENV_DIR/install/shell/fish.sh" --run
+fi
+bash "$UM_ENV_DIR/install/shell/zsh.sh" --run
+{{- end }}

@@ -10,8 +10,8 @@ new zellij pane.
 
 | Shell | Hook | File |
 | --- | --- | --- |
-| zsh | Sourced last from `~/.zshrc` | [`config/zsh/greeting.zsh`](../../config/zsh/greeting.zsh) |
-| fish | Overrides `fish_greeting` | [`shells/fish/conf.d/greeting.fish`](../../shells/fish/conf.d/greeting.fish) |
+| zsh | Sourced last from `~/.zshrc` | [`env/dot_config/zsh/greeting.zsh`](../../../dot_config/zsh/greeting.zsh) |
+| fish | Overrides `fish_greeting` | [`env/dot_config/fish/conf.d/greeting.fish`](../../../dot_config/fish/conf.d/greeting.fish) |
 | pwsh | Tail of the managed profile block | [`windows/profile.ps1`](https://github.com/Robertcl795/dotfiles/blob/1b1239a/windows/profile.ps1) |
 
 The greeting is deliberately the *last* thing the shell config does, so it
@@ -40,7 +40,7 @@ UM_NO_FASTFETCH=1 zsh        # one shell
 
 ## Config
 
-[`config/fastfetch/config.jsonc`](../../config/fastfetch/config.jsonc),
+[`env/dot_config/fastfetch/config.jsonc`](../../../dot_config/fastfetch/config.jsonc),
 symlinked to `~/.config/fastfetch` in [phase 2](02-linking.md).
 
 Modules: OS, kernel, uptime, package count, shell, terminal — then CPU, RAM,
@@ -60,13 +60,13 @@ Two options, one line apart in the config:
 | Custom Arch mark with `RL` initials | `"logo": { "type": "file", "source": "~/.config/fastfetch/logo/arch-rl.txt", "color": { "1": "cyan", "2": "magenta" } }` |
 
 The custom mark lives at
-[`config/fastfetch/logo/arch-rl.txt`](../../config/fastfetch/logo/arch-rl.txt):
+[`env/dot_config/fastfetch/logo/arch-rl.txt`](../../../dot_config/fastfetch/logo/arch-rl.txt):
 a 21×45 block-drawn Arch triangle with the initials punched into the hollow,
 `$1`/`$2` colour placeholders splitting it into a cyan frame and magenta
 letters. `~` is expanded by fastfetch itself, so the same config works on
 Linux and Windows.
 
-Any `.txt` in `config/fastfetch/logo/` can be used the same way — pass
+Any `.txt` in `env/dot_config/fastfetch/logo/` can be used the same way — pass
 `--logo-type file` on the command line to preview one without editing the
 config.
 
@@ -81,7 +81,7 @@ config.
 ## Customization
 
 `UM_NO_FASTFETCH=1` disables the greeting. Everything else is
-`config/fastfetch/config.jsonc` — see the
+`env/dot_config/fastfetch/config.jsonc` — see the
 [fastfetch configuration wiki](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration)
 for the full module list.
 

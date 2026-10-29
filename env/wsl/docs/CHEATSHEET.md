@@ -1,8 +1,8 @@
 # Cheatsheet
 
 Everything this environment actually gives you, in one page. Aliases come
-from [`config/zsh/`](../config/zsh) (zsh) and
-[`shells/fish/conf.d/`](../shells/fish/conf.d) (fish) — the two are kept in
+from [`env/dot_config/zsh/`](../../dot_config/zsh) (zsh) and
+[`env/dot_config/fish/conf.d/`](../../dot_config/fish/conf.d) (fish) — the two are kept in
 sync, and the pwsh profile mirrors the same names on native Windows.
 
 - [Git](#git)
@@ -191,9 +191,10 @@ k3d cluster delete dev
 
 ```bash
 # from env/wsl/ in the umbra checkout
-bash install/run.sh                          # re-run the full bootstrap (idempotent)
+bash bootstrap.sh --yes                      # re-run the full bootstrap (idempotent)
 bash tests/99_smoke.sh                       # every checkpoint
-UM_THEME=tron bash install/prompt/starship.sh --run   # switch prompt theme
+UM_THEME=tron chezmoi init --apply           # switch prompt theme
+chezmoi diff && chezmoi apply                # after editing a dotfile in env/
 bash install/fastfetch.sh --run              # reinstall/relink the greeting
 bash ../../toolkit/ai-standard/scaffold.sh ~/repo     # drop the AI standard into a repo
 # replaced files are kept as <file>.backup.<timestamp>
@@ -215,12 +216,12 @@ export UM_NO_AUTOCD=1           # don't auto-cd out of /mnt/*
 | Symptom | Fix |
 | --- | --- |
 | Boxes/tofu instead of icons | Install a [Nerd Font](https://www.nerdfonts.com/) and select it in the terminal, or switch to the `cyber` theme |
-| Slow shell startup | `time zsh -i -c exit`, then bisect by commenting modules out of `shells/zsh/zshrc` |
+| Slow shell startup | `time zsh -i -c exit`, then bisect by commenting modules out of `env/dot_zshrc.tmpl` |
 | Completions stale or broken | `rm ~/.cache/zsh/zcompdump && exec zsh` |
 | A plugin failed to load | `rm -rf ~/.local/share/zsh/plugins && exec zsh` (they re-clone) |
 | Greeting doesn't appear | `command -v fastfetch`; check `UM_NO_FASTFETCH`; it's skipped when `TERM` is `dumb`/`linux` or the window is under 70 columns |
 | Greeting is too noisy | `export UM_NO_FASTFETCH=1` in `~/.zshrc.local` |
-| Prompt didn't change after switching theme | Open a new shell — the symlink is read at startup |
+| Prompt didn't change after switching theme | Open a new shell — the config is read at startup |
 | Everything is slow under `/mnt/c` | Move the repo and your projects under `~/` — cross-OS I/O is 10-20× slower |
 | Login shell is still bash | `chsh -s $(command -v zsh)`, then log out and back in |
 | WSL networking changes had no effect | `wsl --shutdown` from PowerShell, then reopen |

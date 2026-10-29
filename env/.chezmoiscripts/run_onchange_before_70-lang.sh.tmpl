@@ -1,0 +1,7 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/dev/lang.sh" | sha256sum }} dev/lang.sh
+component_enabled lang || exit 0
+bash "$UM_ENV_DIR/install/dev/lang.sh" --run
+{{- end }}

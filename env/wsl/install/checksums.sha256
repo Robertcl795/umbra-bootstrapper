@@ -1,0 +1,22 @@
+# Pinned downloads of the WSL bootstrapper (ADR 0006, docs/plans/chezmoi.md §8).
+# Format: <sha256>  <url>. install_release_bin and install/chezmoi.sh refuse a URL that is
+# missing here or whose download does not match. Hashes recorded 2026-10-28; chezmoi's match its
+# release checksums file.
+18d051581bfa1a9a9004657d9e67f259f63d7021dd549e9e7c7afd556dd27a87  https://github.com/charmbracelet/glow/releases/download/v2.1.0/glow_2.1.0_Linux_arm64.tar.gz
+8f4e9a1c7ed8f8a0f44128d27faae90ab484be7ff109251422c3ba7f9d764a56  https://github.com/charmbracelet/glow/releases/download/v2.1.0/glow_2.1.0_Linux_x86_64.tar.gz
+fff4a127e4d76242e3bdac2a12430fc252fd6086d3eb30aee0382c3b0fece478  https://github.com/fastfetch-cli/fastfetch/releases/download/2.70.0/fastfetch-linux-aarch64.tar.gz
+945b941b2a85e8de88b4c89714ad18ee6a7a129bb3c544bb448e9e0e027c226a  https://github.com/fastfetch-cli/fastfetch/releases/download/2.70.0/fastfetch-linux-amd64.tar.gz
+c38e715f2cb56440bec16e3744005522c1d13c47d2e3730572849dc69cefd8ae  https://github.com/jesseduffield/lazydocker/releases/download/v0.24.1/lazydocker_0.24.1_Linux_arm64.tar.gz
+461cacf618e1020dff1d7896248c1c1f2267d5c25fb529755e4b9c43c5d1d4a5  https://github.com/jesseduffield/lazydocker/releases/download/v0.24.1/lazydocker_0.24.1_Linux_x86_64.tar.gz
+26a435f47b691325c086dad2f84daa6556df5af8efc52b6ed624fa657605c976  https://github.com/jesseduffield/lazygit/releases/download/v0.44.1/lazygit_0.44.1_Linux_arm64.tar.gz
+84682f4ad5a449d0a3ffbc8332200fe8651aee9dd91dcd8d87197ba6c2450dbc  https://github.com/jesseduffield/lazygit/releases/download/v0.44.1/lazygit_0.44.1_Linux_x86_64.tar.gz
+66d304427bb30e5766e66e740394b0b07bd852b64cc5cda755eab33adf853e72  https://github.com/muesli/duf/releases/download/v0.8.1/duf_0.8.1_linux_arm64.tar.gz
+a8343eed730df04acfc0ba1553b99b4ef91d5122cab58ee241ea8196948408d7  https://github.com/muesli/duf/releases/download/v0.8.1/duf_0.8.1_linux_x86_64.tar.gz
+74afb1f7bbaf907c99c3bf0262e6c98a1084e8e1f939202917c5f35486afeab8  https://github.com/quantumsheep/sshs/releases/download/4.8.0/sshs-linux-amd64
+5a9f1b2e832406f26966dc6c62a6367d509978d76a568be5a40d643c9340f1f8  https://github.com/quantumsheep/sshs/releases/download/4.8.0/sshs-linux-arm64
+02807f08d6b589b65b7516a4e259d83f5995d7a23bb12b3a155141385b370b3a  https://github.com/sxyazi/yazi/releases/download/v26.9.1/yazi-aarch64-unknown-linux-gnu.zip
+a02fe91d3304294048c681f010f1100856872a4e98ecf6927328e888d40a6ad2  https://github.com/sxyazi/yazi/releases/download/v26.9.1/yazi-x86_64-unknown-linux-gnu.zip
+2064f23d8d0b8d4b9c12fa1643344fa3cfd0c63b048d511e7bcc6a057b482b75  https://github.com/twpayne/chezmoi/releases/download/v2.73.3/chezmoi_2.73.3_linux_amd64.deb
+a74819082655863371e6560d0d4bec969841002ccd4f6072c650b3b5fff8c260  https://github.com/twpayne/chezmoi/releases/download/v2.73.3/chezmoi_2.73.3_linux_arm64.deb
+05f0802afadd53f8db9514e7cae53c9ae8432fed1b35b8294aa816ee3044a16b  https://github.com/zellij-org/zellij/releases/download/v0.45.1/zellij-aarch64-unknown-linux-musl.tar.gz
+40bcc2e03f5d5ae8e054e39f676081fe12ab70871506996ba595834c3718eefc  https://github.com/zellij-org/zellij/releases/download/v0.45.1/zellij-x86_64-unknown-linux-musl.tar.gz

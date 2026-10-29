@@ -77,7 +77,7 @@ official `.ps1` installers, and `kubectl`/`helm`/`k3d` if
 `UM_ENABLE_K8S=1`.
 
 **Not covered** (WSL/bash-only, no native-Windows equivalent yet): fish
-shell setup, the `config/zsh` modules, `install/link.sh`'s symlink-based
+shell setup, the `env/dot_config/zsh` modules, `install/link.sh`'s symlink-based
 dotfile linking, and phase 11's AI Development Standard deployment
 (`ai/` → `~/.claude/*`, context DB). `k3d` additionally
 requires Docker Desktop with the WSL2 backend, since it runs containers

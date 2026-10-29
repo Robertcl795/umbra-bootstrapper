@@ -1,0 +1,34 @@
+{{- /* Umbra chezmoi config (ADR 0006, docs/plans/chezmoi.md §3). Rendered into
+       ~/.config/chezmoi/chezmoi.toml; nothing here is stored in the repo. */ -}}
+{{- $id := .chezmoi.osRelease.id | default "" -}}
+{{- $os := env "UM_OS" -}}
+{{- if not $os -}}
+{{-   if eq $id "omarchy" }}{{ $os = "omarchy" -}}
+{{-   else if eq $id "arch" }}{{ $os = "wsl-arch" -}}
+{{-   else if eq $id "ubuntu" }}{{ $os = "wsl-ubuntu" -}}
+{{-   else }}{{ $os = printf "unsupported-%s" $id -}}
+{{-   end -}}
+{{- end -}}
+{{- $profile := env "UM_MODE" -}}
+{{- if not $profile -}}
+{{-   $profile = promptChoiceOnce . "profile" "Umbra profile" (list "personal" "work") "personal" -}}
+{{- end -}}
+{{- $shell := env "UM_SHELL" | default (get . "shell") | default "zsh" -}}
+{{- $theme := env "UM_THEME" | default (get . "theme") | default "default" -}}
+{{- /* The selection of bootstrap.sh (it sets UM_CHEZMOI_INIT=1) is stored, so a plain
+       `chezmoi apply` later sees the same selection and re-runs nothing. */ -}}
+{{- $fromBootstrap := eq (env "UM_CHEZMOI_INIT") "1" -}}
+{{- $sel := dict -}}
+{{- range $key, $var := dict "components" "UM_COMPONENTS" "skip" "UM_SKIP" "k8s" "UM_ENABLE_K8S" "wslconfig" "UM_ENABLE_WSLCONFIG" "networking" "UM_WSL_NETWORKING" "is_wsl" "UM_IS_WSL" "noninteractive" "UM_NONINTERACTIVE" -}}
+{{-   if $fromBootstrap }}{{ $_ := set $sel $key (env $var) }}{{ else }}{{ $_ := set $sel $key (get $ $key | default "") }}{{ end -}}
+{{- end -}}
+sourceDir = {{ .chezmoi.workingTree | quote }}
+
+[data]
+    os = {{ $os | quote }}
+    profile = {{ $profile | quote }}
+    shell = {{ $shell | quote }}
+    theme = {{ $theme | quote }}
+{{- range $key, $value := $sel }}
+    {{ $key }} = {{ $value | quote }}
+{{- end }}

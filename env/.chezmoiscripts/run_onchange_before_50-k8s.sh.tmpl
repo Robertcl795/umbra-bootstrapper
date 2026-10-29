@@ -1,0 +1,7 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/dev/k8s.sh" | sha256sum }} dev/k8s.sh
+component_enabled k8s || exit 0
+bash "$UM_ENV_DIR/install/dev/k8s.sh" --run
+{{- end }}

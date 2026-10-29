@@ -298,17 +298,58 @@ else
   UM_ENV_DIR="$UM_REPO_DIR/env/wsl"
 fi
 
-# Export UM_ENV_DIR for child scripts and run installer forwarding args
+# Export UM_ENV_DIR for child scripts
 export UM_ENV_DIR
 cd "$UM_ENV_DIR"
-chmod +x install/run.sh
+REPO_ROOT="$(cd "$UM_ENV_DIR/../.." && pwd)"
 
-# If piped from curl, we need to restore stdin from terminal for interactive prompts
-# This is critical for making the menu work when running: curl ... | bash
+# If piped from curl, take the terminal back for the prompts below and chezmoi's.
 # With --yes there are no prompts, so no terminal is needed (container tests).
 if [ ! -t 0 ] && [ "${UM_NONINTERACTIVE:-0}" != "1" ]; then
   print_info "Detected piped execution, restoring terminal for interactive prompts..."
-  exec ./install/run.sh "${INSTALL_ARGS[@]}" </dev/tty
-else
-  exec ./install/run.sh "${INSTALL_ARGS[@]}"
+  exec </dev/tty
 fi
+
+# The choices install/run.sh used to ask (shell, theme, k8s) are asked here once;
+# chezmoi stores them with the profile (ADR 0006, docs/plans/chezmoi.md §3-4).
+profile_given="${UM_MODE:-}"
+# shellcheck disable=SC1091
+source "$UM_ENV_DIR/install/common.sh"
+if [ "$UM_VERBOSE" = "1" ]; then
+  set -x
+fi
+if [ "$UM_NONINTERACTIVE" != "1" ] && is_tty; then
+  select_shell
+  select_theme
+  if [ -z "${UM_ENABLE_K8S:-}" ]; then
+    if confirm "Enable Kubernetes tooling (kubectl/helm/k3d)?" "y"; then
+      UM_ENABLE_K8S=1
+    else
+      UM_ENABLE_K8S=0
+    fi
+  fi
+else
+  UM_ENABLE_K8S="${UM_ENABLE_K8S:-1}"
+  select_shell
+  select_theme
+fi
+export UM_ENABLE_K8S
+
+# Profile: --profile/UM_MODE if given; otherwise chezmoi asks once (or personal without a terminal).
+if [ -z "$profile_given" ]; then
+  if [ "$UM_NONINTERACTIVE" = "1" ] || ! is_tty; then
+    export UM_MODE=personal
+  else
+    unset UM_MODE
+  fi
+fi
+
+bash "$UM_ENV_DIR/install/chezmoi.sh" --run
+
+# chezmoi deploys the dotfiles and runs the install phases as scripts (env/.chezmoiscripts).
+chezmoi_args=(init --apply --source "$REPO_ROOT")
+if [ "$UM_NONINTERACTIVE" = "1" ]; then
+  chezmoi_args+=(--no-tty --force)
+fi
+export UM_CHEZMOI_INIT=1
+exec chezmoi "${chezmoi_args[@]}"

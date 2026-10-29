@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Fallback without chezmoi (ADR 0006, kept for one release): runs the install phases
+# directly. It installs packages and tools only; dotfiles are deployed by chezmoi
+# (bash env/wsl/bootstrap.sh), so nothing is linked here.
 set -euo pipefail
 
 SOURCE_PATH="${BASH_SOURCE[0]:-${0:-}}"
@@ -36,15 +39,13 @@ detect_os
 log_info "Profile: $UM_MODE${UM_COMPONENTS:+ · components: $UM_COMPONENTS}${UM_SKIP:+ · skip: $UM_SKIP}"
 
 # Phases run in the original order. Names for --components/--skip:
-# packages link shell prompt nvim k8s zellij lang ai-cli wsl ai-standard fastfetch
+# packages shell prompt nvim k8s zellij lang ai-cli wsl ai-standard fastfetch
 if component_enabled packages; then
   case "$UM_OS" in
     ubuntu) bash "$UM_ENV_DIR/install/packages/ubuntu.sh" --run ;;
     arch) bash "$UM_ENV_DIR/install/packages/arch.sh" --run ;;
   esac
 fi
-
-component_enabled link && bash "$UM_ENV_DIR/install/link.sh" --run
 
 if component_enabled shell; then
   # ADR 0004: fish is set up only when it is the chosen shell.

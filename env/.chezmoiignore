@@ -1,0 +1,19 @@
+# Source-only content of env/ (docs/plans/chezmoi.md §2)
+README.md
+wsl
+wsl/**
+core
+core/**
+omarchy
+omarchy/**
+
+# ADR 0004: fish files only when fish is the chosen shell
+{{ if ne .shell "fish" }}
+.config/fish
+.config/fish/**
+{{ end }}
+
+# Omarchy: manage nothing until the Omarchy plan is approved (decision 23)
+{{ if eq .os "omarchy" }}
+**
+{{ end }}

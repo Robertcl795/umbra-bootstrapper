@@ -66,7 +66,9 @@ install_sshs_arch() {
   fi
   local arch
   arch="$(detect_arch)"
-  install_release_bin sshs "https://github.com/quantumsheep/sshs/releases/latest/download/sshs-linux-${arch}" \
+  # pin-downloads (ADR 0006): pinned version, sha256 from install/checksums.sha256.
+  local url="https://github.com/quantumsheep/sshs/releases/download/${UM_SSHS_VERSION:-4.8.0}/sshs-linux-${arch}"
+  install_release_bin sshs "$url" "$(pinned_sha256 "$url")" \
     || log_warn "sshs could not be installed (AUR/cargo/release all failed)."
 }
 
