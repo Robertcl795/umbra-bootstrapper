@@ -15,9 +15,13 @@ targets=(
 )
 for t in "${targets[@]}"; do
   if [ -L "$t" ]; then
-    case "$(readlink -f "$t" 2>/dev/null || true)" in
-      "$repo"/*) rm "$t"; echo "[INFO] removed v0.2.0 link: $t" >&2; continue ;;
-    esac
+    # Raw target first: after the upgrade most v0.2.0 targets no longer exist, and
+    # `readlink -f` fails on a dangling link whose parent directory is gone.
+    for target in "$(readlink "$t" 2>/dev/null || true)" "$(readlink -f "$t" 2>/dev/null || true)"; do
+      case "$target" in
+        "$repo"/*) rm "$t"; echo "[INFO] removed v0.2.0 link: $t" >&2; continue 2 ;;
+      esac
+    done
   fi
   if [ -e "$t" ] || [ -L "$t" ]; then
     mv "$t" "$t.backup.$ts"
