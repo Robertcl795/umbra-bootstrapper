@@ -1,0 +1,188 @@
+# ============================================================================
+# Git Configuration Template
+# User-specific settings (name, email) are set by install.sh
+# This file contains additional global git settings
+# ============================================================================
+
+[core]
+    editor = vim
+    pager = bat
+    autocrlf = input
+    whitespace = trailing-space,space-before-tab
+    excludesfile = ~/.gitignore_global
+
+[init]
+    defaultBranch = main
+
+[pull]
+    # Set by install.sh: merge, rebase, or ff-only
+    # rebase = false
+
+[push]
+    default = current
+    followTags = true
+    autoSetupRemote = true
+
+[fetch]
+    prune = true
+    prunetags = true
+
+[rebase]
+    autoStash = true
+    autoSquash = true
+
+[merge]
+    conflictstyle = diff3
+    tool = vimdiff
+
+[diff]
+    colorMoved = default
+    algorithm = histogram
+    tool = vimdiff
+
+[color]
+    ui = auto
+    branch = auto
+    diff = auto
+    status = auto
+
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green
+
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[color "status"]
+    added = green
+    changed = yellow
+    untracked = red
+
+[status]
+    showUntrackedFiles = all
+    submoduleSummary = true
+
+[log]
+    date = relative
+
+[alias]
+    # Short aliases
+    st = status
+    co = checkout
+    br = branch
+    ci = commit
+    df = diff
+    dc = diff --cached
+    
+    # Log aliases
+    l = log --oneline --decorate --graph
+    la = log --oneline --decorate --graph --all
+    ll = log --graph --pretty=format:'%C(yellow)%h%C(reset) - %C(blue)%an%C(reset) %C(green)(%cr)%C(reset)%C(auto)%d%C(reset)%n%s%n'
+    
+    # Show all aliases
+    aliases = config --get-regexp ^alias\\.
+    
+    # Amend last commit
+    amend = commit --amend --no-edit
+    
+    # Undo last commit but keep changes
+    undo = reset --soft HEAD^
+    
+    # Show files changed in last commit
+    changed = show --pretty=format: --name-only
+    
+    # Interactive rebase
+    rb = rebase -i
+    
+    # List branches sorted by last modified
+    branches = branch -a --sort=-committerdate
+    
+    # Show verbose output about tags, branches or remotes
+    tags = tag -l
+    remotes = remote -v
+    
+    # Find branches containing commit
+    fb = "!f() { git branch -a --contains $1; }; f"
+    
+    # Find commits by source code
+    fc = "!f() { git log --pretty=format:'%C(yellow)%h  %C(blue)%ad  %C(reset)%s%C(green)  [%cn]' --decorate --date=short -S$1; }; f"
+    
+    # Find commits by commit message
+    fm = "!f() { git log --pretty=format:'%C(yellow)%h  %C(blue)%ad  %C(reset)%s%C(green)  [%cn]' --decorate --date=short --grep=$1; }; f"
+    
+    # Remove branches that have already been merged
+    cleanup = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
+    
+    # Show the current branch name
+    current = rev-parse --abbrev-ref HEAD
+    
+    # Stash with message
+    save = stash save
+    
+    # Show stashes with diff
+    stashes = stash list --pretty=format:'%C(yellow)%gd%C(reset): %C(blue)%gs%C(reset)'
+    
+    # Pull with rebase
+    up = pull --rebase --autostash
+    
+    # Push and set upstream
+    publish = push -u origin HEAD
+    
+    # Create a new branch and switch to it
+    new = checkout -b
+    
+    # Show diff with main branch
+    diffm = diff main...HEAD
+    
+    # Worktree aliases
+    wt = worktree
+    wta = worktree add
+    wtl = worktree list
+    wtr = worktree remove
+
+[help]
+    autocorrect = 1
+
+[rerere]
+    enabled = true
+
+[credential]
+    helper = cache --timeout=3600
+
+[commit]
+    gpgsign = false
+    verbose = true
+
+[branch]
+    autosetupmerge = always
+    autosetuprebase = always
+
+[url "git@github.com:"]
+    insteadOf = https://github.com/
+
+# ============================================================================
+# Delta - A syntax-highlighting pager for git (optional)
+# Install: mise use -g delta@latest
+# ============================================================================
+
+# [core]
+#     pager = delta
+
+# [interactive]
+#     diffFilter = delta --color-only
+
+# [delta]
+#     navigate = true
+#     light = false
+#     side-by-side = true
+#     line-numbers = true
+#     
+# [merge]
+#     conflictstyle = diff3
+#
+# [diff]
+#     colorMoved = default

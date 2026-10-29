@@ -1,0 +1,63 @@
+# ~/.zshrc — entrypoint (symlinked from shells/zsh/zshrc)
+# The configuration itself is split into modules under config/zsh/;
+# machine-local overrides go in ~/.zshrc.local.
+
+# =========================================================
+# Environment
+# =========================================================
+
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+if command -v bat >/dev/null 2>&1; then
+  export MANPAGER="bat -l man -p"
+fi
+
+if [ -d "$HOME/.local/bin" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# Resolve the repo root by following the ~/.zshrc symlink
+# (shells/zsh/zshrc -> repo root is three levels up).
+if [ -z "${UM_ENV_DIR:-}" ]; then
+  _zshrc_real="$(readlink -f "${ZDOTDIR:-$HOME}/.zshrc" 2>/dev/null)"
+  UM_ENV_DIR="${_zshrc_real:h:h:h}"
+  unset _zshrc_real
+fi
+
+# =========================================================
+# Modules (config/zsh/*.zsh)
+#
+# Order matters:
+#   core     compinit — must run before git.zsh registers completions
+#   bindings must run before plugins (zsh-vi-mode reads its ZVM_* settings
+#            at load time)
+#   dev/wsl  after the aliases they may override
+# =========================================================
+
+ZSH_MODULE_DIR="$UM_ENV_DIR/config/zsh"
+for _zsh_module in core fzf aliases git bindings plugins prompt dev wsl; do
+  [ -f "$ZSH_MODULE_DIR/${_zsh_module}.zsh" ] && source "$ZSH_MODULE_DIR/${_zsh_module}.zsh"
+done
+unset _zsh_module
+
+# =========================================================
+# Local overrides
+# =========================================================
+
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# =========================================================
+# Greeting (fastfetch) — last, so it renders below everything the
+# modules above may print. Skipped for non-interactive shells, inside
+# editors/multiplexer panes, and when UM_NO_FASTFETCH=1.
+# =========================================================
+
+if [ -f "$UM_ENV_DIR/config/zsh/greeting.zsh" ]; then
+  source "$UM_ENV_DIR/config/zsh/greeting.zsh"
+fi

@@ -1,0 +1,69 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+add_newline = true
+command_timeout = 500
+
+format = """
+[>>](bold cyan)$username$hostname$directory$git_branch$git_status$nodejs$python$rust$docker_context$kubernetes
+[>](bold cyan)$character"""
+
+right_format = """$cmd_duration"""
+
+[character]
+success_symbol = "[➜](bold cyan)"
+error_symbol = "[✗](bold red)"
+
+[username]
+format = "[$user]($style)"
+style_user = "bold bright-blue"
+show_always = true
+
+[hostname]
+ssh_only = false
+format = "[@$hostname](bold bright-cyan) "
+
+[directory]
+style = "bold bright-cyan"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " ro"
+read_only_style = "red"
+
+[git_branch]
+symbol = "git:"
+style = "bold bright-blue"
+format = "on [$symbol$branch]($style) "
+
+[git_status]
+style = "bold bright-red"
+format = '([\[$all_status$ahead_behind\]]($style) )'
+
+[nodejs]
+symbol = "node:"
+style = "bold bright-green"
+format = "via [$symbol($version )]($style)"
+
+[python]
+symbol = "py:"
+style = "bold bright-yellow"
+format = "via [$symbol($version )]($style)"
+
+[rust]
+symbol = "rs:"
+style = "bold bright-red"
+format = "via [$symbol($version )]($style)"
+
+[docker_context]
+symbol = "docker:"
+style = "bold bright-blue"
+format = "via [$symbol$context]($style) "
+
+[kubernetes]
+symbol = "☸ "
+style = "bold bright-cyan"
+format = "on [$symbol$context( \\($namespace\\))]($style) "
+
+[cmd_duration]
+min_time = 500
+style = "bold bright-magenta"
+format = "took [$duration]($style)"

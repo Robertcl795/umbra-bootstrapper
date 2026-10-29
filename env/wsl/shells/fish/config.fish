@@ -1,0 +1,43 @@
+set -gx XDG_CONFIG_HOME $HOME/.config
+set -gx XDG_DATA_HOME $HOME/.local/share
+set -gx XDG_CACHE_HOME $HOME/.cache
+
+if test -d "$HOME/.local/bin"
+  fish_add_path "$HOME/.local/bin"
+end
+
+if test -d "$HOME/.fzf/bin"
+  fish_add_path "$HOME/.fzf/bin"
+end
+
+set -l this_file (status --current-filename)
+if test -n "$this_file"
+  set -gx UM_ENV_DIR (dirname (dirname $this_file))
+end
+
+if type -q starship
+  starship init fish | source
+end
+
+if type -q zoxide
+  zoxide init fish | source
+end
+
+if test -f "$HOME/.cargo/env.fish"
+  source "$HOME/.cargo/env.fish"
+else if test -d "$HOME/.cargo/bin"
+  fish_add_path "$HOME/.cargo/bin"
+end
+
+if type -q fnm
+  fnm env --use-on-cd --shell fish | source
+end
+
+set -gx PNPM_HOME "$HOME/.local/share/pnpm"
+if test -d "$PNPM_HOME"
+  fish_add_path "$PNPM_HOME"
+end
+
+if type -q fzf
+  set -gx FZF_DEFAULT_COMMAND 'rg --files --hidden --glob "!.git/*"'
+end
