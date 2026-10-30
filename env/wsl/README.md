@@ -111,6 +111,8 @@ Everything is interactive on a terminal; every prompt has an env-var override. W
 | `UM_THEME` | `umbra` · `default` · `tron` · `cyber` · `eva01` · `minimal` | `umbra` (generated from the brand tokens) |
 | `UM_MODE` (`--profile`) | `personal` · `work` — work skips the AI standard and opencode | `personal` |
 | `UM_COMPONENTS` (`--components`) · `UM_SKIP` (`--skip`) | comma-separated phase names | all phases |
+| opt-in components (ADR 0017, 0018) | `desktop` (Ghostty + font, native only), `um`, `vault`, `ollama` | run only when `--components` names them; `install.sh` adds them from the selector |
+| `UM_VAULT_REPO` | git URL of your private vault (personal profile) | unset: `um init` from `vault-template` |
 | `UM_ENABLE_K8S` | `0` · `1` | prompt on a terminal; `1` otherwise |
 | `UM_NO_FASTFETCH` | `1` disables the shell greeting | unset |
 | `UM_NO_AUTOCD` | `1` keeps shells in `/mnt/*` | unset |

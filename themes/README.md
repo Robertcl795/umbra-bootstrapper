@@ -1,10 +1,11 @@
 # themes
 
-Generated copies of Umbra's theme files, written by `themes/generate.py` in the Umbra umbrella from `brand/tokens/umbra.json` (ADR 0013, 0014). chezmoi deploys them with `include "../themes/…"`. Never edit by hand: change the tokens and re-run the generator.
+Generated copies of Umbra's theme files, written by `themes/generate.py` in the Umbra umbrella from `brand/tokens/umbra.json` (ADR 0013, 0014). chezmoi deploys them with `include "../themes/…"`; `install.sh` uses the Omarchy copy as a fallback. Never edit by hand: change the tokens and re-run the generator.
 
 | File | Deployed to |
 |---|---|
 | `shell/colors.zsh` | `~/.config/zsh/colors.zsh` |
 | `shell/colors.fish` | `~/.config/fish/conf.d/umbra-colors.fish` (fish only) |
 | `bat/Umbra.tmTheme` | `~/.config/bat/themes/Umbra.tmTheme` |
-| `omarchy/umbra/colors.toml`, `icons.theme` | `~/.config/omarchy/themes/umbra/` (Omarchy only) |
+| `terminals/ghostty/umbra` | `~/.config/ghostty/themes/umbra` (native desktops, `desktop` component) |
+| `omarchy/umbra/colors.toml`, `icons.theme` | bundled copy of the theme repo: `install.sh` copies it to `~/.config/omarchy/themes/umbra/` when the theme repo is unreachable |

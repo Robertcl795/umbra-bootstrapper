@@ -1,9 +1,10 @@
-{{- if hasPrefix "wsl-" .os -}}
+{{- if or (hasPrefix "wsl-" .os) (eq .os "omarchy") -}}
 #!/usr/bin/env bash
 {{ template "um-env.sh" . }}
 # phase: {{ include "wsl/install/detect_os.sh" | sha256sum }} detect_os.sh
 # phase: {{ include "wsl/install/packages/ubuntu.sh" | sha256sum }} packages/ubuntu.sh
 # phase: {{ include "wsl/install/packages/arch.sh" | sha256sum }} packages/arch.sh
+# phase: {{ include "wsl/install/packages/omarchy.sh" | sha256sum }} packages/omarchy.sh
 # shellcheck disable=SC1091
 source "$UM_ENV_DIR/install/detect_os.sh"
 detect_os
@@ -12,5 +13,6 @@ component_enabled packages || exit 0
 case "$UM_OS" in
   ubuntu) bash "$UM_ENV_DIR/install/packages/ubuntu.sh" --run ;;
   arch) bash "$UM_ENV_DIR/install/packages/arch.sh" --run ;;
+  omarchy) bash "$UM_ENV_DIR/install/packages/omarchy.sh" --run ;;
 esac
 {{- end }}

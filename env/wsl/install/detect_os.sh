@@ -19,13 +19,15 @@ detect_os() {
     *) grep -qi microsoft /proc/version 2>/dev/null && wsl=1 ;;
   esac
   if [ "$wsl" != "1" ]; then
-    log_warn "Not running under WSL. This bootstrap targets WSL Arch/Ubuntu."
+    log_info "Not running under WSL: native install, no WSL tuning (ADR 0017)."
   fi
 
   if [ ! -f /etc/os-release ]; then
     die "Cannot detect OS: /etc/os-release not found."
   fi
   . /etc/os-release
+  # UM_OS (install.sh, tests) overrides the detected ID.
+  ID="${UM_OS:-${ID:-}}"
 
   case "${ID:-}" in
     ubuntu)
@@ -34,8 +36,11 @@ detect_os() {
     arch)
       export UM_OS="arch"
       ;;
+    omarchy)
+      export UM_OS="omarchy"
+      ;;
     *)
-      die "Unsupported OS: ${ID:-unknown}. Only WSL Ubuntu and WSL Arch are supported."
+      die "Unsupported OS: ${ID:-unknown}. Supported: Ubuntu and Arch (WSL or native), Omarchy."
       ;;
   esac
 

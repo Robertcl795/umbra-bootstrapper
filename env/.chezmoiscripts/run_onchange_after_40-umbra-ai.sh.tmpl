@@ -1,0 +1,7 @@
+{{- if or (hasPrefix "wsl-" .os) (eq .os "omarchy") -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/umbra-ai.sh" | sha256sum }} umbra-ai.sh
+component_enabled um || component_enabled vault || component_enabled ollama || exit 0
+bash "$UM_ENV_DIR/install/umbra-ai.sh" --run
+{{- end }}

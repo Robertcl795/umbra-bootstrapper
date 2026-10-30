@@ -27,10 +27,17 @@ log_step() { echo -e "${CYAN}==>${NC} $*" >&2; }
 
 die() { log_error "$*"; exit 1; }
 
+# Opt-in components (install.sh, ADR 0017, 0018) run only when UM_COMPONENTS names them,
+# so a plain `bootstrap.sh --yes` installs what it always did.
+UM_OPTIN_COMPONENTS="desktop um vault ollama"
+
 # component_enabled <name>: true unless excluded by UM_COMPONENTS (allow-list) or UM_SKIP.
 component_enabled() {
   local name="$1"
   if [ -n "$UM_COMPONENTS" ] && [[ ",$UM_COMPONENTS," != *",$name,"* ]]; then
+    return 1
+  fi
+  if [[ " $UM_OPTIN_COMPONENTS " == *" $name "* ]] && [[ ",$UM_COMPONENTS," != *",$name,"* ]]; then
     return 1
   fi
   [[ ",$UM_SKIP," != *",$name,"* ]]
@@ -217,17 +224,25 @@ select_theme() {
 
 export UM_ENV_DIR UM_NONINTERACTIVE UM_VERBOSE UM_SHELL UM_THEME UM_ENABLE_K8S UM_MODE UM_COMPONENTS UM_SKIP
 
-# find_ai_standard: prints the toolkit/ai-standard directory of umbra-ai (ADR 0018): UM_AI_DIR,
-# then the umbrella's ai/ submodule next to the bootstrapper, then the clone made by the
-# Umbra AI item. Returns 1 when none exists.
-find_ai_standard() {
+# find_umbra_ai: prints the umbra-ai checkout (ADR 0018): UM_AI_DIR, then the umbrella's ai/
+# submodule next to the bootstrapper, then the clone made by the Umbra AI item
+# (UM_AI_CLONE_DIR). Returns 1 when none exists.
+UM_AI_CLONE_DIR="${UM_AI_CLONE_DIR:-$HOME/.local/share/umbra/umbra-ai}"
+find_umbra_ai() {
   local base d
   base="$(cd -- "$UM_ENV_DIR/../.." && pwd)"
-  for d in ${UM_AI_DIR:+"$UM_AI_DIR"} "$base/../ai" "$HOME/.local/share/umbra/umbra-ai"; do
-    if [ -d "$d/toolkit/ai-standard" ]; then
-      (cd -- "$d/toolkit/ai-standard" && pwd)
+  for d in ${UM_AI_DIR:+"$UM_AI_DIR"} "$base/../ai" "$UM_AI_CLONE_DIR"; do
+    if [ -d "$d/cli" ] && [ -d "$d/toolkit/ai-standard" ]; then
+      (cd -- "$d" && pwd)
       return 0
     fi
   done
   return 1
+}
+
+# find_ai_standard: prints the toolkit/ai-standard directory of umbra-ai, or returns 1.
+find_ai_standard() {
+  local d
+  d="$(find_umbra_ai)" || return 1
+  echo "$d/toolkit/ai-standard"
 }

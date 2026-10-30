@@ -1,4 +1,4 @@
-{{- if and (hasPrefix "wsl-" .os) (eq .profile "personal") -}}
+{{- if and (or (hasPrefix "wsl-" .os) (eq .os "omarchy")) (eq .profile "personal") -}}
 #!/usr/bin/env bash
 {{ template "um-env.sh" . }}
 # phase: {{ include "wsl/install/ai.sh" | sha256sum }} ai.sh

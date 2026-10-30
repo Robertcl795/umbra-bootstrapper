@@ -13,16 +13,21 @@ omarchy/**
 .config/fish/**
 {{ end }}
 
-# Omarchy (ADR 0012): only the Umbra theme folder until ADR 0011 is implemented.
-# Everywhere else the Omarchy theme folder is not deployed.
+# Omarchy (ADR 0011): only the zsh files and the starship prompt. The theme is installed by
+# install.sh with `omarchy theme install` (ADR 0012, 0014), not by chezmoi.
 {{ if eq .os "omarchy" }}
 **
+!.chezmoiscripts
+!.chezmoiscripts/**
+!.zshrc
 !.config
-!.config/omarchy
-!.config/omarchy/themes
-!.config/omarchy/themes/umbra
-!.config/omarchy/themes/umbra/**
-{{ else }}
-.config/omarchy
-.config/omarchy/**
+!.config/zsh
+!.config/zsh/**
+!.config/starship.toml
+{{ end }}
+
+# ADR 0017: the Ghostty config only with the desktop component (native Ubuntu and Arch).
+{{ if not (has "desktop" (splitList "," .components)) }}
+.config/ghostty
+.config/ghostty/**
 {{ end }}

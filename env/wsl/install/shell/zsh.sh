@@ -21,7 +21,7 @@ install_zsh() {
   if ! ensure_cmd zsh; then
     case "${UM_OS:-}" in
       ubuntu) sudo apt-get install -y zsh ;;
-      arch) sudo pacman -S --noconfirm --needed zsh ;;
+      arch|omarchy) sudo pacman -S --noconfirm --needed zsh ;;
       *) die "Unknown OS for zsh install" ;;
     esac
   fi
@@ -43,7 +43,8 @@ install_zsh() {
   # State/cache dirs used by history and completion
   mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/zsh" "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 
-  if [ "$UM_SHELL" = "zsh" ]; then
+  # ADR 0011: on Omarchy the login shell stays Omarchy's.
+  if [ "$UM_SHELL" = "zsh" ] && [ "${UM_OS:-}" != "omarchy" ]; then
     set_default_shell_zsh
   fi
 }

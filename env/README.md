@@ -1,9 +1,9 @@
 # env
 
 - **Purpose:** dotfiles for every machine profile.
-- **Status:** active for WSL Ubuntu and WSL Arch; Omarchy planned (managed by nothing yet)
+- **Status:** active for WSL and native Ubuntu and Arch, and Omarchy (ADR 0011, 0017)
 - **Activates in:** v0.2 for WSL; chezmoi since ADR 0006; Omarchy after its plan (Stage 7b)
-- **Contains:** the chezmoi source (the repo's `.chezmoiroot` points here) and `wsl/`, the bootstrapper. Entry: `bash env/wsl/bootstrap.sh`; see [wsl/README.md](wsl/README.md).
+- **Contains:** the chezmoi source (the repo's `.chezmoiroot` points here) and `wsl/`, the bootstrapper. Entry: `bash install.sh` (the single command, with the selector) or `bash env/wsl/bootstrap.sh`; see [wsl/README.md](wsl/README.md).
 
 | Path | What it holds |
 |---|---|
@@ -11,7 +11,7 @@
 | `.chezmoi.toml.tmpl` | the local config: `os`, `profile`, `shell`, `theme` and the phase selection, stored in `~/.config/chezmoi/chezmoi.toml` |
 | `.chezmoiscripts/` | the install phases, run by chezmoi when a phase script or the selection changes |
 | `.chezmoitemplates/` | starship themes, the shared script header |
-| `.chezmoiignore` | source-only folders; fish unless chosen; everything on Omarchy for now |
+| `.chezmoiignore` | source-only folders; fish unless chosen; Ghostty only with `desktop`; on Omarchy only the zsh files and `starship.toml` |
 | `wsl/` | `bootstrap.sh`, the phase scripts, pinned checksums, checkpoint tests, docs |
 | `core/`, `omarchy/` | reserved (ignored by chezmoi) |
 
