@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# umbra-bootstrap-command — the temporary `umbra` between stage 1 and stage 2 (ADR 0022). Installed
+# at /usr/local/bin/umbra by stage 1 and removed when stage 2 succeeds, so `umbra` then means `um`
+# or nothing (ADR 0005).
+set -euo pipefail
+
+marker="$HOME/.local/state/um/bootstrap.env"
+
+usage() {
+  echo "usage: umbra bootstrap resume|status" >&2
+  exit 2
+}
+
+case "${1:-}:${2:-}" in
+  bootstrap:resume)
+    if [ "$(id -u)" -eq 0 ]; then
+      echo "Run this as your regular user, not root. Restart the distro first if you are root by default." >&2
+      exit 1
+    fi
+    if [ ! -f "$marker" ]; then
+      echo "Nothing to resume: $marker does not exist." >&2
+      exit 1
+    fi
+    # shellcheck disable=SC1090
+    source "$marker"
+    shift 2
+    exec bash "$UM_ENV_DIR/bootstrap.sh" "$@"
+    ;;
+  bootstrap:status)
+    if [ -f "$marker" ]; then
+      echo "stage 2: pending (run: umbra bootstrap resume)"
+    else
+      echo "stage 2: nothing pending"
+    fi
+    if sudo -n true 2>/dev/null; then
+      echo "sudo: passwordless (the temporary rule is removed when stage 2 succeeds)"
+    else
+      echo "sudo: password required"
+    fi
+    ;;
+  *)
+    if command -v um >/dev/null 2>&1; then
+      exec um "$@"
+    fi
+    usage
+    ;;
+esac
