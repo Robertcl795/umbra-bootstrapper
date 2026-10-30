@@ -4,4 +4,5 @@
 # phase: {{ include "wsl/install/dev/k8s.sh" | sha256sum }} dev/k8s.sh
 component_enabled k8s || exit 0
 bash "$UM_ENV_DIR/install/dev/k8s.sh" --run
+phase_gate k8s "a Kubernetes tool is missing; run tests/06_dev.sh" bash "$UM_ENV_DIR/tests/06_dev.sh"
 {{- end }}

@@ -4,6 +4,7 @@
 # selection: os={{ .os }} profile={{ .profile }} shell={{ .shell }} components={{ .components }} skip={{ .skip }} k8s={{ .k8s }} wslconfig={{ .wslconfig }} networking={{ .networking }} is_wsl={{ .is_wsl }}
 # common: {{ include "wsl/install/common.sh" | sha256sum }} {{ include "wsl/install/checksums.sha256" | sha256sum }}
 set -euo pipefail
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 export UM_ENV_DIR={{ joinPath .chezmoi.workingTree "env" "wsl" | quote }}
 export UM_MODE={{ .profile | quote }} UM_SHELL={{ .shell | quote }}
 export UM_OS={{ trimPrefix "wsl-" .os | quote }}

@@ -9,4 +9,5 @@ if [ "$UM_SHELL" = "fish" ]; then
   bash "$UM_ENV_DIR/install/shell/fish.sh" --run
 fi
 bash "$UM_ENV_DIR/install/shell/zsh.sh" --run
+phase_gate shell "zsh is missing" have_cmds zsh
 {{- end }}

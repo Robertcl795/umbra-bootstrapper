@@ -4,4 +4,5 @@
 # phase: {{ include "wsl/install/dev/lang.sh" | sha256sum }} dev/lang.sh
 component_enabled lang || exit 0
 bash "$UM_ENV_DIR/install/dev/lang.sh" --run
+phase_gate lang "a language toolchain is missing" have_cmds rustup fnm uv
 {{- end }}

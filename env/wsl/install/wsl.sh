@@ -8,10 +8,8 @@ fi
 SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# Remember whether the user set UM_ENABLE_WSLCONFIG before it gets its default:
-# in the work profile, .wslconfig on the Windows host is edited only on request.
-UM_WSLCONFIG_EXPLICIT="${UM_ENABLE_WSLCONFIG+set}"
-UM_ENABLE_WSLCONFIG="${UM_ENABLE_WSLCONFIG:-1}"
+# .wslconfig on the Windows host is global, so it is written only on request (ADR 0024).
+UM_ENABLE_WSLCONFIG="${UM_ENABLE_WSLCONFIG:-0}"
 
 # UM_IS_WSL=1|0 overrides the detection (used by container tests).
 is_wsl() {
@@ -38,84 +36,25 @@ windows_userprofile() {
   wslpath -u "$win_path" 2>/dev/null
 }
 
-# Set key=value inside an INI section, preserving the rest of the file.
-# Usage: set_ini_key <file> <section> <key> <value>
-set_ini_key() {
-  local file="$1" section="$2" key="$3" value="$4"
-  if [ ! -f "$file" ]; then
-    printf '[%s]\n%s=%s\n' "$section" "$key" "$value" > "$file"
-    return 0
-  fi
-  local tmp
-  tmp="$(mktemp)"
-  awk -v section="$section" -v key="$key" -v value="$value" '
-    BEGIN { in_section = 0; done = 0; seen_section = 0 }
-    /^\[.*\]$/ {
-      if (in_section && !done) { print key "=" value; done = 1 }
-      in_section = (tolower($0) == "[" tolower(section) "]")
-      if (in_section) seen_section = 1
-      print
-      next
-    }
-    {
-      if (in_section && !done) {
-        line = $0
-        gsub(/[ \t]/, "", line)
-        split(line, kv, "=")
-        if (tolower(kv[1]) == tolower(key)) { print key "=" value; done = 1; next }
-      }
-      print
-    }
-    END {
-      if (!seen_section) { print "[" section "]"; print key "=" value }
-      else if (!done) { print key "=" value }
-    }
-  ' "$file" > "$tmp" && mv "$tmp" "$file"
-}
-
 configure_wsl_conf() {
-  log_info "Writing /etc/wsl.conf (systemd, interop, automount metadata)..."
+  log_info "Merging /etc/wsl.conf (systemd, interop, automount metadata)..."
 
-  # Preserve the default user set at first boot (or fall back to the
-  # invoking user) so a WSL restart never drops back to root.
-  local default_user=""
-  if [ -f /etc/wsl.conf ]; then
-    default_user="$(awk -F= '
-      /^\[/ { section = tolower($0) }
-      section == "[user]" && tolower($1) ~ /^[ \t]*default[ \t]*$/ { gsub(/[ \t\r]/, "", $2); print $2; exit }
-    ' /etc/wsl.conf)"
-    sudo cp /etc/wsl.conf "/etc/wsl.conf.backup.$(date +%Y%m%d_%H%M%S)"
+  # Keep the default user set at first boot, or use the invoking user, so a restart never
+  # drops back to root. Other sections and keys stay as they are (ADR 0024).
+  local default_user=()
+  if ! grep -qi '^default[[:space:]]*=' /etc/wsl.conf 2>/dev/null && [ "$(id -u)" -ne 0 ]; then
+    default_user=(user default "$(id -un)")
   fi
-  if [ -z "$default_user" ] && [ "$(id -u)" -ne 0 ]; then
-    default_user="$USER"
-  fi
-
-  sudo tee /etc/wsl.conf > /dev/null << 'EOF'
-# Managed by Umbra (env/wsl/install/wsl.sh)
-# Apply with: wsl --shutdown (from PowerShell), then reopen the terminal.
-
-[boot]
-systemd=true
-
-[network]
-generateHosts=true
-generateResolvConf=true
-
-[interop]
-enabled=true
-appendWindowsPath=true
-
-[automount]
-enabled=true
-root=/mnt/
-# metadata enables Linux permissions on NTFS mounts
-options="metadata,umask=22,fmask=11"
-EOF
-
-  if [ -n "$default_user" ]; then
-    printf '\n[user]\ndefault=%s\n' "$default_user" | sudo tee -a /etc/wsl.conf > /dev/null
-    log_info "Default WSL user preserved: $default_user"
-  fi
+  wsl_conf_merge \
+    boot systemd true \
+    network generateHosts true \
+    network generateResolvConf true \
+    interop enabled true \
+    interop appendWindowsPath true \
+    automount enabled true \
+    automount root /mnt/ \
+    automount options '"metadata,umask=22,fmask=11"' \
+    "${default_user[@]}"
 }
 
 configure_wslconfig() {
@@ -184,20 +123,18 @@ configure_wsl() {
     return 0
   fi
 
-  if [ "$UM_ENABLE_WSLCONFIG" != "1" ]; then
-    log_info "WSL host configuration disabled (UM_ENABLE_WSLCONFIG=0)."
-    return 0
-  fi
-
   configure_wsl_conf
-  if [ "${UM_MODE:-personal}" = "work" ] && [ -z "$UM_WSLCONFIG_EXPLICIT" ]; then
-    log_info "Work profile: leaving the Windows .wslconfig untouched (set UM_ENABLE_WSLCONFIG=1 to edit it)."
-  else
+  if [ "$UM_ENABLE_WSLCONFIG" = "1" ]; then
     configure_wslconfig
+    log_warn ".wslconfig applies once every distro has stopped."
+  else
+    log_info "Windows .wslconfig left alone. Recommended: [wsl2] networkingMode=NAT, localhostForwarding=true, dnsTunneling=true, autoProxy=true (--enable-wslconfig applies them)."
   fi
   check_filesystem_location
 
-  log_warn "Run 'wsl --shutdown' from PowerShell for network changes to take effect."
+  if [ "$UM_WSL_CONF_CHANGED" = "1" ]; then
+    log_warn "/etc/wsl.conf changed. Restart this distro to apply it: wsl.exe --terminate ${WSL_DISTRO_NAME:-<distro>}"
+  fi
 }
 
 if [ "${1:-}" = "--run" ]; then
