@@ -7,7 +7,9 @@ if [ -z "$SOURCE_PATH" ]; then
 fi
 SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 
-export UM_ENV_DIR="${UM_ENV_DIR:-$(cd -- "$SCRIPT_DIR/.." && pwd)}"
+# common.sh sets its own SCRIPT_DIR.
+TESTS_DIR="$SCRIPT_DIR"
+export UM_ENV_DIR="${UM_ENV_DIR:-$(cd -- "$TESTS_DIR/.." && pwd)}"
 # shellcheck disable=SC1091
 source "$UM_ENV_DIR/install/common.sh"
 
@@ -18,7 +20,7 @@ check() {
   for c in "$@"; do
     component_enabled "$c" || return 0
   done
-  bash "$SCRIPT_DIR/$t"
+  bash "$TESTS_DIR/$t"
 }
 
 check 00_preflight.sh
