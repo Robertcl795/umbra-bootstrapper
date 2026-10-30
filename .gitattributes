@@ -1,0 +1,2 @@
+# LF everywhere, even under core.autocrlf=true: these files are read by Linux tools.
+* text=auto eol=lf
