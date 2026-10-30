@@ -20,13 +20,13 @@ install_fastfetch() {
   if ! ensure_cmd fastfetch; then
     case "${UM_OS:-}" in
       arch)
-        sudo pacman -S --noconfirm --needed fastfetch \
+        run_priv pacman -S --noconfirm --needed fastfetch \
           || log_warn "pacman could not install fastfetch."
         ;;
       ubuntu)
         # In the archive from 24.10 onwards; older releases fall through to
         # the upstream release tarball below.
-        sudo apt-get install -y fastfetch 2>/dev/null \
+        run_priv apt-get install -y fastfetch 2>/dev/null \
           || log_info "fastfetch is not in apt for this release; using the upstream build."
         ;;
     esac

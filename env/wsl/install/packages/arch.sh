@@ -11,15 +11,15 @@ source "$SCRIPT_DIR/../common.sh"
 install_packages_arch() {
   log_step "Phase 1: System update + base packages (Arch)"
 
-  if [ ! -d /etc/pacman.d/gnupg ] || ! sudo pacman-key --list-keys >/dev/null 2>&1; then
+  if [ ! -d /etc/pacman.d/gnupg ] || ! run_priv pacman-key --list-keys >/dev/null 2>&1; then
     log_info "Initializing pacman keyring..."
-    sudo pacman-key --init
-    sudo pacman-key --populate archlinux
+    run_priv pacman-key --init
+    run_priv pacman-key --populate archlinux
   fi
 
-  sudo pacman -Sy --noconfirm
+  run_priv pacman -Sy --noconfirm
 
-  sudo pacman -S --noconfirm --needed \
+  run_priv pacman -S --noconfirm --needed \
     base-devel git curl wget unzip ca-certificates \
     ripgrep fd bat eza fzf zoxide neovim starship \
     tldr zsh \
@@ -27,7 +27,7 @@ install_packages_arch() {
 
   # ADR 0004: fish only when it is the chosen shell.
   if [ "${UM_SHELL:-zsh}" = "fish" ]; then
-    sudo pacman -S --noconfirm --needed fish
+    run_priv pacman -S --noconfirm --needed fish
   fi
 
   install_sshs_arch

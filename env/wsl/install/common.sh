@@ -43,6 +43,93 @@ component_enabled() {
   [[ ",$UM_SKIP," != *",$name,"* ]]
 }
 
+# run_priv <command...>: runs a command as root (ADR 0021): directly when already root, otherwise
+# through sudo. Returns 77 with the reason when neither works. The only sudo in the installer,
+# apart from its copy in install.sh.
+run_priv() {
+  if [ "$(id -u)" -eq 0 ]; then "$@"; return; fi
+  if command -v sudo >/dev/null 2>&1; then
+    if sudo -n true 2>/dev/null; then sudo -n "$@"; return; fi
+    # sudo prompts on the terminal, so a terminal on stdin or stderr is enough (pipes into tee).
+    if [ -t 0 ] || [ -t 2 ]; then sudo "$@"; return; fi
+  fi
+  log_error "need root for: $*"
+  log_error "no usable sudo for user $(id -un) (installed: $(command -v sudo >/dev/null 2>&1 && echo yes || echo no), groups: $(id -nG))"
+  return 77
+}
+
+# phase_gate <id> <failure message> <command...>: a side-effect-free postcondition (ADR 0023).
+phase_gate() {
+  local id="$1" msg="$2"
+  shift 2
+  if "$@" >/dev/null 2>&1; then
+    log_info "gate $id: ok"
+    return 0
+  fi
+  log_error "gate $id failed: $msg"
+  return 1
+}
+
+# Set key=value inside an INI section, preserving the rest of the file.
+# Usage: set_ini_key <file> <section> <key> <value>
+set_ini_key() {
+  local file="$1" section="$2" key="$3" value="$4"
+  if [ ! -f "$file" ]; then
+    printf '[%s]\n%s=%s\n' "$section" "$key" "$value" > "$file"
+    return 0
+  fi
+  local tmp
+  tmp="$(mktemp)"
+  awk -v section="$section" -v key="$key" -v value="$value" '
+    BEGIN { in_section = 0; done = 0; seen_section = 0 }
+    /^\[.*\]$/ {
+      if (in_section && !done) { print key "=" value; done = 1 }
+      in_section = (tolower($0) == "[" tolower(section) "]")
+      if (in_section) seen_section = 1
+      print
+      next
+    }
+    {
+      if (in_section && !done) {
+        line = $0
+        gsub(/[ \t]/, "", line)
+        split(line, kv, "=")
+        if (tolower(kv[1]) == tolower(key)) { print key "=" value; done = 1; next }
+      }
+      print
+    }
+    END {
+      if (!seen_section) { print "[" section "]"; print key "=" value }
+      else if (!done) { print key "=" value }
+    }
+  ' "$file" > "$tmp" && cat "$tmp" > "$file" && rm -f "$tmp"
+}
+
+# wsl_conf_merge <section> <key> <value> ...: sets keys in /etc/wsl.conf and keeps everything else
+# (ADR 0024). Writes, with one backup, only when something changes; UM_WSL_CONF_CHANGED is 1 after
+# a write and 0 otherwise.
+UM_WSL_CONF_CHANGED=0
+wsl_conf_merge() {
+  local tmp
+  tmp="$(mktemp)"
+  if [ -f /etc/wsl.conf ]; then
+    cp /etc/wsl.conf "$tmp"
+  fi
+  while [ $# -ge 3 ]; do
+    set_ini_key "$tmp" "$1" "$2" "$3"
+    shift 3
+  done
+  UM_WSL_CONF_CHANGED=0
+  if ! cmp -s "$tmp" /etc/wsl.conf; then
+    if [ -f /etc/wsl.conf ]; then
+      run_priv cp /etc/wsl.conf "/etc/wsl.conf.backup.$(date +%Y%m%d_%H%M%S)" || { rm -f "$tmp"; return 1; }
+    fi
+    run_priv install -m 0644 -o root -g root "$tmp" /etc/wsl.conf || { rm -f "$tmp"; return 1; }
+    UM_WSL_CONF_CHANGED=1
+  fi
+  rm -f "$tmp"
+}
+
 is_tty() { [ -t 0 ] && [ -t 1 ]; }
 
 confirm() {
@@ -95,6 +182,14 @@ symlink_with_backup() {
 
 ensure_cmd() {
   command -v "$1" >/dev/null 2>&1
+}
+
+# have_cmds <name...>: all of them exist (`command -v a b` succeeds when any does).
+have_cmds() {
+  local c
+  for c in "$@"; do
+    ensure_cmd "$c" || return 1
+  done
 }
 
 run() {
@@ -224,6 +319,9 @@ select_theme() {
 
 export UM_ENV_DIR UM_NONINTERACTIVE UM_VERBOSE UM_SHELL UM_THEME UM_ENABLE_K8S UM_MODE UM_COMPONENTS UM_SKIP
 
+UM_AI_REPO_HTTPS="${UM_AI_REPO_HTTPS:-https://github.com/Robertcl795/umbra-ai.git}"
+UM_AI_REPO_SSH="${UM_AI_REPO_SSH:-git@github.com:Robertcl795/umbra-ai.git}"
+
 # find_umbra_ai: prints the umbra-ai checkout (ADR 0018): UM_AI_DIR, then the umbrella's ai/
 # submodule next to the bootstrapper, then the clone made by the Umbra AI item
 # (UM_AI_CLONE_DIR). Returns 1 when none exists.
@@ -238,6 +336,15 @@ find_umbra_ai() {
     fi
   done
   return 1
+}
+
+# clone_umbra_ai: clones umbra-ai with the user's own credentials (ADR 0018). Runs in the user's
+# session, so the clone lands in the user's home. Never starts a login.
+clone_umbra_ai() {
+  mkdir -p "$(dirname "$UM_AI_CLONE_DIR")"
+  GIT_TERMINAL_PROMPT=0 git clone -q --depth=1 "$UM_AI_REPO_HTTPS" "$UM_AI_CLONE_DIR" 2>/dev/null \
+    || GIT_SSH_COMMAND="ssh -o BatchMode=yes" git clone -q --depth=1 "$UM_AI_REPO_SSH" "$UM_AI_CLONE_DIR" 2>/dev/null \
+    || log_warn "Could not clone umbra-ai; its components will be skipped."
 }
 
 # find_ai_standard: prints the toolkit/ai-standard directory of umbra-ai, or returns 1.

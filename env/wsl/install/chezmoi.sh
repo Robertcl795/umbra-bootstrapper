@@ -22,7 +22,7 @@ install_chezmoi() {
   [ -f /etc/os-release ] && id="$(. /etc/os-release && echo "${ID:-}")"
   case "$id" in
     arch|omarchy)
-      sudo pacman -S --noconfirm --needed chezmoi
+      run_priv pacman -S --noconfirm --needed chezmoi
       ;;
     ubuntu)
       local url tmp sha
@@ -35,7 +35,7 @@ install_chezmoi() {
         rm -rf "$tmp"
         die "sha256 mismatch for $url; not installing chezmoi."
       fi
-      sudo dpkg -i "$tmp/chezmoi.deb"
+      run_priv dpkg -i "$tmp/chezmoi.deb"
       rm -rf "$tmp"
       ;;
     *)

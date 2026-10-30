@@ -59,11 +59,11 @@ install_desktop() {
       if ! grep -q 'Candidate: [0-9]' <<<"$policy"; then
         die "Ghostty is not in this Ubuntu release's archive; install it yourself, then re-run with --skip desktop."
       fi
-      sudo apt-get install -y ghostty fontconfig xz-utils
+      run_priv apt-get install -y ghostty fontconfig xz-utils
       install_font_ubuntu
       ;;
     arch)
-      sudo pacman -S --noconfirm --needed ghostty ttf-jetbrains-mono-nerd
+      run_priv pacman -S --noconfirm --needed ghostty ttf-jetbrains-mono-nerd
       ;;
     *)
       log_info "Desktop pieces are for native Ubuntu and Arch only; skipping on '${UM_OS:-unknown}'."

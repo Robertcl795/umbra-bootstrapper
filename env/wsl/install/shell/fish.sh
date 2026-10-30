@@ -13,8 +13,8 @@ install_fish() {
 
   if ! ensure_cmd fish; then
     case "${UM_OS:-}" in
-      ubuntu) sudo apt-get install -y fish ;;
-      arch) sudo pacman -S --noconfirm --needed fish ;;
+      ubuntu) run_priv apt-get install -y fish ;;
+      arch) run_priv pacman -S --noconfirm --needed fish ;;
       *) die "Unknown OS for fish install" ;;
     esac
   fi

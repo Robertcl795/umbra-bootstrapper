@@ -20,8 +20,8 @@ install_zsh() {
 
   if ! ensure_cmd zsh; then
     case "${UM_OS:-}" in
-      ubuntu) sudo apt-get install -y zsh ;;
-      arch|omarchy) sudo pacman -S --noconfirm --needed zsh ;;
+      ubuntu) run_priv apt-get install -y zsh ;;
+      arch|omarchy) run_priv pacman -S --noconfirm --needed zsh ;;
       *) die "Unknown OS for zsh install" ;;
     esac
   fi
@@ -65,13 +65,13 @@ set_default_shell_zsh() {
 
   # chsh refuses shells missing from /etc/shells
   if ! grep -qx "$zsh_path" /etc/shells 2>/dev/null; then
-    echo "$zsh_path" | sudo tee -a /etc/shells > /dev/null
+    echo "$zsh_path" | run_priv tee -a /etc/shells > /dev/null
   fi
 
-  # usermod via sudo avoids chsh's password prompt (which silently fails
+  # usermod as root avoids chsh's password prompt (which silently fails
   # in scripted runs); fall back to chsh for systems without usermod.
   log_info "Setting zsh as default shell for $USER..."
-  if sudo usermod -s "$zsh_path" "$USER" 2>/dev/null || chsh -s "$zsh_path"; then
+  if run_priv usermod -s "$zsh_path" "$USER" 2>/dev/null || chsh -s "$zsh_path"; then
     log_info "Default shell changed to zsh (takes effect on next login)."
   else
     log_warn "Unable to change default shell. Run manually: chsh -s $zsh_path"

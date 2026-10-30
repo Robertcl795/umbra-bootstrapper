@@ -10,19 +10,19 @@ source "$SCRIPT_DIR/../common.sh"
 
 install_packages_ubuntu() {
   log_step "Phase 1: System update + base packages (Ubuntu)"
-  sudo apt-get update
-  sudo apt-get install -y \
+  run_priv apt-get update
+  run_priv apt-get install -y \
     build-essential git curl wget unzip ca-certificates \
     ripgrep fd-find bat \
     fzf zoxide neovim zsh
   # ADR 0004: fish only when it is the chosen shell.
   if [ "${UM_SHELL:-zsh}" = "fish" ]; then
-    sudo apt-get install -y fish
+    run_priv apt-get install -y fish
   fi
 
-  if ! sudo apt-get install -y eza; then
+  if ! run_priv apt-get install -y eza; then
     log_warn "eza has no installable candidate; trying exa instead."
-    sudo apt-get install -y exa || log_warn "Neither eza nor exa is installable via apt; skipping."
+    run_priv apt-get install -y exa || log_warn "Neither eza nor exa is installable via apt; skipping."
   fi
 
   # `apt-cache show tldr` can return 0 (cached metadata) even when apt has no
@@ -31,9 +31,9 @@ install_packages_ubuntu() {
   # under `set -e` when `apt-get install` then failed. Just attempt the
   # install directly (inside an `if`, so failure never trips errexit) and
   # fall back to tealdeer; skip entirely if neither is installable.
-  if ! sudo apt-get install -y tldr; then
+  if ! run_priv apt-get install -y tldr; then
     log_warn "tldr has no installable candidate; trying tealdeer instead."
-    if ! sudo apt-get install -y tealdeer; then
+    if ! run_priv apt-get install -y tealdeer; then
       log_warn "Neither tldr nor tealdeer is installable via apt; skipping (cheat-sheet lookups won't be available)."
     fi
   fi
@@ -70,7 +70,7 @@ install_packages_ubuntu() {
 install_cli_extras_ubuntu() {
   log_step "Core CLI extras (lazygit, glow, duf, lazydocker, yazi, sshs, lnav, just, zellij)"
 
-  sudo apt-get install -y duf just lnav || log_warn "apt could not install duf/just/lnav; continuing."
+  run_priv apt-get install -y duf just lnav || log_warn "apt could not install duf/just/lnav; continuing."
 
   local arch rust_arch
   arch="$(detect_arch)"
@@ -110,7 +110,7 @@ install_cli_extras_ubuntu() {
 
   # fastfetch entered the Ubuntu archive in 24.10; older releases (and the
   # LTS) need the upstream build. Its arm64 asset is named aarch64.
-  if ! ensure_cmd fastfetch && ! sudo apt-get install -y fastfetch 2>/dev/null; then
+  if ! ensure_cmd fastfetch && ! run_priv apt-get install -y fastfetch 2>/dev/null; then
     url="https://github.com/fastfetch-cli/fastfetch/releases/download/${fastfetch_ver}/fastfetch-linux-${rust_arch/x86_64/amd64}.tar.gz"
     install_release_bin fastfetch "$url" "$(pinned_sha256 "$url")"
   fi

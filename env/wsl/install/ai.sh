@@ -24,6 +24,7 @@ install_ai_standard() {
   fi
 
   # The standard lives in the private umbra-ai repo (ADR 0014, 0018).
+  find_umbra_ai >/dev/null 2>&1 || clone_umbra_ai
   local ai_dir
   ai_dir="$(find_ai_standard)" || {
     log_warn "AI standard not found (umbra-ai is private: set UM_AI_DIR or clone it); skipping."

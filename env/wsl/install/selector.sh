@@ -3,8 +3,6 @@
 # (ADR 0016, docs/plans/platform.md §3-4 in the Umbra umbrella). Sourced after common.sh.
 
 UM_GUM_VERSION="2.0.2"
-UM_AI_REPO_HTTPS="${UM_AI_REPO_HTTPS:-https://github.com/Robertcl795/umbra-ai.git}"
-UM_AI_REPO_SSH="${UM_AI_REPO_SSH:-git@github.com:Robertcl795/umbra-ai.git}"
 UM_AI_PRIVATE_MSG="Umbra AI is private: log in with \`gh auth login\` or add an SSH key with access, then run the command again."
 
 # um_platform: wsl-ubuntu, wsl-arch, ubuntu, arch or omarchy. UM_OS (ubuntu|arch|omarchy) and

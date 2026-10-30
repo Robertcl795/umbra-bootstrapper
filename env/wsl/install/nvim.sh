@@ -13,8 +13,8 @@ install_nvim() {
 
   if ! ensure_cmd nvim; then
     case "${UM_OS:-}" in
-      ubuntu) sudo apt-get install -y neovim ;;
-      arch) sudo pacman -S --noconfirm --needed neovim ;;
+      ubuntu) run_priv apt-get install -y neovim ;;
+      arch) run_priv pacman -S --noconfirm --needed neovim ;;
       *) die "Unknown OS for neovim install" ;;
     esac
   fi

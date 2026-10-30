@@ -39,8 +39,8 @@ install_gh_copilot() {
   if ! ensure_cmd gh; then
     log_info "Installing GitHub CLI..."
     case "${UM_OS:-}" in
-      arch|omarchy) sudo pacman -S --noconfirm --needed github-cli ;;
-      ubuntu) sudo apt-get install -y gh ;;
+      arch|omarchy) run_priv pacman -S --noconfirm --needed github-cli ;;
+      ubuntu) run_priv apt-get install -y gh ;;
       *) log_warn "Unknown OS for gh install; skipping Copilot CLI."; return 0 ;;
     esac
   fi
