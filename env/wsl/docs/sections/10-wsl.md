@@ -9,7 +9,7 @@ whatever Windows itself is already using. See
 [os/windows.md](../os/windows.md) for what *does* differ on that path
 (scoop's own proxy handling, if any).
 
-No-ops entirely if not running under WSL, or if `UM_ENABLE_WSLCONFIG=0`.
+No-ops entirely if not running under WSL. `.wslconfig` is written only with `--enable-wslconfig`.
 
 ## What it changes
 
@@ -27,12 +27,13 @@ No-ops entirely if not running under WSL, or if `UM_ENABLE_WSLCONFIG=0`.
   `/mnt/*` — cross-OS I/O there is 10-20x slower than the native ext4
   filesystem.
 
-Changes to `.wslconfig` need `wsl --shutdown` (from PowerShell) and a
-terminal reopen to take effect — the script prints this reminder.
+`/etc/wsl.conf` is merged: other keys are kept, and a backup is written only
+when something changes. It applies after `wsl.exe --terminate <distro>`.
+`.wslconfig` applies once every distro has stopped.
 
 ## Customization
 
-`UM_ENABLE_WSLCONFIG=0|1` (default `1`)
+`UM_ENABLE_WSLCONFIG=0|1` (default `0`)
 
 ## Test
 
