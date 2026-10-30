@@ -19,7 +19,7 @@ install_rustup() {
   if ! ensure_cmd rustup; then
     log_info "Installing rustup..."
     case "${UM_OS:-}" in
-      arch) sudo pacman -S --noconfirm --needed rustup ;;
+      arch) run_priv pacman -S --noconfirm --needed rustup ;;
       *) curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path ;;
     esac
   fi
@@ -88,7 +88,7 @@ install_uv() {
   if ! ensure_cmd uv; then
     log_info "Installing uv (Python package/environment manager)..."
     case "${UM_OS:-}" in
-      arch) sudo pacman -S --noconfirm --needed uv ;;
+      arch) run_priv pacman -S --noconfirm --needed uv ;;
       *) curl -fsSL https://astral.sh/uv/install.sh | sh ;;
     esac
   fi

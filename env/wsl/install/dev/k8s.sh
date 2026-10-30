@@ -18,7 +18,7 @@ install_kubectl() {
   local version
   version="$(curl -fsSL https://dl.k8s.io/release/stable.txt)"
   curl -fsSL "https://dl.k8s.io/release/${version}/bin/linux/${arch}/kubectl" -o /tmp/kubectl
-  sudo install -m 0755 /tmp/kubectl /usr/local/bin/kubectl
+  run_priv install -m 0755 /tmp/kubectl /usr/local/bin/kubectl
   rm -f /tmp/kubectl
 }
 

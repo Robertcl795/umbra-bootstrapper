@@ -13,7 +13,7 @@ install_zellij() {
 
   if ! ensure_cmd zellij; then
     case "${UM_OS:-}" in
-      arch) sudo pacman -S --noconfirm --needed zellij ;;
+      arch) run_priv pacman -S --noconfirm --needed zellij ;;
       ubuntu)
         local rust_arch
         case "$(detect_arch)" in

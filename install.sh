@@ -7,12 +7,37 @@
 # (gum, pinned and sha256-checked) and hands the selection to env/wsl/bootstrap.sh.
 # Flags (no selector, no gum download): --yes, --profile personal|work, --components a,b,
 # --skip c. UM_SELECT=<item ids> selects items without a menu. --dry-run prints the platform and
-# the selection and changes nothing. Other flags (--shell, --theme, …) go to bootstrap.sh.
+# the selection and changes nothing. Other flags (--user, --shell, --theme, …) go to bootstrap.sh.
 set -euo pipefail
 
 UM_BOOTSTRAPPER_REPO="${UM_BOOTSTRAPPER_REPO:-https://github.com/Robertcl795/umbra-bootstrapper.git}"
 UM_BRANCH="${UM_BRANCH:-main}"
 UM_THEME_REPO="${UM_THEME_REPO:-https://github.com/Robertcl795/omarchy-umbra-theme.git}"
+
+# run_priv: copy of the helper in env/wsl/install/common.sh (ADR 0021); nothing else is here yet.
+run_priv() {
+  if [ "$(id -u)" -eq 0 ]; then "$@"; return; fi
+  if command -v sudo >/dev/null 2>&1; then
+    if sudo -n true 2>/dev/null; then sudo -n "$@"; return; fi
+    if [ -t 0 ] || [ -t 2 ]; then sudo "$@"; return; fi
+  fi
+  echo "[ERROR] need root for: $*; no usable sudo for user $(id -un)." >&2
+  return 77
+}
+
+# A fresh Arch has no git, no sudo and, when imported, no keyring. As root, get git with a full
+# upgrade; on Omarchy (ADR 0011) only pacman -S.
+install_git_pacman() {
+  if [ "$(id -u)" -eq 0 ] && grep -q '^ID=arch' /etc/os-release 2>/dev/null; then
+    if ! keys="$(pacman-key --list-keys 2>/dev/null)" || [ -z "$keys" ]; then
+      pacman-key --init
+      pacman-key --populate archlinux
+    fi
+    pacman -Syu --noconfirm --needed git
+  else
+    run_priv pacman -S --noconfirm --needed git
+  fi
+}
 
 SOURCE_PATH="${BASH_SOURCE[0]:-}"
 SCRIPT_DIR=""
@@ -26,9 +51,9 @@ if [ -z "$SCRIPT_DIR" ] || [ ! -f "$SCRIPT_DIR/env/wsl/bootstrap.sh" ]; then
   echo "[INFO] Fetching the Umbra bootstrapper into $dest (branch: $UM_BRANCH)..." >&2
   if ! command -v git >/dev/null 2>&1; then
     if command -v apt-get >/dev/null 2>&1; then
-      sudo apt-get update && sudo apt-get install -y git
+      run_priv apt-get update && run_priv apt-get install -y git
     elif command -v pacman >/dev/null 2>&1; then
-      sudo pacman -S --noconfirm --needed git
+      install_git_pacman
     else
       echo "[ERROR] git is missing and no supported package manager was found." >&2
       exit 1
@@ -143,12 +168,10 @@ if [ "$dry_run" = 1 ]; then
 fi
 
 # Umbra AI selected and not here yet: clone it with the user's own credentials (ADR 0018).
-if [ "$access" = 1 ] && [[ ",$comps," =~ ,(um|vault|ai-standard), ]] && ! find_umbra_ai >/dev/null 2>&1; then
+# As root this waits for stage 2, so the clone lands in the new user's home.
+if [ "$access" = 1 ] && [ "$(id -u)" -ne 0 ] && [[ ",$comps," =~ ,(um|vault|ai-standard), ]] && ! find_umbra_ai >/dev/null 2>&1; then
   log_info "Cloning umbra-ai into $UM_AI_CLONE_DIR"
-  mkdir -p "$(dirname "$UM_AI_CLONE_DIR")"
-  GIT_TERMINAL_PROMPT=0 git clone -q --depth=1 "$UM_AI_REPO_HTTPS" "$UM_AI_CLONE_DIR" 2>/dev/null \
-    || GIT_SSH_COMMAND="ssh -o BatchMode=yes" git clone -q --depth=1 "$UM_AI_REPO_SSH" "$UM_AI_CLONE_DIR" \
-    || log_warn "Could not clone umbra-ai; its components will be skipped."
+  clone_umbra_ai
 fi
 
 # ---------------------------------------------------------------------------

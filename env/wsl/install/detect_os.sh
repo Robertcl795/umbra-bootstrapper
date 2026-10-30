@@ -56,7 +56,7 @@ detect_os() {
     die "Network check failed. Please verify internet connectivity."
   fi
 
-  if ! ensure_cmd sudo; then
+  if [ "$(id -u)" -ne 0 ] && ! ensure_cmd sudo; then
     die "sudo is required for package installation."
   fi
 }

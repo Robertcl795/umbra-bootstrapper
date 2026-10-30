@@ -16,6 +16,7 @@ source "$SCRIPT_DIR/common.sh"
 UM_OLLAMA_VERSION="0.40.13"
 
 install_um() {
+  find_umbra_ai >/dev/null 2>&1 || clone_umbra_ai
   local ai
   ai="$(find_umbra_ai)" || { log_warn "umbra-ai not found (it is private); skipping um."; return 0; }
   bash "$ai/cli/install.sh" --no-init
@@ -48,7 +49,7 @@ install_ollama() {
   fi
   case "${UM_OS:-}" in
     arch|omarchy)
-      sudo pacman -S --noconfirm --needed ollama
+      run_priv pacman -S --noconfirm --needed ollama
       ;;
     ubuntu)
       local url sha tmp dest="$HOME/.local/share/umbra/ollama"
@@ -57,7 +58,7 @@ install_ollama() {
       url="https://github.com/ollama/ollama/releases/download/v${UM_OLLAMA_VERSION}/ollama-linux-${arch}.tar.zst"
       sha="$(pinned_sha256 "$url")"
       [ -n "$sha" ] || die "No pinned sha256 for $url in install/checksums.sha256."
-      sudo apt-get install -y zstd
+      run_priv apt-get install -y zstd
       tmp="$(mktemp -d)"
       log_info "Downloading Ollama ${UM_OLLAMA_VERSION} (about 1.5 GB)"
       curl -fsSL -o "$tmp/ollama.tar.zst" "$url" || { rm -rf "$tmp"; die "Download failed: $url"; }
