@@ -216,3 +216,18 @@ select_theme() {
 }
 
 export UM_ENV_DIR UM_NONINTERACTIVE UM_VERBOSE UM_SHELL UM_THEME UM_ENABLE_K8S UM_MODE UM_COMPONENTS UM_SKIP
+
+# find_ai_standard: prints the toolkit/ai-standard directory of umbra-ai (ADR 0018): UM_AI_DIR,
+# then the umbrella's ai/ submodule next to the bootstrapper, then the clone made by the
+# Umbra AI item. Returns 1 when none exists.
+find_ai_standard() {
+  local base d
+  base="$(cd -- "$UM_ENV_DIR/../.." && pwd)"
+  for d in ${UM_AI_DIR:+"$UM_AI_DIR"} "$base/../ai" "$HOME/.local/share/umbra/umbra-ai"; do
+    if [ -d "$d/toolkit/ai-standard" ]; then
+      (cd -- "$d/toolkit/ai-standard" && pwd)
+      return 0
+    fi
+  done
+  return 1
+}

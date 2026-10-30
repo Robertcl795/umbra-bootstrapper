@@ -23,13 +23,12 @@ install_ai_standard() {
     return 0
   fi
 
-  # The standard lives in the umbra repo's toolkit/, two levels above env/wsl.
+  # The standard lives in the private umbra-ai repo (ADR 0014, 0018).
   local ai_dir
-  ai_dir="$(cd -- "$UM_ENV_DIR/../.." && pwd)/toolkit/ai-standard"
-  if [ ! -d "$ai_dir" ]; then
-    log_warn "toolkit/ai-standard/ directory not found; skipping."
+  ai_dir="$(find_ai_standard)" || {
+    log_warn "AI standard not found (umbra-ai is private: set UM_AI_DIR or clone it); skipping."
     return 0
-  fi
+  }
 
   local f name
   for f in "$ai_dir"/agents/*.md; do

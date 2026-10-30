@@ -3,10 +3,10 @@ set -euo pipefail
 
 # Bootstrap script for the Umbra WSL environment (env/wsl)
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/Robertcl795/umbra/main/env/wsl/bootstrap.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Robertcl795/umbra-bootstrapper/main/env/wsl/bootstrap.sh | bash
 #   OR cloned: env/wsl/bootstrap.sh
 
-UM_REPO="https://github.com/Robertcl795/umbra.git"
+UM_REPO="https://github.com/Robertcl795/umbra-bootstrapper.git"
 UM_BRANCH="${UM_BRANCH:-main}"
 SOURCE_PATH="${BASH_SOURCE[0]:-${0:-}}"
 if [ -z "$SOURCE_PATH" ]; then
@@ -14,9 +14,9 @@ if [ -z "$SOURCE_PATH" ]; then
 fi
 SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 
-# A fresh clone of the umbra repo goes to UM_REPO_DIR; the bootstrapper lives
+# A fresh clone of the umbra-bootstrapper repo goes to UM_REPO_DIR (ADR 0014); the installer lives
 # in its env/wsl/ subdirectory (UM_ENV_DIR).
-UM_REPO_DIR="${UM_REPO_DIR:-$HOME/dev/umbra}"
+UM_REPO_DIR="${UM_REPO_DIR:-$HOME/dev/umbra-bootstrapper}"
 if [ -d "$SCRIPT_DIR/.git" ] || [ -d "$SCRIPT_DIR/install" ]; then
   UM_ENV_DIR="${UM_ENV_DIR:-$SCRIPT_DIR}"
 else
@@ -166,15 +166,15 @@ EOF
   local user_home staged
   user_home="$(getent passwd "$username" | cut -d: -f6)"
   user_home="${user_home:-/home/$username}"
-  staged="$user_home/dev/umbra"
+  staged="$user_home/dev/umbra-bootstrapper"
 
   if [ ! -d "$staged" ]; then
     mkdir -p "$user_home/dev"
     if [ -d "$SCRIPT_DIR/.git" ] || [ -d "$SCRIPT_DIR/install" ]; then
-      print_info "Staging the umbra repo at $staged..."
+      print_info "Staging the bootstrapper at $staged..."
       cp -a "$SCRIPT_DIR/../.." "$staged"
     else
-      print_info "Cloning Umbra into $staged (branch: $UM_BRANCH)..."
+      print_info "Cloning the bootstrapper into $staged (branch: $UM_BRANCH)..."
       git clone --depth=1 --branch "$UM_BRANCH" "$UM_REPO" "$staged" \
         || print_warning "Clone failed; the resume hook will fetch the bootstrap itself."
     fi
@@ -204,10 +204,10 @@ if [ -f "$HOME/.umbra-resume.env" ] && [ -t 0 ]; then
   rm -f "$HOME/.umbra-resume.env"
   sed -i '/^# >>> umbra-bootstrap-resume >>>$/,/^# <<< umbra-bootstrap-resume <<<$/d' "$HOME/.bashrc"
   echo "Resuming Umbra bootstrap..."
-  if [ -f "${UM_ENV_DIR:-$HOME/dev/umbra/env/wsl}/bootstrap.sh" ]; then
-    bash "${UM_ENV_DIR:-$HOME/dev/umbra/env/wsl}/bootstrap.sh"
+  if [ -f "${UM_ENV_DIR:-$HOME/dev/umbra-bootstrapper/env/wsl}/bootstrap.sh" ]; then
+    bash "${UM_ENV_DIR:-$HOME/dev/umbra-bootstrapper/env/wsl}/bootstrap.sh"
   else
-    curl -fsSL "https://raw.githubusercontent.com/Robertcl795/umbra/${UM_BRANCH:-main}/env/wsl/bootstrap.sh" | bash
+    curl -fsSL "https://raw.githubusercontent.com/Robertcl795/umbra-bootstrapper/${UM_BRANCH:-main}/env/wsl/bootstrap.sh" | bash
   fi
 fi
 # <<< umbra-bootstrap-resume <<<
@@ -268,7 +268,7 @@ if is_wsl; then
   case "$UM_ENV_DIR" in
     /mnt/*)
       print_warning "UM_ENV_DIR ($UM_ENV_DIR) is on a Windows NTFS mount."
-      print_warning "WSL2 cross-OS I/O is 10-20x slower; install under ~/ instead (e.g. UM_REPO_DIR=\$HOME/dev/umbra)."
+      print_warning "WSL2 cross-OS I/O is 10-20x slower; install under ~/ instead (e.g. UM_REPO_DIR=\$HOME/dev/umbra-bootstrapper)."
       ;;
   esac
 fi
@@ -286,14 +286,15 @@ if ! command -v git >/dev/null 2>&1; then
   fi
 fi
 
-# Clone or update repo (UM_ENV_DIR is env/wsl inside the umbra repo)
-if [ -d "$UM_ENV_DIR/../../.git" ]; then
-  print_info "Found existing umbra repo at $UM_ENV_DIR/../.. — pulling updates..."
+# Clone or update repo (UM_ENV_DIR is env/wsl inside the bootstrapper repo; inside the
+# umbrella the bootstrapper is a submodule, whose .git is a file)
+if [ -e "$UM_ENV_DIR/../../.git" ]; then
+  print_info "Found existing bootstrapper repo at $UM_ENV_DIR/../.. — pulling updates..."
   (cd "$UM_ENV_DIR/../.." && git pull --rebase --autostash) || true
 elif [ -d "$UM_ENV_DIR" ] && [ "$(ls -A "$UM_ENV_DIR" 2>/dev/null | wc -l)" -gt 0 ]; then
   print_warning "$UM_ENV_DIR exists and is not empty; using it without cloning."
 else
-  print_info "Cloning Umbra into $UM_REPO_DIR (branch: $UM_BRANCH)..."
+  print_info "Cloning the bootstrapper into $UM_REPO_DIR (branch: $UM_BRANCH)..."
   git clone --depth=1 --branch "$UM_BRANCH" "$UM_REPO" "$UM_REPO_DIR"
   UM_ENV_DIR="$UM_REPO_DIR/env/wsl"
 fi

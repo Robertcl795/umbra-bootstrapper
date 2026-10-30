@@ -86,5 +86,5 @@ deliberately differs from the WSL path.
 
 ## Also see
 
-- [toolkit/ai-standard/README.md](../../../toolkit/ai-standard/README.md) — the AI Development Standard deployed
+- toolkit/ai-standard/README.md (private umbra-ai repo: `toolkit/ai-standard/README.md`) — the AI Development Standard deployed
   by phase 11 (personal profile only).

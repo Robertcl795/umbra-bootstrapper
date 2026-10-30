@@ -5,8 +5,11 @@ set -euo pipefail
 
 SOURCE_PATH="${BASH_SOURCE[0]:-${0:-}}"
 SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
-# The AI standard lives in the umbra repo's toolkit/ (three levels above env/wsl/tests).
-AI_DIR="$(cd -- "$SCRIPT_DIR/../../.." && pwd)/toolkit/ai-standard"
+# The AI standard lives in the umbra-ai repo (ADR 0018); same lookup as install/ai.sh.
+UM_ENV_DIR="${UM_ENV_DIR:-$(cd -- "$SCRIPT_DIR/.." && pwd)}"
+# shellcheck disable=SC1091
+source "$UM_ENV_DIR/install/common.sh"
+AI_DIR="$(find_ai_standard)" || { echo "AI standard not found (set UM_AI_DIR)" >&2; exit 1; }
 
 # Personal-only (ADR 0007, decision 11).
 if [ "${UM_MODE:-personal}" = "work" ]; then
@@ -48,13 +51,14 @@ if [ -d "$HOME/.claude/agents" ]; then
     || { echo "Agents not linked into ~/.claude/agents." >&2; exit 1; }
 fi
 
-# Context DB env + a real index/search round-trip. The first run downloads
+# Context DB env + a real index/search round-trip over the bootstrapper repo
+# (its docs cover zellij). The first run downloads
 # the embedding model; on restricted networks that fails, so a failed index
 # is a warning — but a successful index with irrelevant search results is
 # a hard failure.
 export PATH="$HOME/.local/bin:$PATH"
 if command -v uv >/dev/null 2>&1 && [ -d "$AI_DIR/context/.venv" ]; then
-  if uv run --directory "$AI_DIR/context" indexer.py index --repo "$AI_DIR/../.." --collection umbra-smoke >/dev/null 2>&1; then
+  if uv run --directory "$AI_DIR/context" indexer.py index --repo "$UM_ENV_DIR/../.." --collection umbra-smoke >/dev/null 2>&1; then
     uv run --directory "$AI_DIR/context" indexer.py search "zellij multiplexer" --collection umbra-smoke \
       | grep -qi "zellij" || { echo "Context DB search returned nothing relevant." >&2; exit 1; }
     echo "Context DB round-trip OK." >&2

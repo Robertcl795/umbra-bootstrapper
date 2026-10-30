@@ -88,7 +88,7 @@ flowchart LR
 | **Greeting** | fastfetch on every new tab | [12-fastfetch](docs/sections/12-fastfetch.md) |
 | **Editor** | Neovim + lazy.nvim | [05-nvim](docs/sections/05-nvim.md) |
 | **Languages** | rustup · fnm (Node) · uv (Python) · kubectl/helm/k3d | [08-lang-toolchains](docs/sections/08-lang-toolchains.md) |
-| **AI** | Claude Code · opencode · gh copilot, plus the [AI Development Standard](../../toolkit/ai-standard/README.md) (personal profile only) | [09](docs/sections/09-ai-tooling.md) · [11](docs/sections/11-ai-standard.md) |
+| **AI** | Claude Code · opencode · gh copilot, plus the AI Development Standard (private umbra-ai repo: `toolkit/ai-standard/README.md`) (personal profile only) | [09](docs/sections/09-ai-tooling.md) · [11](docs/sections/11-ai-standard.md) |
 | **WSL tuning** | `.wslconfig` networking, systemd, NTFS performance guards | [10-wsl](docs/sections/10-wsl.md) |
 
 The aliases you'll use every day — full list in the
@@ -151,8 +151,8 @@ bash ../../toolkit/ai-standard/scaffold.sh ~/p        # drop the AI standard int
 | `tests/` | One checkpoint script per phase |
 | `docs/` | [Documentation](docs/README.md) |
 
-The AI Development Standard lives in [`toolkit/ai-standard/`](../../toolkit/ai-standard/README.md). The Git config in `config/git/` sets no user name or email; set them yourself.
+The AI Development Standard lives in `toolkit/ai-standard/` (private umbra-ai repo: `toolkit/ai-standard/README.md`). The Git config in `config/git/` sets no user name or email; set them yourself.
 
 ## License
 
-All rights reserved until Phase 5; the license decision is in the [ROADMAP](../../ROADMAP.md).
+MIT; see [LICENSE](../../LICENSE) (ADR 0015).

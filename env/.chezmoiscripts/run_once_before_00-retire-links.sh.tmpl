@@ -5,6 +5,12 @@
 # existing target to <path>.backup.<timestamp>, so nothing is overwritten silently.
 set -euo pipefail
 repo={{ .chezmoi.workingTree | quote }}
+# Since ADR 0014 the bootstrapper is a submodule of the umbra umbrella; v0.2.0 links point
+# into the umbrella checkout one level up (<umbrella>/env/...).
+umbrella="$repo"
+if [ -f "$repo/../.gitmodules" ] && grep -q '^[[:space:]]*path = bootstrapper$' "$repo/../.gitmodules"; then
+  umbrella="$(cd -- "$repo/.." && pwd)"
+fi
 ts="$(date +%Y%m%d_%H%M%S)"
 targets=(
   "$HOME/.zshrc" "$HOME/.config/zsh" "$HOME/.config/nvim" "$HOME/.config/fastfetch"
@@ -19,7 +25,7 @@ for t in "${targets[@]}"; do
     # `readlink -f` fails on a dangling link whose parent directory is gone.
     for target in "$(readlink "$t" 2>/dev/null || true)" "$(readlink -f "$t" 2>/dev/null || true)"; do
       case "$target" in
-        "$repo"/*) rm "$t"; echo "[INFO] removed v0.2.0 link: $t" >&2; continue 2 ;;
+        "$repo"/* | "$umbrella"/*) rm "$t"; echo "[INFO] removed v0.2.0 link: $t" >&2; continue 2 ;;
       esac
     done
   fi

@@ -1,9 +1,9 @@
 # Phase 11 — AI Development Standard
 
 Script: [`install/ai.sh`](../../install/ai.sh) — full docs:
-[`ai/README.md`](../../../../toolkit/ai-standard/README.md)
+`ai/README.md` (private umbra-ai repo: `toolkit/ai-standard/README.md`)
 
-Deploys this repo's [`ai/`](../../../../toolkit/ai-standard) directory globally so it's available
+Deploys this repo's `ai/` (private umbra-ai repo: `toolkit/ai-standard`) directory globally so it's available
 in every project, not just this one:
 
 | Source | Destination |
@@ -28,7 +28,7 @@ bash install/ai.sh --run
 
 To scaffold this same standard into an arbitrary project (not just deploy
 it globally), see `bash toolkit/ai-standard/scaffold.sh /path/to/repo` (from the umbra checkout)
-([`ai/scaffold.sh`](../../../../toolkit/ai-standard/scaffold.sh)).
+(`ai/scaffold.sh` (private umbra-ai repo: `toolkit/ai-standard/scaffold.sh`)).
 
 ## OS notes
 

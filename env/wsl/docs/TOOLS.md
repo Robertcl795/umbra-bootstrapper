@@ -73,7 +73,7 @@ launch is instant and works offline. Update them with `zplugin-update`.
 | [Claude Code](https://claude.com/claude-code) | Agentic CLI (`claude`) | [09-ai-tooling](sections/09-ai-tooling.md) |
 | [opencode](https://opencode.ai) | Open-source coding agent | [09-ai-tooling](sections/09-ai-tooling.md) |
 | [gh](https://cli.github.com) + copilot | GitHub CLI, `gh copilot suggest` | [09-ai-tooling](sections/09-ai-tooling.md) |
-| AI Development Standard | Agents, prompts, skills, vector context DB | [11-ai-standard](sections/11-ai-standard.md) · [ai/README](../../../toolkit/ai-standard/README.md) |
+| AI Development Standard | Agents, prompts, skills, vector context DB | [11-ai-standard](sections/11-ai-standard.md) · ai/README (private umbra-ai repo: `toolkit/ai-standard/README.md`) |
 
 ## Where a tool comes from
 
