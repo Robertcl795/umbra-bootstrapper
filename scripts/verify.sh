@@ -43,7 +43,25 @@ check_layout() {
   done < <(grep -ro 'include "\.\./themes/[^"]*"' env)
 }
 
+# new-code: scripts added by the bootstrap fix pass shellcheck; migrated ones stay out of it
+# (ADR 0023, 0009). guards: the rules of ADR 0021 and 0022 hold in the code.
+check_new_code() {
+  local f
+  for f in env/wsl/install/stage1.sh env/wsl/install/finish.sh env/wsl/bin/umbra \
+    env/wsl/tests/unit_guards.sh env/wsl/tests/unit_phase.sh; do
+    bash -n "$f" || { echo "bash -n $f"; return 1; }
+    shellcheck -f gcc "$f" >&2 || { echo "shellcheck $f"; return 1; }
+  done
+}
+
+check_guards() {
+  bash env/wsl/tests/unit_guards.sh
+  bash env/wsl/tests/unit_phase.sh
+}
+
 rc=0; out=$(check_env_syntax 2>&1) || rc=$?; report env-syntax "$rc" "$out"
 rc=0; out=$(check_layout 2>&1) || rc=$?; report layout "$rc" "$out"
+rc=0; out=$(check_new_code 2>&1) || rc=$?; report new-code "$rc" "$out"
+rc=0; out=$(check_guards 2>&1) || rc=$?; report guards "$rc" "$out"
 
 exit $((failed > 0))
