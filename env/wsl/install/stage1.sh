@@ -245,12 +245,13 @@ write_marker() {
   rm -f "$tmp"
 }
 
-# The reminder only prints: nothing in a shell startup file starts stage 2 (ADR 0022).
+# The reminder only prints, to stderr so it never mixes into captured output. Nothing in a shell
+# startup file starts stage 2 (ADR 0022).
 install_reminder() {
   cat > "$UM_REMINDER" <<'EOF'
 # Written by the Umbra bootstrapper; removed when stage 2 finishes.
 case "$-" in
-  *i*) [ -f "$HOME/.local/state/um/bootstrap.env" ] && echo "Umbra: run 'umbra bootstrap resume' to finish the install." ;;
+  *i*) [ -f "$HOME/.local/state/um/bootstrap.env" ] && echo "Umbra: run 'umbra bootstrap resume' to finish the install." >&2 ;;
 esac
 EOF
   chmod 0644 "$UM_REMINDER"

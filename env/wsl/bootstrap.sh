@@ -123,7 +123,10 @@ fi
 
 # Clone or update repo (UM_ENV_DIR is env/wsl inside the bootstrapper repo; inside the
 # umbrella the bootstrapper is a submodule, whose .git is a file)
-if [ -e "$UM_ENV_DIR/../../.git" ]; then
+# A pending stage 2 runs exactly what stage 1 staged: a pull could move it (ADR 0022).
+if [ -f "$HOME/.local/state/um/bootstrap.env" ]; then
+  print_info "Stage 2: using the staged bootstrapper at $UM_ENV_DIR/../.."
+elif [ -e "$UM_ENV_DIR/../../.git" ]; then
   print_info "Found existing bootstrapper repo at $UM_ENV_DIR/../.. — pulling updates..."
   (cd "$UM_ENV_DIR/../.." && git pull --rebase --autostash) || true
 elif [ -d "$UM_ENV_DIR" ] && [ "$(ls -A "$UM_ENV_DIR" 2>/dev/null | wc -l)" -gt 0 ]; then
