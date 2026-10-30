@@ -52,10 +52,10 @@ bash bootstrap.sh --yes --skip k8s,ai-cli
 
 Phase names: `packages shell prompt nvim k8s zellij lang ai-cli wsl ai-standard fastfetch`. The dotfiles themselves are always deployed by chezmoi (ADR 0006).
 
-**Fresh Arch WSL** starts as `root` with no user. Run the same command: it
-updates the system, enables sudo for `wheel`, creates your user, sets it as
-the WSL default, and offers to `wsl --shutdown`. Reopen Arch and the install
-**resumes automatically** from a one-shot `~/.bashrc` hook.
+**Fresh Arch WSL** starts as `root` with no user. Run the same command, with
+`--user <name>` if there is no terminal: stage 1 sets up the keyring, updates
+the system, creates your user and makes it the WSL default. It then stops and
+prints the restart commands. Reopen Arch and run `umbra bootstrap resume`.
 Details: [docs/os/arch.md](docs/os/arch.md).
 
 </details>
@@ -116,7 +116,9 @@ Everything is interactive on a terminal; every prompt has an env-var override. W
 | `UM_ENABLE_K8S` | `0` · `1` | prompt on a terminal; `1` otherwise |
 | `UM_NO_FASTFETCH` | `1` disables the shell greeting | unset |
 | `UM_NO_AUTOCD` | `1` keeps shells in `/mnt/*` | unset |
-| `UM_ENABLE_WSLCONFIG` | `0` · `1` — write `/etc/wsl.conf` and `.wslconfig` on the Windows host (no prompt) | `1`; in the work profile `.wslconfig` is left alone unless set to `1` |
+| `UM_ENABLE_WSLCONFIG` (`--enable-wslconfig`) | `1` writes `.wslconfig` on the Windows host, which affects every distro | `0`: the recommended settings are printed |
+| `UM_USERNAME` (`--user`) | the user first boot creates or reuses | prompt on a terminal |
+| `UM_USER_PASSWORD_FILE` | file holding that user's password | prompt on a terminal; otherwise the account stays locked |
 | `UM_WSL_NETWORKING` | `nat` · `mirrored` | `nat` |
 | `UM_NONINTERACTIVE` (`--yes`) | `1` accepts every default | unset |
 | `UM_IS_WSL` | `1` · `0` — skip WSL detection (container tests) | detect |
@@ -124,8 +126,8 @@ Everything is interactive on a terminal; every prompt has an env-var override. W
 | `UM_VERBOSE` | `1` traces every command | unset |
 | `UM_BRANCH` | branch to bootstrap from | `main` |
 
-After changing WSL networking, run `wsl --shutdown` from PowerShell and
-reopen your terminal.
+`/etc/wsl.conf` changes apply after `wsl.exe --terminate <distro>`. `.wslconfig`
+changes apply once every distro has stopped.
 
 ## Day to day
 
