@@ -4,4 +4,5 @@
 # phase: {{ include "wsl/install/dev/ai.sh" | sha256sum }} dev/ai.sh
 component_enabled ai-cli || exit 0
 bash "$UM_ENV_DIR/install/dev/ai.sh" --run
+phase_gate ai-cli "an AI CLI is missing" have_cmds claude gh
 {{- end }}

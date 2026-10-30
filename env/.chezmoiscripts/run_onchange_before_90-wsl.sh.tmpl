@@ -4,4 +4,5 @@
 # phase: {{ include "wsl/install/wsl.sh" | sha256sum }} wsl.sh
 component_enabled wsl || exit 0
 bash "$UM_ENV_DIR/install/wsl.sh" --run
+phase_gate wsl "/etc/wsl.conf is not as expected; run tests/08_wsl.sh" bash "$UM_ENV_DIR/tests/08_wsl.sh"
 {{- end }}

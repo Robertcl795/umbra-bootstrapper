@@ -15,4 +15,5 @@ case "$UM_OS" in
   arch) bash "$UM_ENV_DIR/install/packages/arch.sh" --run ;;
   omarchy) bash "$UM_ENV_DIR/install/packages/omarchy.sh" --run ;;
 esac
+phase_gate packages "base packages are missing; see the package manager output above" have_cmds git curl rg fzf zsh
 {{- end }}
