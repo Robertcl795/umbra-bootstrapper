@@ -67,11 +67,12 @@ is_wsl() {
   esac
   grep -qi microsoft /proc/version 2>/dev/null
 }
-is_arch() { grep -qi '^ID=arch' /etc/os-release 2>/dev/null; }
+has_stage1() { grep -qiE '^ID=(arch|ubuntu)$' /etc/os-release 2>/dev/null; }
 
 if [ "$(id -u)" -eq 0 ]; then
-  # A fresh Arch WSL starts as root with no user: stage 1, then a restart (ADR 0022).
-  if is_arch && is_wsl; then
+  # Fresh Arch WSL, and an Ubuntu WSL with no first launch, start as root with no user: stage 1,
+  # then a restart (ADR 0022).
+  if has_stage1 && is_wsl; then
     if [ ! -f "$SCRIPT_DIR/install/stage1.sh" ]; then
       print_error "Run install.sh, not a piped bootstrap.sh: stage 1 needs the whole bootstrapper."
       exit 1

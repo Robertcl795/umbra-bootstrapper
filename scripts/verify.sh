@@ -47,7 +47,8 @@ check_layout() {
 # (ADR 0023, 0009). guards: the rules of ADR 0021 and 0022 hold in the code.
 check_new_code() {
   local f
-  for f in env/wsl/install/stage1.sh env/wsl/install/finish.sh env/wsl/install/wsl_detect.sh \
+  for f in env/wsl/install/stage1.sh env/wsl/install/stage1_pacman.sh env/wsl/install/stage1_apt.sh \
+    env/wsl/install/finish.sh env/wsl/install/wsl_detect.sh \
     env/wsl/bin/umbra env/wsl/tests/unit_guards.sh env/wsl/tests/unit_phase.sh \
     env/wsl/tests/unit_wsl_detect.sh; do
     bash -n "$f" || { echo "bash -n $f"; return 1; }

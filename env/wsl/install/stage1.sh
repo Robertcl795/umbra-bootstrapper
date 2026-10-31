@@ -45,34 +45,31 @@ phase() {
 }
 
 # --- P0 detect -------------------------------------------------------------------------------
+# One adapter per package manager: pm_present, pm_ready, pm_prepare and the admin group.
+load_adapter() {
+  # shellcheck disable=SC1091
+  case "$(. /etc/os-release && echo "${ID:-}")" in
+    arch) source "$SCRIPT_DIR/stage1_pacman.sh" ;;
+    ubuntu) source "$SCRIPT_DIR/stage1_apt.sh" ;;
+    *) return 1 ;;
+  esac
+}
+
 p0_ok() {
-  [ "$(id -u)" -eq 0 ] && grep -q '^ID=arch' /etc/os-release
+  [ "$(id -u)" -eq 0 ] && load_adapter
 }
 
 # --- P1 root prerequisites -------------------------------------------------------------------
-keyring_ready() {
-  local keys
-  keys="$(pacman-key --list-keys 2>/dev/null)" && [ -n "$keys" ]
-}
-
 p1_pre() {
-  command -v pacman >/dev/null 2>&1
+  pm_present
 }
 
 p1_post() {
-  keyring_ready \
-    && [ -n "$(ls -A /var/lib/pacman/sync 2>/dev/null)" ] \
-    && pacman -Q base-devel git sudo >/dev/null 2>&1 \
-    && [ -z "$(pacman -Qu 2>/dev/null)" ]
+  pm_ready
 }
 
 p1_apply() {
-  # Only the image's first-launch script sets up the keyring; an imported distro has none.
-  if ! keyring_ready; then
-    pacman-key --init || return 1
-    pacman-key --populate archlinux || return 1
-  fi
-  pacman -Syu --noconfirm --needed base-devel git sudo
+  pm_prepare
 }
 
 # --- P2 user and wheel -----------------------------------------------------------------------
@@ -113,9 +110,9 @@ password_source() {
 # A password that can be set now and is not set yet keeps the phase open.
 p2_post() {
   [ -n "$UM_USER" ] \
-    && id -nG "$UM_USER" 2>/dev/null | tr ' ' '\n' | grep -qx wheel \
-    && [ -f "$SUDOERS_WHEEL" ] && [ -f "$SUDOERS_TEMP" ] \
-    && visudo -cf "$SUDOERS_WHEEL" >/dev/null 2>&1 \
+    && id -nG "$UM_USER" 2>/dev/null | tr ' ' '\n' | grep -qx "$UM_ADMIN_GROUP" \
+    && { [ -z "$UM_ADMIN_RULE" ] || { [ -f "$SUDOERS_WHEEL" ] && visudo -cf "$SUDOERS_WHEEL" >/dev/null 2>&1; }; } \
+    && [ -f "$SUDOERS_TEMP" ] \
     && visudo -cf "$SUDOERS_TEMP" >/dev/null 2>&1 \
     && runuser -u "$UM_USER" -- sudo -n true 2>/dev/null \
     && ! { account_locked && password_source; }
@@ -153,10 +150,10 @@ set_password() {
 
 p2_apply() {
   if id "$UM_USER" >/dev/null 2>&1; then
-    log_info "User $UM_USER already exists; ensuring wheel membership."
-    usermod -aG wheel "$UM_USER" || return 1
+    log_info "User $UM_USER already exists; ensuring $UM_ADMIN_GROUP membership."
+    usermod -aG "$UM_USER_GROUPS" "$UM_USER" || return 1
   else
-    useradd -m -G wheel -s /bin/bash "$UM_USER" || return 1
+    useradd -m -G "$UM_USER_GROUPS" -s /bin/bash "$UM_USER" || return 1
   fi
   if account_locked; then
     set_password || return 1
@@ -165,7 +162,9 @@ p2_apply() {
   if [ "$(cat /etc/sudoers.d/wheel 2>/dev/null)" = "%wheel ALL=(ALL) ALL" ]; then
     rm -f /etc/sudoers.d/wheel
   fi
-  install_sudoers "$SUDOERS_WHEEL" "%wheel ALL=(ALL:ALL) ALL" || return 1
+  if [ -n "$UM_ADMIN_RULE" ]; then
+    install_sudoers "$SUDOERS_WHEEL" "$UM_ADMIN_RULE" || return 1
+  fi
   # Removed when stage 2 finishes. zz sorts last, and in sudoers the last match wins.
   install_sudoers "$SUDOERS_TEMP" "$UM_USER ALL=(ALL:ALL) NOPASSWD: ALL"
 }
@@ -296,8 +295,8 @@ run_stage1() {
   if [ "$UM_DET_VM" = 1 ]; then
     log_warn "This distro runs on WSL 1, where systemd is not supported. Convert it: wsl.exe --set-version ${WSL_DISTRO_NAME:-<distro>} 2"
   fi
-  phase P0 true p0_ok true "Stage 1 runs as root on Arch."
-  phase P1 p1_pre p1_post p1_apply "Check the network and the pacman output above, then run the command again."
+  phase P0 true p0_ok true "Stage 1 runs as root on Arch or Ubuntu."
+  phase P1 p1_pre p1_post p1_apply "Check the network and the package manager's output above, then run the command again."
   p2_pre || die "P2: precondition failed."
   phase P2 true p2_post p2_apply "See the message above, then run the command again."
   phase P3 p3_pre p3_post p3_apply "Check /etc/wsl.conf, then run the command again."

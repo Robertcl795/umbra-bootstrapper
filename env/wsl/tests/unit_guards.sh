@@ -33,4 +33,22 @@ if [ -n "$found" ]; then
   fails=$((fails + 1))
 fi
 
+# Starship's installer runs its own sudo unless its directory is writable (H19), and the sudo guard
+# above cannot see inside a downloaded script.
+# shellcheck disable=SC2016
+found="$(code_files | xargs grep -n 'starship.rs/install.sh' | grep -vE '^[^:]+:[0-9]+:[[:space:]]*#' | grep -v -- ' -b "\$HOME/.local/bin"')"
+if [ -n "$found" ]; then
+  echo "starship installer without a user directory: $(head -n 1 <<<"$found")"
+  fails=$((fails + 1))
+fi
+
+# Both adapters of stage 1 give the same names.
+adapter_names() {
+  grep -oE '^(pm_[a-z]+\(\)|UM_[A-Z_]+=)' "$1" | sort
+}
+if [ "$(adapter_names env/wsl/install/stage1_pacman.sh)" != "$(adapter_names env/wsl/install/stage1_apt.sh)" ]; then
+  echo "stage 1 adapters differ"
+  fails=$((fails + 1))
+fi
+
 exit $((fails > 0))
