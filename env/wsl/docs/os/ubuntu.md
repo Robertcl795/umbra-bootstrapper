@@ -26,14 +26,21 @@ does the most work outside the package manager:
   if neither is installable — see
   [01-packages.md](../sections/01-packages.md#ubuntu).
 - Starship always comes from the official installer script here (Arch has
-  a native `pacman` package instead).
+  a native `pacman` package instead), into `~/.local/bin`: for `/usr/local/bin`
+  the script runs its own `sudo -v`, which stalls with no terminal.
 
 ## Prerequisites
 
-A fresh WSL Ubuntu instance already boots as your regular user (unlike
-Arch — no first-boot provisioning step needed here). You do need `sudo`
-and a working network connection before running `bootstrap.sh`;
+After its first launch, WSL Ubuntu boots as the user that launch created, and
+no first-boot step is needed. You need a working network connection, and
+`sudo` that can ask for your password, so run it in a terminal;
 [00-preflight.md](../sections/00-preflight.md) checks both up front.
+
+An Ubuntu with no first launch, such as one made with `wsl --import`, starts as
+`root`. Run the same command as `root`: stage 1 works as described in
+[arch.md](arch.md), with these differences: the group is `sudo`, `/etc/sudoers`
+already grants it so no rule is added, and nothing is upgraded. With a user
+already there, name it with `--user <name>`.
 
 ## Known-good install
 
