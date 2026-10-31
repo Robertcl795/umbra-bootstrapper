@@ -12,8 +12,10 @@ install_starship() {
   log_step "Phase 4: Prompt themes (Starship)"
 
   if ! ensure_cmd starship; then
+    # To ~/.local/bin: for /usr/local/bin the installer runs its own `sudo -v`, outside run_priv.
     log_info "Installing Starship via official installer."
-    curl -fsSL https://starship.rs/install.sh | sh -s -- -y
+    mkdir -p "$HOME/.local/bin"
+    curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
   fi
 
   # chezmoi-unlink (ADR 0006): ~/.config/starship.toml is rendered by chezmoi from the

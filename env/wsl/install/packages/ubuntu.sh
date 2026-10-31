@@ -39,8 +39,10 @@ install_packages_ubuntu() {
   fi
 
   if ! ensure_cmd starship; then
+    # To ~/.local/bin: for /usr/local/bin the installer runs its own `sudo -v`, outside run_priv.
     log_info "Installing Starship via official installer."
-    curl -fsSL https://starship.rs/install.sh | sh -s -- -y
+    mkdir -p "$HOME/.local/bin"
+    curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
   fi
 
   if ensure_cmd fdfind && ! ensure_cmd fd; then
