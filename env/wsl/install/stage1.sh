@@ -13,6 +13,8 @@ SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 UM_MODE_GIVEN="${UM_MODE:-}"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/common.sh"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/wsl_detect.sh"
 
 BOOT_ROOT="$(cd -- "$UM_ENV_DIR/../.." && pwd)"
 UM_BOOTSTRAPPER_REPO="${UM_BOOTSTRAPPER_REPO:-https://github.com/Robertcl795/umbra-bootstrapper.git}"
@@ -289,6 +291,11 @@ run_stage1() {
     exit 0
   fi
   cd /root
+  wsl_detect
+  wsl_detect_log
+  if [ "$UM_DET_VM" = 1 ]; then
+    log_warn "This distro runs on WSL 1, where systemd is not supported. Convert it: wsl.exe --set-version ${WSL_DISTRO_NAME:-<distro>} 2"
+  fi
   phase P0 true p0_ok true "Stage 1 runs as root on Arch."
   phase P1 p1_pre p1_post p1_apply "Check the network and the pacman output above, then run the command again."
   p2_pre || die "P2: precondition failed."

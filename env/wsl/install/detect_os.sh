@@ -7,6 +7,7 @@ if [ -z "$SOURCE_PATH" ]; then
 fi
 SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
+source "$SCRIPT_DIR/wsl_detect.sh"
 
 detect_os() {
   log_step "Phase 0: Preflight & OS detection"
@@ -20,6 +21,9 @@ detect_os() {
   esac
   if [ "$wsl" != "1" ]; then
     log_info "Not running under WSL: native install, no WSL tuning (ADR 0017)."
+  else
+    wsl_detect
+    wsl_detect_log
   fi
 
   if [ ! -f /etc/os-release ]; then

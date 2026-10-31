@@ -42,4 +42,16 @@ case "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" in
   /mnt/*) echo "[warn] the umbra checkout lives under /mnt (NTFS) — expect slow I/O." >&2 ;;
 esac
 
+# What this WSL is. pending warns, not fails: a plain run has just written wsl.conf and asked for a
+# restart it cannot do itself.
+# shellcheck disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/install/wsl_detect.sh"
+wsl_detect
+wsl_detect_report >&2
+for state in "systemd:$UM_DET_CONF_SYSTEMD" "default user:$UM_DET_CONF_USER" "interop:$UM_DET_CONF_INTEROP" "automount options:$UM_DET_CONF_AUTOMOUNT"; do
+  if [ "${state##*:}" = pending ]; then
+    echo "[warn] wsl.conf ${state%%:*} is not active yet. Restart this distro: wsl.exe --terminate ${WSL_DISTRO_NAME:-<distro>}" >&2
+  fi
+done
+
 echo "WSL checks OK."

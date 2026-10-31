@@ -7,6 +7,7 @@ if [ -z "$SOURCE_PATH" ]; then
 fi
 SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
+source "$SCRIPT_DIR/wsl_detect.sh"
 
 # .wslconfig on the Windows host is global, so it is written only on request (ADR 0024).
 UM_ENABLE_WSLCONFIG="${UM_ENABLE_WSLCONFIG:-0}"
@@ -45,6 +46,12 @@ configure_wsl_conf() {
   if ! grep -qi '^default[[:space:]]*=' /etc/wsl.conf 2>/dev/null && [ "$(id -u)" -ne 0 ]; then
     default_user=(user default "$(id -un)")
   fi
+  # The documented options are drvfs options; whether virtiofs takes them is not documented.
+  local automount_options=(automount options '"metadata,umask=22,fmask=11"')
+  if [ "${UM_DET_WINDOWS_FS:-}" = virtiofs ]; then
+    log_info "Windows drives are on virtiofs: leaving the automount options as they are."
+    automount_options=()
+  fi
   wsl_conf_merge \
     boot systemd true \
     network generateHosts true \
@@ -53,7 +60,7 @@ configure_wsl_conf() {
     interop appendWindowsPath true \
     automount enabled true \
     automount root /mnt/ \
-    automount options '"metadata,umask=22,fmask=11"' \
+    "${automount_options[@]}" \
     "${default_user[@]}"
 }
 
@@ -123,12 +130,13 @@ configure_wsl() {
     return 0
   fi
 
+  wsl_detect
   configure_wsl_conf
   if [ "$UM_ENABLE_WSLCONFIG" = "1" ]; then
     configure_wslconfig
     log_warn ".wslconfig applies once every distro has stopped."
   else
-    log_info "Windows .wslconfig left alone. Recommended: [wsl2] networkingMode=NAT, localhostForwarding=true, dnsTunneling=true, autoProxy=true (--enable-wslconfig applies them)."
+    log_info "Windows .wslconfig left alone (networking mode now: $UM_DET_NETWORKING). Recommended: [wsl2] networkingMode=NAT, localhostForwarding=true, dnsTunneling=true, autoProxy=true (--enable-wslconfig applies them)."
   fi
   check_filesystem_location
 
