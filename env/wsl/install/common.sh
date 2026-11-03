@@ -323,7 +323,7 @@ find_umbra_ai() {
   local base d
   base="$(cd -- "$UM_ENV_DIR/../.." && pwd)"
   for d in ${UM_AI_DIR:+"$UM_AI_DIR"} "$base/../ai" "$UM_AI_CLONE_DIR"; do
-    if [ -d "$d/cli" ] && [ -d "$d/toolkit/ai-standard" ]; then
+    if [ -d "$d/cli" ] && { [ -d "$d/standard" ] || [ -d "$d/toolkit/ai-standard" ]; }; then
       (cd -- "$d" && pwd)
       return 0
     fi
@@ -340,9 +340,11 @@ clone_umbra_ai() {
     || log_warn "Could not clone umbra-ai; its components will be skipped."
 }
 
-# find_ai_standard: prints the toolkit/ai-standard directory of umbra-ai, or returns 1.
+# find_ai_standard: prints the umbra-ai checkout that holds the AI-Standard (standard/, adapters/,
+# tools/umbra_ai.py; ADR 0028 in the umbrella), or returns 1.
 find_ai_standard() {
   local d
   d="$(find_umbra_ai)" || return 1
-  echo "$d/toolkit/ai-standard"
+  [ -f "$d/tools/umbra_ai.py" ] || return 1
+  echo "$d"
 }

@@ -32,7 +32,7 @@ check 05_nvim.sh nvim
 check 06_dev.sh k8s
 check 07_devstack.sh lang ai-cli
 check 08_wsl.sh wsl
-# umbra-ai is private (ADR 0018): a public install has no AI standard.
+# Without umbra-ai (no access, ADR 0018) there is no AI-Standard to check.
 if find_ai_standard >/dev/null 2>&1; then
   check 09_ai.sh ai-standard
 else

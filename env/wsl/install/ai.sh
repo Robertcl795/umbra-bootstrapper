@@ -8,50 +8,36 @@ fi
 SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# Deploy the AI development standard (toolkit/ai-standard/) globally:
-#   agents  -> ~/.claude/agents/     (Claude Code subagents)
-#   prompts -> ~/.claude/commands/   (slash commands)
-#   skills  -> ~/.claude/skills/     (Claude skills)
-# plus: uv environment for the vector context DB and MCP registration.
+# Phase 11: the AI-Standard, through `um ai setup` (umbra-ai tools/umbra_ai.py):
+#   links the global layer of each chosen agent (Claude Code: ~/.claude/rules, skills, agents;
+#   Antigravity: ~/.gemini/config/rules, skills), and records mode, agents and profile.
+# Work profile (ADR 0007): the generic standard for the allowed agents only; no MCP server.
+# Personal profile: also the local context DB (uv) and its MCP registration with Claude Code.
+#   UM_AI_AGENTS  comma-separated agents for setup (default: claude)
 
 install_ai_standard() {
-  log_step "Phase 11: AI development standard"
+  log_step "Phase 11: AI-Standard"
 
-  # Personal-only (ADR 0007, decision 11).
-  if [ "${UM_MODE:-personal}" = "work" ]; then
-    log_info "Work profile: the AI standard is personal-only; skipping."
-    return 0
-  fi
-
-  # The standard lives in the private umbra-ai repo (ADR 0014, 0018).
   find_umbra_ai >/dev/null 2>&1 || clone_umbra_ai
-  local ai_dir
+  local ai_dir mode="${UM_MODE:-personal}"
   ai_dir="$(find_ai_standard)" || {
-    log_warn "AI standard not found (umbra-ai is private: set UM_AI_DIR or clone it); skipping."
+    log_warn "AI-Standard not found (set UM_AI_DIR or clone umbra-ai); skipping."
     return 0
   }
 
-  local f name
-  for f in "$ai_dir"/agents/*.md; do
-    [ -e "$f" ] || continue
-    symlink_with_backup "$f" "$HOME/.claude/agents/$(basename "$f")"
-  done
-  for f in "$ai_dir"/prompts/*.md; do
-    [ -e "$f" ] || continue
-    symlink_with_backup "$f" "$HOME/.claude/commands/$(basename "$f")"
-  done
-  for f in "$ai_dir"/skills/*/; do
-    [ -d "$f" ] || continue
-    name="$(basename "$f")"
-    symlink_with_backup "${f%/}" "$HOME/.claude/skills/$name"
-  done
-  log_info "Agents, prompts and skills linked into ~/.claude."
+  python3 -I "$ai_dir/tools/umbra_ai.py" setup --mode "$mode" --agents "${UM_AI_AGENTS:-claude}" --yes \
+    || { log_warn "um ai setup failed; run it again: um ai setup"; return 0; }
+
+  if [ "$mode" = "work" ]; then
+    log_info "Work profile: no MCP server and no context DB (ADR 0007)."
+    return 0
+  fi
 
   # Vector context DB environment (uv is installed by install/dev/lang.sh)
   export PATH="$HOME/.local/bin:$PATH"
   if ensure_cmd uv; then
     log_info "Syncing vector context DB environment (uv)..."
-    (cd "$ai_dir/context" && uv sync) || log_warn "uv sync failed; run manually: uv sync (in toolkit/ai-standard/context)."
+    (cd "$ai_dir/context" && uv sync) || log_warn "uv sync failed; run manually: uv sync (in umbra-ai/context)."
   else
     log_warn "uv not found; skipping context DB env. Re-run after install/dev/lang.sh."
   fi
@@ -64,7 +50,7 @@ install_ai_standard() {
       log_info "Registering context-db MCP server with Claude Code..."
       claude mcp add --scope user context-db -- \
         uv run --directory "$ai_dir/context" server.py \
-        || log_warn "Could not register MCP server; register manually (see toolkit/ai-standard/README.md)."
+        || log_warn "Could not register MCP server; register manually (see umbra-ai context/README.md)."
     else
       log_info "context-db MCP server already registered."
     fi

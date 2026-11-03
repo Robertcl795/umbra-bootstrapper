@@ -24,7 +24,7 @@ Each component is a phase. chezmoi runs them as scripts from [`env/.chezmoiscrip
 | `lang` | rustup, fnm (Node LTS), uv, pnpm | `07_devstack.sh` |
 | `ai-cli` | Claude Code, opencode (personal only), `gh` with the Copilot extension once `gh auth login` is done | `09_ai.sh` |
 | `wsl` | WSL tuning; see [wsl.md](wsl.md) | `08_wsl.sh` |
-| `ai-standard` | Umbra AI's standard, when Umbra AI is installed (personal only) | `09_ai.sh` |
+| `ai-standard` | the Umbra AI-Standard through `um ai setup`, when Umbra AI is installed (work: only the allowed agents, no MCP server; personal: also the local context DB) | `09_ai.sh` |
 | `fastfetch` | the greeting on each new interactive shell | `12_fastfetch.sh` |
 | `desktop` (opt-in, native only) | Ghostty and JetBrainsMono Nerd Font | container scenario `desktop` |
 

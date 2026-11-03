@@ -62,12 +62,8 @@ component_enabled zellij && bash "$UM_ENV_DIR/install/zellij.sh" --run
 component_enabled lang && bash "$UM_ENV_DIR/install/dev/lang.sh" --run
 component_enabled ai-cli && bash "$UM_ENV_DIR/install/dev/ai.sh" --run
 component_enabled wsl && bash "$UM_ENV_DIR/install/wsl.sh" --run
-# The AI standard is personal-only (ADR 0007, decision 11).
-if [ "$UM_MODE" = "work" ]; then
-  log_info "Work profile: skipping the AI standard (personal-only)."
-elif component_enabled ai-standard; then
-  bash "$UM_ENV_DIR/install/ai.sh" --run
-fi
+# The AI-Standard is generic, so work mode gets it for the allowed agents, without MCP (ADR 0007).
+component_enabled ai-standard && bash "$UM_ENV_DIR/install/ai.sh" --run
 component_enabled fastfetch && bash "$UM_ENV_DIR/install/fastfetch.sh" --run
 
 if [ -d "$UM_ENV_DIR/tests" ]; then
