@@ -35,4 +35,4 @@ UM_SHELL=zsh UM_THEME=cyber UM_ENABLE_K8S=1 bash install/summary.sh --run
 Native Windows has the equivalent
 [`windows/summary.ps1`](https://github.com/Robertcl795/dotfiles/blob/1b1239a/windows/summary.ps1) (`Show-Summary`),
 covering the same tool list translated to scoop/pwsh naming — see
-[os/windows.md](../os/windows.md).
+os/windows.md (removed).

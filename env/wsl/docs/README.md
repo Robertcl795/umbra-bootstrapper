@@ -12,7 +12,7 @@ is the map of everything else.
 | Look up a command or keybinding | [CHEATSHEET.md](CHEATSHEET.md) |
 | Know which file configures what | [Config map](#config-map) |
 | Understand one bootstrap phase | [Phases](#bootstrap-phases) |
-| Read OS-specific behaviour | [Arch](os/arch.md) · [Ubuntu](os/ubuntu.md) · [Windows](os/windows.md) |
+| Read OS-specific behaviour | [Arch](os/arch.md) · [Ubuntu](os/ubuntu.md) · Windows (removed) |
 | Fix something that broke | [Troubleshooting](CHEATSHEET.md#troubleshooting) |
 
 ## Config map
@@ -79,7 +79,7 @@ bash tests/99_smoke.sh                    # all checkpoints
 ## Native Windows
 
 Deferred: not part of Umbra v0.2. The installer stays in lux-dotfiles.
-No WSL involved — [os/windows.md](os/windows.md) has the full phase
+No WSL involved — os/windows.md (removed) has the full phase
 breakdown (`windows/packages.ps1`, `windows/profile.ps1`,
 `windows/terminal.ps1`, `windows/summary.ps1`) and the places it
 deliberately differs from the WSL path.

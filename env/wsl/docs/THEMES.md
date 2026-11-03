@@ -35,7 +35,7 @@ the language modules.
 ╰─➜
 ```
 
-File: [`env/.chezmoitemplates/starship/default.toml`](../../.chezmoitemplates/starship/default.toml) ·
+File: `env/.chezmoitemplates/starship/default.toml` (removed) ·
 no Windows Terminal scheme (keeps your terminal's current colours).
 
 ### `tron`
@@ -55,7 +55,7 @@ the work. Two-line prompt with `>>` / `➜`; modules are labelled in text
 ➜
 ```
 
-Files: [`env/.chezmoitemplates/starship/tron.toml`](../../.chezmoitemplates/starship/tron.toml) · scheme `dotfiles-tron`
+Files: `env/.chezmoitemplates/starship/tron.toml` (removed) · scheme `dotfiles-tron`
 
 ### `cyber`
 
@@ -75,7 +75,7 @@ you don't control.
 $ >
 ```
 
-Files: [`env/.chezmoitemplates/starship/cyber.toml`](../../.chezmoitemplates/starship/cyber.toml) · scheme `dotfiles-cyber`
+Files: `env/.chezmoitemplates/starship/cyber.toml` (removed) · scheme `dotfiles-cyber`
 
 ### `eva01`
 
@@ -93,7 +93,7 @@ Same ASCII-safe module labels as `cyber`, with `::` / `:]` prompt brackets.
 :] >
 ```
 
-Files: [`env/.chezmoitemplates/starship/eva01.toml`](../../.chezmoitemplates/starship/eva01.toml) · scheme `dotfiles-eva01`
+Files: `env/.chezmoitemplates/starship/eva01.toml` (removed) · scheme `dotfiles-eva01`
 
 ### `minimal`
 
@@ -111,7 +111,7 @@ the current project. The quietest of the five — everything else is dropped.
 ~/projects/app 󰣇  main +2 ●1 ❯
 ```
 
-Files: [`env/.chezmoitemplates/starship/minimal.toml`](../../.chezmoitemplates/starship/minimal.toml) · scheme `dotfiles-minimal`
+Files: `env/.chezmoitemplates/starship/minimal.toml` (removed) · scheme `dotfiles-minimal`
 
 ## What's in a theme
 

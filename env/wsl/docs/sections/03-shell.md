@@ -73,7 +73,7 @@ Both apt (Ubuntu) and pacman (Arch) package `fish`/`zsh` directly — no
 release-binary fallbacks needed here, unlike phase 1. On native Windows
 there's no zsh or fish at all; `windows/profile.ps1` reproduces the aliases,
 history predictions and fzf bindings in pwsh instead — see
-[os/windows.md](../os/windows.md).
+os/windows.md (removed).
 
 ## Customization
 

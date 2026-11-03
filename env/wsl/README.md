@@ -26,7 +26,7 @@ bash ~/dev/umbra/env/wsl/bootstrap.sh
 
 The one-line `curl … | bash` install below needs the umbra repo to be public, which happens in Phase 5 (ADR 0001). Until then, install from a clone.
 
-**Native Windows** is not part of Umbra v0.2. The PowerShell installer stays in lux-dotfiles; see [docs/os/windows.md](docs/os/windows.md).
+**Native Windows** is not part of Umbra v0.2. The PowerShell installer stays in lux-dotfiles; see docs/os/windows.md (removed).
 
 <details>
 <summary><b>Other ways to install</b> — from a branch, from a clone, non-interactive</summary>

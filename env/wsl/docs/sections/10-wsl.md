@@ -6,7 +6,7 @@ Script: [`install/wsl.sh`](../../install/wsl.sh)
 completely skipped by `bootstrap.ps1`. The native PowerShell path has no
 `.wslconfig`/`wsl.conf` equivalent — your network settings there are just
 whatever Windows itself is already using. See
-[os/windows.md](../os/windows.md) for what *does* differ on that path
+os/windows.md (removed) for what *does* differ on that path
 (scoop's own proxy handling, if any).
 
 No-ops entirely if not running under WSL. `.wslconfig` is written only with `--enable-wslconfig`.

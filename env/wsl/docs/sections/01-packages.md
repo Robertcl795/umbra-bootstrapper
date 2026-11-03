@@ -49,7 +49,7 @@ Full matrix of what each tool replaces and how to reach it:
 ## Windows (native PowerShell)
 
 Different package manager entirely (scoop, not apt/pacman) and a smaller
-guaranteed-available set — see [os/windows.md](../os/windows.md).
+guaranteed-available set — see os/windows.md (removed).
 
 ## Customization
 

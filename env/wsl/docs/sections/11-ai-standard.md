@@ -34,7 +34,7 @@ it globally), see `bash toolkit/ai-standard/scaffold.sh /path/to/repo` (from the
 
 Identical on Ubuntu and Arch (symlinks + `uv`/`claude`, no OS-specific
 branching). Not currently ported to the native Windows path — Claude Code
-itself installs there (see [os/windows.md](../os/windows.md)), but the
+itself installs there (see os/windows.md (removed)), but the
 `ai/` agents/prompts/skills/context-DB deployment is WSL/bash-only for now.
 
 ## Test

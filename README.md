@@ -57,7 +57,7 @@ Each of these came from a real run on a fresh distro.
 |---|---|
 | `install.sh` | the single command: platform detection, selector, hand-over to `env/wsl/bootstrap.sh` |
 | `.chezmoiroot` | points chezmoi at `env/`; the repo root is the chezmoi source |
-| [`env/`](env/README.md) | dotfiles, install phases (`.chezmoiscripts/`), the installer in `env/wsl/` |
+| `env/` (removed) | dotfiles, install phases (`.chezmoiscripts/`), the installer in `env/wsl/` |
 | [`themes/`](themes/README.md) | generated theme files that chezmoi includes; never edited by hand |
 | `scripts/verify.sh` | static checks, no containers |
 

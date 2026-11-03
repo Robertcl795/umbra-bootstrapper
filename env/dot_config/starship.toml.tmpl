@@ -1,4 +1,4 @@
-{{- /* Theme chosen by the `theme` value (umbra, default, tron, cyber, eva01, minimal);
+{{- /* Theme chosen by the `theme` value (umbra);
        an unknown name falls back to umbra, generated from the brand tokens (ADR 0013). */ -}}
 {{- $theme := .theme -}}
 {{- if not (stat (joinPath .chezmoi.sourceDir ".chezmoitemplates" "starship" (printf "%s.toml" $theme))) -}}

@@ -24,7 +24,7 @@ Day to day: edit the file in the checkout, then `chezmoi diff` and
 
 First apply on a machine set up with v0.2.0: a one-time script removes the old
 symlinks into the checkout and backs up any other existing file to
-`<path>.backup.<timestamp>`. Rollback steps are in [env/README.md](../../../README.md).
+`<path>.backup.<timestamp>`. Rollback steps are in env/README.md (removed).
 
 Checkpoint: [`tests/02_linking.sh`](../../tests/02_linking.sh) — the targets are
 chezmoi-managed files and `chezmoi verify` passes.

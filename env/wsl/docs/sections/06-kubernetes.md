@@ -16,7 +16,7 @@ The installers used here are all official upstream scripts that detect
 architecture themselves — identical on Ubuntu and Arch. On native Windows,
 the same three tools come from scoop instead (`kubectl`, `helm`, `k3d`
 manifests) — `k3d` additionally needs Docker Desktop with the WSL2 backend
-since it runs containers; see [os/windows.md](../os/windows.md).
+since it runs containers; see os/windows.md (removed).
 
 ## Customization
 

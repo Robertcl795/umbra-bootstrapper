@@ -38,7 +38,7 @@ UM_THEME=tron chezmoi init --apply
 Identical on Ubuntu and Arch — starship itself is a single static binary,
 no OS-specific packaging quirks. On native Windows, the *same*
 `env/.chezmoitemplates/starship/<theme>.toml` files are reused (via `$env:STARSHIP_CONFIG`
-rather than a symlink) — see [os/windows.md](../os/windows.md) — plus each
+rather than a symlink) — see os/windows.md (removed) — plus each
 theme also has a matching `env/.chezmoitemplates/starship/` color
 scheme for the terminal itself, which has no bash-side equivalent.
 
