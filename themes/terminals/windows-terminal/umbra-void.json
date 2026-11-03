@@ -1,0 +1,23 @@
+{
+  "name": "Umbra Void",
+  "background": "#07060D",
+  "foreground": "#E8E4F7",
+  "cursorColor": "#2BE4FF",
+  "selectionBackground": "#241E3D",
+  "black": "#171329",
+  "red": "#FF5C7A",
+  "green": "#3DF5A0",
+  "yellow": "#FFC857",
+  "blue": "#6C9BFF",
+  "purple": "#FF4FAE",
+  "cyan": "#2BE4FF",
+  "white": "#C9C4E0",
+  "brightBlack": "#6B6390",
+  "brightRed": "#FF8097",
+  "brightGreen": "#7DFFC0",
+  "brightYellow": "#FFD98A",
+  "brightBlue": "#98B7FF",
+  "brightPurple": "#FF7FC4",
+  "brightCyan": "#7DEEFF",
+  "brightWhite": "#E8E4F7"
+}

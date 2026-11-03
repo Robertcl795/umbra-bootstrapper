@@ -1,0 +1,23 @@
+{
+  "name": "Umbra Lux",
+  "background": "#F7F5FE",
+  "foreground": "#171329",
+  "cursorColor": "#027382",
+  "selectionBackground": "#D2CDE4",
+  "black": "#171329",
+  "red": "#C7214D",
+  "green": "#067849",
+  "yellow": "#886305",
+  "blue": "#3A65C3",
+  "purple": "#C90080",
+  "cyan": "#027382",
+  "white": "#6A6486",
+  "brightBlack": "#8A84A8",
+  "brightRed": "#F65373",
+  "brightGreen": "#07A365",
+  "brightYellow": "#B68607",
+  "brightBlue": "#5D8BEE",
+  "brightPurple": "#F646A6",
+  "brightCyan": "#009CB0",
+  "brightWhite": "#4A4165"
+}

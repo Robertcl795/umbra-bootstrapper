@@ -1,26 +1,47 @@
 # Umbra Bootstrapper
 
-One command sets up a themed developer environment: packages, zsh, Starship, Neovim, zellij, Kubernetes and language tools, and the dotfiles, deployed by [chezmoi](https://www.chezmoi.io/). Part of Umbra; the umbrella repo is private for now.
+One command sets up a themed developer environment: packages, zsh, Starship, Neovim, zellij, Kubernetes and language tools. [chezmoi](https://www.chezmoi.io/) deploys the dotfiles. One palette covers every app, in three variants: umbra, void and lux.
+
+- [Getting started](#getting-started)
+- [Philosophy](docs/philosophy.md)
+- [Stack](docs/stack/README.md): [Omarchy](docs/stack/omarchy.md) · [Arch and Ubuntu](docs/stack/linux.md) · [WSL](docs/stack/wsl.md) · [Planned](docs/stack/planned.md)
+
+## Getting started
+
+Every platform uses the same command. It follows the `main` branch.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Robertcl795/umbra-bootstrapper/main/install.sh | bash
 ```
 
-It detects the system and shows a menu ([gum](https://github.com/charmbracelet/gum), downloaded pinned and sha256-checked):
+To read the script before you run it:
 
-| System | What it offers |
-|---|---|
-| WSL Ubuntu, WSL Arch | every component, plus WSL tuning |
-| Ubuntu, Arch (native) | every component, plus Ghostty and JetBrainsMono Nerd Font themed with the Umbra colors (pre-selected when a desktop session is running) |
-| Omarchy | the Umbra theme (`omarchy theme install`), then only zsh, Starship and the tools Omarchy lacks (`pacman -S --needed`); Omarchy keeps its editor, terminal, fonts, updates and login shell |
+```sh
+curl -fsSL -o install.sh https://raw.githubusercontent.com/Robertcl795/umbra-bootstrapper/main/install.sh
+less install.sh && bash install.sh
+```
 
-Umbra AI (the `um` CLI, vault, AI standard, AI CLIs, Ollama) is private: the menu offers it only when your GitHub credentials (`gh auth login` or an SSH key) can read it.
+What happens:
 
-Without a menu: `bash install.sh --yes [--profile personal|work] [--components a,b] [--skip c]`, or `UM_SELECT=packages,shell bash install.sh`. `--dry-run` prints what would run. The WSL installer alone: `bash env/wsl/bootstrap.sh --yes`. Details in [env/wsl/README.md](env/wsl/README.md).
+1. The installer clones this repo to `~/.local/share/umbra/bootstrapper`.
+2. It detects the system and shows a menu ([gum](https://github.com/charmbracelet/gum), pinned and sha256-checked):
 
-## Fresh WSL
+   | System | The menu offers |
+   |---|---|
+   | WSL Arch, WSL Ubuntu | every component, plus WSL tuning |
+   | Arch, Ubuntu (native) | every component, plus Ghostty and JetBrainsMono Nerd Font (pre-selected when a desktop session runs) |
+   | Omarchy | the Umbra Omarchy theme, zsh, Starship and the tools Omarchy lacks; Omarchy keeps everything else |
 
-A distro with no regular user starts as `root`: Arch always, Ubuntu when its first launch was skipped or it was imported. Run the same command as `root`, with `--user <name>` when there is no terminal to ask on. Stage 1 prepares the distro, then stops and prints what to run, because a default user only applies after a restart:
+3. It installs what you picked, and chezmoi deploys the dotfiles.
+4. The last phase runs the doctor (`env/wsl/tests/99_smoke.sh`). The run fails if any check fails.
+
+To skip the menu, pass `--yes`, and optionally `--profile personal|work`, `--components a,b` or `--skip c`. `--dry-run` prints the plan without running it.
+
+### Fresh WSL: the restart point
+
+A distro with no regular user starts as `root`. That is always the case for Arch, and for Ubuntu when its first launch was skipped or it was imported. Run the same command as `root`. Add `--user <name>` if there is no terminal to ask on.
+
+Stage 1 prepares the distro, then stops: a default user only takes effect after a restart. It prints what to run next:
 
 ```powershell
 wsl.exe --terminate <distro>
@@ -28,11 +49,31 @@ wsl.exe -d <distro>
 ```
 
 ```sh
-umbra bootstrap resume   # safe to run again if it fails
+umbra bootstrap resume   # stage 2; safe to run again if it fails
 umbra bootstrap status   # what is pending, and whether sudo is still passwordless
 ```
 
-Sudo needs no password until stage 2 succeeds, then asks for one again. An Ubuntu that already has its user needs none of this: run the command as that user.
+Sudo needs no password until stage 2 succeeds, then asks for one again. An Ubuntu that already has its user skips all of this: run the command as that user, in a terminal.
+
+### Check it
+
+Run the doctor again at any time:
+
+```sh
+bash ~/.local/share/umbra/bootstrapper/env/wsl/tests/99_smoke.sh
+```
+
+After a fresh-WSL stage 1, the checkout is `~/dev/umbra-bootstrapper` instead. With Umbra AI installed, `um doctor` also checks the `um` CLI and the vault.
+
+### Pick a variant
+
+The menu asks for umbra (dark, default), void (darkest background) or lux (light). To switch later:
+
+```sh
+UM_THEME=lux chezmoi init --apply
+```
+
+The prompt, zsh/fish colors, fzf, bat, zellij, Ghostty and Neovim follow the variant. The other apps get all three theme files. See [Stack › Themes](docs/stack/README.md#themes).
 
 ## Troubleshooting
 
@@ -40,28 +81,27 @@ Each of these came from a real run on a fresh distro.
 
 | You see | Cause | What to do |
 |---|---|---|
-| `need root for: …`, then `no usable sudo for user …`, exit 77 | no terminal to type a password on, and no passwordless sudo | run it in a terminal; the run says which command needed root |
+| `need root for: …`, then `no usable sudo for user …`, exit 77 | no terminal to type a password on, and no passwordless sudo | run it in a terminal; the message names the command that needed root |
 | `No terminal and no UM_USER_PASSWORD_FILE: <user> stays locked` | stage 1 had nowhere to ask for a password | set one with the printed `wsl.exe … passwd <user>` command, or pass `UM_USER_PASSWORD_FILE=<path>` |
-| `No username: pass --user <name>` | no terminal to ask on | add `--user <name>` |
-| `This distro already has users: …` | stage 1 never guesses a user | add `--user <name>` with one of them |
+| `No username: pass --user <name>` or `This distro already has users: …` | stage 1 never guesses a user | add `--user <name>` |
 | `Nothing to resume` | no stage 2 is pending for this user | check `umbra bootstrap status`, and that you are not `root` |
 | Still `root` after stage 1 | the distro has not restarted | run the two `wsl.exe` lines above |
 | `P1: apply failed` | the package manager or the network | read the output above it, then run the command again |
 | `P6: the doctor failed` | a check named above it failed; the marker and the temporary sudo rule stay | fix it, then `umbra bootstrap resume` |
 | `[warn] wsl.conf … is not active yet` | `/etc/wsl.conf` changed after the last restart | `wsl.exe --terminate <distro>`, from Windows |
-| A warning that `tldr` has no candidate | Ubuntu dropped the package; `tealdeer` replaces it | nothing |
 
 ## Layout
 
 | Path | What it holds |
 |---|---|
 | `install.sh` | the single command: platform detection, selector, hand-over to `env/wsl/bootstrap.sh` |
-| `.chezmoiroot` | points chezmoi at `env/`; the repo root is the chezmoi source |
-| `env/` (removed) | dotfiles, install phases (`.chezmoiscripts/`), the installer in `env/wsl/` |
-| [`themes/`](themes/README.md) | generated theme files that chezmoi includes; never edited by hand |
+| `.chezmoiroot` | points chezmoi at `env/`, so the repo root is the chezmoi source |
+| `env/` | dotfiles, install phases (`.chezmoiscripts/`), the installer and its tests in `env/wsl/` |
+| `themes/` | generated theme files that chezmoi includes; never edited by hand |
+| `docs/` | philosophy and stack pages |
 | `scripts/verify.sh` | static checks, no containers |
 
-Container tests (Ubuntu 26.04, Arch) and the gates on real disposable WSL distros run from the Umbra umbrella, which has this repo at `bootstrapper/`.
+Umbra AI (the `um` CLI, vault, AI standard, AI CLIs, Ollama) appears in the menu only when your GitHub credentials can read its repo (`gh auth login` or an SSH key).
 
 ## License
 
