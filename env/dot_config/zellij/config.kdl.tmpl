@@ -1,7 +1,7 @@
 // Zellij configuration — managed by Umbra (env/wsl)
 // Docs: https://zellij.dev/documentation/configuration
 
-theme "catppuccin-mocha"
+theme "{{ if eq .theme "void" }}umbra-void{{ else if eq .theme "lux" }}umbra-lux{{ else }}umbra{{ end }}"
 default_shell "zsh"
 
 // UI

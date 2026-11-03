@@ -290,12 +290,24 @@ select_shell() {
 }
 
 select_theme() {
-  # umbra, generated from brand/tokens (ADR 0013), is the only theme; the legacy
-  # lux-dotfiles themes were archived. An unknown UM_THEME falls back to umbra in chezmoi.
-  if [ -z "$UM_THEME" ]; then
-    UM_THEME="umbra"
+  if [ -n "$UM_THEME" ]; then
+    return 0
   fi
-  return 0
+  # Variants of the one Umbra theme (ADR 0013, 0025); umbra is the default.
+  if [ "$UM_NONINTERACTIVE" = "1" ] || ! is_tty; then
+    UM_THEME="umbra"
+    return 0
+  fi
+  log_info "Choose the Umbra variant:"
+  echo "1) umbra  (dark, default)"
+  echo "2) void   (darkest background)"
+  echo "3) lux    (light)"
+  read -r -p "Select [1-3] (default 1): " choice </dev/tty
+  case "$choice" in
+    2) UM_THEME="void" ;;
+    3) UM_THEME="lux" ;;
+    *) UM_THEME="umbra" ;;
+  esac
 }
 
 export UM_ENV_DIR UM_NONINTERACTIVE UM_VERBOSE UM_SHELL UM_THEME UM_ENABLE_K8S UM_MODE UM_COMPONENTS UM_SKIP

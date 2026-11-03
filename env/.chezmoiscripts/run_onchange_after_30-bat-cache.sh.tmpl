@@ -1,7 +1,9 @@
 {{- if hasPrefix "wsl-" .os -}}
 #!/usr/bin/env bash
-# Rebuild bat's theme cache when the Umbra bat theme changes (Phase 1, ADR 0013).
+# Rebuild bat's theme cache when an Umbra bat theme changes (Phase 1, ADR 0013, 0025).
 # theme: {{ include "../themes/bat/Umbra.tmTheme" | sha256sum }}
+# void: {{ include "../themes/bat/Umbra-Void.tmTheme" | sha256sum }}
+# lux: {{ include "../themes/bat/Umbra-Lux.tmTheme" | sha256sum }}
 set -euo pipefail
 for bat in bat batcat; do
   if command -v "$bat" >/dev/null 2>&1; then

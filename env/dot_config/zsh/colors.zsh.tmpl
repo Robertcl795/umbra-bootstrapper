@@ -1,2 +1,8 @@
-{{- /* Generated colors (Phase 1, ADR 0013): source themes/shell/colors.zsh */ -}}
+{{- /* Generated colors (ADR 0013): source themes/shell/colors*.zsh. Variant from the `theme` value (ADR 0025); unknown names use umbra. */ -}}
+{{- if eq .theme "void" -}}
+{{ include "../themes/shell/colors-void.zsh" -}}
+{{- else if eq .theme "lux" -}}
+{{ include "../themes/shell/colors-lux.zsh" -}}
+{{- else -}}
 {{ include "../themes/shell/colors.zsh" -}}
+{{- end -}}

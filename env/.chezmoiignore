@@ -31,3 +31,18 @@ omarchy/**
 .config/ghostty
 .config/ghostty/**
 {{ end }}
+
+# ADR 0025: desktop-only theme files (GUI terminals, VS Code, non-Omarchy Hyprland and Waybar)
+# only with the desktop component; never on WSL, where these apps run on the Windows side.
+{{ if or (not (has "desktop" (splitList "," .components))) (hasPrefix "wsl-" .os) }}
+.config/alacritty
+.config/alacritty/**
+.config/kitty
+.config/kitty/**
+.config/hypr
+.config/hypr/**
+.config/waybar
+.config/waybar/**
+.vscode
+.vscode/**
+{{ end }}

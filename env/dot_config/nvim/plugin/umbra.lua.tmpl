@@ -1,0 +1,3 @@
+-- Umbra colorscheme (ADR 0025), variant from the bootstrapper's `theme` value. Managed by chezmoi.
+vim.g.umbra_variant = {{ .theme | quote }}
+pcall(vim.cmd.colorscheme, "umbra")
