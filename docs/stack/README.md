@@ -28,6 +28,8 @@ Each component is a phase. chezmoi runs them as scripts from [`env/.chezmoiscrip
 | `fastfetch` | the greeting on each new interactive shell | `12_fastfetch.sh` |
 | `desktop` (opt-in, native only) | Ghostty and JetBrainsMono Nerd Font | container scenario `desktop` |
 
+The `um` CLI that comes with Umbra AI (notes, tasks across devices, habits) has its own pages: [the `um` docs](https://github.com/Robertcl795/umbra-ai/tree/main/docs).
+
 The run ends with a summary of installed versions, then the doctor (`99_smoke.sh`, all checkpoints). Every downloaded binary is pinned and sha256-checked.
 
 ### Configuration
