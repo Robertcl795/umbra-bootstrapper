@@ -42,15 +42,29 @@ func fixtureEnv(variant string, p theme.Profile, lang string) sys.Env {
 		Lang: lang, Theme: theme.New(variant, p), NoMotion: true, EnvDir: envDir(), Version: "0.0.0-test"}
 }
 
+// slowFacts are the scan lines ScanSlow would send, fixed for goldens.
+var slowFacts = []any{
+	msgs.ScanFact{Key: "scan.systemd", ValueKey: "scan.systemd.yes", State: msgs.FactOK},
+	msgs.ScanFact{Key: "scan.sudo", ValueKey: "scan.sudo.asks", State: msgs.FactOK},
+	msgs.ScanFact{Key: "scan.network", Value: "84ms", ValueKey: "scan.network.yes", State: msgs.FactOK},
+	msgs.ScanFact{Key: "scan.access", ValueKey: "scan.access.yes", State: msgs.FactOK},
+	msgs.Access{OK: true}, msgs.Sudo{},
+}
+
 // started returns a model that has its size, facts and catalog, as after Init.
-func started(t *testing.T, env sys.Env, w, h int) Model {
+func started(t *testing.T, env sys.Env, w, h int, cmds ...Cmds) Model {
 	t.Helper()
-	var m tea.Model = New(env, Cmds{})
+	var c Cmds
+	if len(cmds) > 0 {
+		c = cmds[0]
+	}
+	var m tea.Model = New(env, c, effects.Pending()...)
 	m, _ = m.Update(tea.WindowSizeMsg{Width: w, Height: h})
 	for _, c := range effects.Scan(env) {
 		m, _ = m.Update(c())
 	}
 	m, _ = m.Update(msgs.Catalog{Cat: loadCat(t)})
+	m, _ = m.Update(msgs.Batch(slowFacts))
 	return m.(Model)
 }
 
@@ -93,28 +107,39 @@ func TestKeyNamesMatchBubbleTea(t *testing.T) {
 	}
 }
 
-// The TUI's result equals plan.Args for the same picks (contract C5/C6: one code path).
+// Install starts install.sh with exactly plan.Args for the same picks (contract C5/C6).
 func TestFlowToInstallGivesPlanArgs(t *testing.T) {
-	m := started(t, fixtureEnv("umbra", theme.TrueColor, "en"), 80, 24)
+	var got []string
+	cmds := Cmds{Start: func(args []string) tea.Cmd { got = args; return nil }}
+	env := fixtureEnv("umbra", theme.TrueColor, "en")
+	m := started(t, env, 80, 24, cmds)
 	m, _ = press(m, "enter")                                                   // boot → profile
 	m, _ = press(m, "down", "enter")                                           // work → components
 	m, _ = press(m, "space", "down", "down", "down", "down", "space", "enter") // untick packages and k8s
 	m, _ = press(m, "right", "enter")                                          // void → review
-	m, cmd := press(m, "enter")                                                // Install
-	if cmd == nil {
-		t.Fatal("Install did not quit")
-	}
-	res := m.Result()
-	if res.Action != screens.Install {
-		t.Fatalf("action %v", res.Action)
+	m.d.Passwordless = true                                                    // no sudo prompt in this test
+	m, _ = press(m, "enter")                                                   // Install
+	if m.screen != Run {
+		t.Fatalf("screen %d, want Run", m.screen)
 	}
 	cat := loadCat(t)
 	defaults := cat.Defaults("wsl-arch", false, true)
 	want := slices.DeleteFunc(slices.Clone(defaults), func(id string) bool { return id == "packages" || id == "k8s" })
 	args := plan.Args(cat, "wsl-arch", plan.Selection{Profile: "work", Items: want, Variant: "void"})
-	if !slices.Equal(res.Args, args) {
-		t.Errorf("TUI args\n %v\nwant\n %v", res.Args, args)
+	if !slices.Equal(got, args) {
+		t.Errorf("install.sh args\n %v\nwant\n %v", got, args)
 	}
+	if ids := phaseIDs(m); !slices.Equal(ids, plan.Phases(cat, "wsl-arch", want)) {
+		t.Errorf("run rows %v", ids)
+	}
+}
+
+func phaseIDs(m Model) []string {
+	var ids []string
+	for _, p := range m.r.Phases {
+		ids = append(ids, p.ID)
+	}
+	return ids
 }
 
 func TestBackAndCancel(t *testing.T) {
@@ -124,7 +149,7 @@ func TestBackAndCancel(t *testing.T) {
 		t.Errorf("esc from components: screen %d", m.screen)
 	}
 	m, cmd := press(m, "ctrl+c")
-	if cmd == nil || m.Result().Action != screens.Quit {
+	if cmd == nil || m.Result().Action != screens.Quit || m.Result().Code != 130 {
 		t.Errorf("ctrl+c: %+v", m.Result())
 	}
 }
@@ -214,27 +239,28 @@ func screensOf(t *testing.T, env sys.Env, w, h int) map[string]string {
 	return out
 }
 
-func TestGolden(t *testing.T) {
+func checkGolden(t *testing.T, name, got string) {
+	t.Helper()
 	dir := filepath.Join("testdata", "golden")
+	p := filepath.Join(dir, name+".txt")
 	if *update {
 		_ = os.MkdirAll(dir, 0o755)
+		if err := os.WriteFile(p, []byte(got), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return
 	}
-	check := func(name, got string) {
-		p := filepath.Join(dir, name+".txt")
-		if *update {
-			if err := os.WriteFile(p, []byte(got), 0o644); err != nil {
-				t.Fatal(err)
-			}
-			return
-		}
-		want, err := os.ReadFile(p)
-		if err != nil {
-			t.Fatalf("%s: %v (run go test ./internal/app -update)", p, err)
-		}
-		if string(want) != got {
-			t.Errorf("%s differs (review it, then go test ./internal/app -update)", p)
-		}
+	want, err := os.ReadFile(p)
+	if err != nil {
+		t.Fatalf("%s: %v (run go test ./internal/app -update)", p, err)
 	}
+	if string(want) != got {
+		t.Errorf("%s differs (review it, then go test ./internal/app -update)", p)
+	}
+}
+
+func TestGolden(t *testing.T) {
+	check := func(name, got string) { checkGolden(t, name, got) }
 	for _, v := range theme.Variants {
 		for pn, p := range profiles {
 			for s, content := range screensOf(t, fixtureEnv(v, p, "en"), 80, 24) {

@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 {{ template "um-env.sh" . }}
 # phase: {{ include "wsl/install/nvim.sh" | sha256sum }} nvim.sh
-component_enabled nvim || exit 0
+component_enabled nvim || phase_skip
 bash "$UM_ENV_DIR/install/nvim.sh" --run
 phase_gate nvim "nvim is missing" have_cmds nvim
 {{- end }}

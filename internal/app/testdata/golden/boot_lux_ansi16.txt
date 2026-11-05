@@ -6,17 +6,17 @@
   [37mDark by default. Sharp by design.[m                                             
                                                                                 
  [90m┌[m[90m─[m[37m SYSTEM SCAN [m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┐[m 
+ [90m│[m [32m[ OK ][m [1msystemd     [mrunning (PID 1)                                         [90m│[m 
+ [90m│[m [32m[ OK ][m [1msudo        [masks once for your password                             [90m│[m 
+ [90m│[m [32m[ OK ][m [1mnetwork     [m84ms · github.com reachable                             [90m│[m 
+ [90m│[m [32m[ OK ][m [1mumbra-ai    [maccess confirmed                                        [90m│[m 
  [90m│[m [32m[ OK ][m [1mplatform    [mwsl-arch                                                [90m│[m 
  [90m│[m [32m[ OK ][m [1muser        [mrocker                                                  [90m│[m 
  [90m│[m [37m[ -- ][m [1mdesktop     [m[37mnone · WSL has no desktop session[m                       [90m│[m 
  [90m│[m [32m[ OK ][m [1mterminal    [mWindows Terminal · ANSI-16                              [90m│[m 
- [90m│[m [32m[ OK ][m [1mumbra-ai    [maccess confirmed                                        [90m│[m 
  [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 
                                                                                 
  [37mThe scan is read-only. Nothing is installed before Review.[m                     
-                                                                                
-                                                                                
-                                                                                
                                                                                 
                                                                                 
                                                                                 

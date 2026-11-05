@@ -30,6 +30,7 @@ UM_USER="${UM_USERNAME:-}"
 # apply runs under `||`, so errexit is off inside it: each step returns its own failure.
 phase() {
   local id="$1" pre="$2" post="$3" apply="$4" fix="$5"
+  phase_start "$id"
   log_step "$id"
   if "$post"; then
     log_info "$id: already satisfied."
@@ -38,6 +39,9 @@ phase() {
     "$apply" || die "$id: apply failed. $fix"
     "$post" || die "$id: postcondition failed. $fix"
   fi
+  um_event phase "$id" ok
+  # shellcheck disable=SC2034 # read by the EXIT trap in common.sh
+  UM_PHASE_ENDED=1
   if [ "${UM_STAGE1_STOP_AFTER:-}" = "$id" ]; then
     log_info "Stopping after $id (UM_STAGE1_STOP_AFTER)."
     exit 0

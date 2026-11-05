@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fake sudo: `-n true` says a password is needed, `-v` asks for one on the terminal.
+echo "sudo $*" >>"$FAKE_SUDO_LOG"
+case "$*" in
+  "-n true") exit 1 ;;
+  "-v") printf '[sudo] password for tester: ' >/dev/tty; read -r pw </dev/tty; [ "$pw" = test-password ] ;;
+  "-n -v") exit 0 ;;
+  *) exit 1 ;;
+esac

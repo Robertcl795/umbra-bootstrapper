@@ -6,17 +6,17 @@
   Dark by default. Sharp by design.                                             
                                                                                 
  ┌─ SYSTEM SCAN ──────────────────────────────────────────────────────────────┐ 
+ │ [ OK ] systemd     running (PID 1)                                         │ 
+ │ [ OK ] sudo        asks once for your password                             │ 
+ │ [ OK ] network     84ms · github.com reachable                             │ 
+ │ [ OK ] umbra-ai    access confirmed                                        │ 
  │ [ OK ] platform    wsl-arch                                                │ 
  │ [ OK ] user        rocker                                                  │ 
  │ [ -- ] desktop     none · WSL has no desktop session                       │ 
  │ [ OK ] terminal    Windows Terminal · NO_COLOR                             │ 
- │ [ OK ] umbra-ai    access confirmed                                        │ 
  └────────────────────────────────────────────────────────────────────────────┘ 
                                                                                 
  The scan is read-only. Nothing is installed before Review.                     
-                                                                                
-                                                                                
-                                                                                
                                                                                 
                                                                                 
                                                                                 

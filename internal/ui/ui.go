@@ -210,3 +210,21 @@ func Next(c Ctx, cmd string, w int) []string {
 	}
 	return out
 }
+
+// Words wraps plain text at spaces into lines of at most w cells.
+func Words(text string, w int) []string {
+	var out []string
+	line := ""
+	for _, word := range strings.Fields(text) {
+		switch {
+		case line == "":
+			line = word
+		case Width(line+" "+word) <= w:
+			line += " " + word
+		default:
+			out = append(out, line)
+			line = word
+		}
+	}
+	return append(out, line)
+}

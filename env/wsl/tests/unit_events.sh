@@ -20,7 +20,7 @@ ESC=$'\033'
 run() {
   local ev="$1"
   shift
-  env -u UM_EVENTS -u UM_PHASE TAB="$TAB" ${ev:+UM_EVENTS="$ev"} bash -c "source '$ENV_DIR/install/common.sh'; set +e; $*" 2>&1
+  env -u UM_EVENTS -u UM_PHASE TAB="$TAB" ${UM_STOP:+UM_STOP="$UM_STOP"} ${ev:+UM_EVENTS="$ev"} bash -c "source '$ENV_DIR/install/common.sh'; set +e; $*" 2>&1
 }
 
 echo "# without UM_EVENTS"
@@ -61,6 +61,43 @@ expect "message cut to 512 bytes" '[ "$(cut -f6 "$ev" | tr -d "\n" | wc -c)" -eq
 
 out="$(run "$t/missing-dir/events" 'log_info still works; phase_gate prompt fix true; echo rc=$?')"
 expect "unwritable UM_EVENTS is ignored" '[[ $out == *"still works"* && $out == *"rc=0"* ]] && [ ! -e "$t/missing-dir/events" ]'
+
+echo "# phase end (G4): every started phase ends with exactly one ok, fail or skip"
+P=run_onchange_before_40-nvim.sh
+states() { cut -f3,5 "$ev" | grep '^phase' | cut -f2 | paste -sd, -; }
+
+: >"$ev"
+run "$ev" "phase_start $P; echo work" >/dev/null
+expect "no gate, exit 0: start then ok" '[ "$(states)" = start,ok ]'
+
+: >"$ev"
+out="$(run "$ev" "phase_start $P; UM_SKIP=nope; component_enabled nope || phase_skip; echo not-reached")"; rc=$?
+expect "phase_skip: start then skip, exit 0, stops the script" '[ "$(states)" = start,skip ] && [ "$rc" -eq 0 ] && [[ $out != *not-reached* ]]'
+
+: >"$ev"
+run "$ev" "phase_start $P; exit 3" >/dev/null
+expect "exit 3 without gate: fail with the code" '[ "$(states)" = start,fail ] && [ "$(grep fail "$ev" | cut -f6)" = "exit 3" ]'
+
+: >"$ev"
+run "$ev" "phase_start $P; phase_gate nvim fix true" >/dev/null
+expect "gate ok, then exit: one ok only" '[ "$(states)" = start,ok ]'
+
+: >"$ev"
+run "$ev" "phase_start $P; phase_gate nvim 'nvim is missing' false; exit 1" >/dev/null
+expect "gate fail, then exit 1: one fail with the gate message" '[ "$(states)" = start,fail ] && [ "$(grep fail "$ev" | cut -f6)" = "nvim is missing" ]'
+
+out="$(run "" "phase_start $P; UM_SKIP=nope; component_enabled nope || phase_skip; echo not-reached")"; rc=$?
+expect "phase_skip without UM_EVENTS: silent exit 0" '[ -z "$out" ] && [ "$rc" -eq 0 ]'
+
+echo "# stop between phases (G4): with the UM_STOP file present, no phase starts"
+stop="$t/stop"
+: >"$ev"
+out="$(UM_STOP="$stop" run "$ev" "phase_start $P; phase_gate nvim fix true")"; rc=$?
+expect "no stop file: the phase runs" '[ "$rc" -eq 0 ] && [ "$(states)" = start,ok ]'
+: >"$stop"
+: >"$ev"
+out="$(UM_STOP="$stop" run "$ev" "phase_start $P; echo not-reached")"; rc=$?
+expect "stop file: exit 130 before the phase starts, said once" '[ "$rc" -eq 130 ] && [[ $out != *not-reached* ]] && [[ $out == *"Stopped before $P"* ]] && ! grep -q start "$ev"'
 
 echo "unit_events: $pass ok, $fails failed"
 [ "$fails" -eq 0 ]

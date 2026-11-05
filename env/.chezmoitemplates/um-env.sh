@@ -26,3 +26,5 @@ export UM_NONINTERACTIVE={{ .noninteractive | quote }}
 {{- end }}
 # shellcheck disable=SC1091
 source "$UM_ENV_DIR/install/common.sh"
+# Front ends (umbra-setup) see this script as one phase, named like the catalog's `scripts` (ADR 0040).
+phase_start {{ base .chezmoi.sourceFile | trimSuffix ".tmpl" | quote }}

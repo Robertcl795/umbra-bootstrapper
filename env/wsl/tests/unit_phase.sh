@@ -48,5 +48,12 @@ pre_run() (
 out="$(pre_run)"; rc=$?
 expect "failing precondition stops before apply" '[ "$rc" -ne 0 ] && [[ $out == *"PX: precondition failed"* ]]'
 
+# Events (ADR 0040, setup-tui G4): each stage 1 phase starts and ends in the stream.
+ev="$t/events"
+: >"$ev"
+(UM_EVENTS="$ev" phase PA ok ok ok "fix" 2>/dev/null; UM_EVENTS="$ev" phase PB ok no ok "fix" 2>/dev/null; UM_EVENTS="$ev" phase PC ok ok ok "fix" 2>/dev/null)
+expect "events: PA start ok, PB start then fail on exit, PC never starts" \
+  '[ "$(awk -F"\t" "\$3 == \"phase\" { print \$4 \"/\" \$5 }" "$ev" | paste -sd, -)" = "PA/start,PA/ok,PB/start,PB/fail" ]'
+
 rm -rf "$t"
 exit $((fails > 0))

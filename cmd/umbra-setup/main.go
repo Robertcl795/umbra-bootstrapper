@@ -1,22 +1,24 @@
 // Command umbra-setup is the bootstrapper's TUI and Umbra's entry point (ADR 0037).
 //
-// G3 build: it walks scan → profile → components → theme → review and prints the install.sh
-// command that does what was picked; running bootstrap.sh from the TUI arrives in G4.
+// It walks scan → profile → components → theme → review, then runs install.sh with the flags of
+// the review's "Next time" line and follows its phases (ADR 0040), then the doctor.
 //
-// Exit codes: 0 done, 1 error, 2 needs a terminal, 130 cancelled (ux-spec §3.1).
+// Exit codes: 0 done (or the WSL restart point), 1 a phase or the doctor failed, 2 needs a
+// terminal, 130 cancelled or stopped (ux-spec §3.1).
 package main
 
 import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/Robertcl795/umbra-bootstrapper/internal/app"
 	"github.com/Robertcl795/umbra-bootstrapper/internal/effects"
 	"github.com/Robertcl795/umbra-bootstrapper/internal/i18n"
-	"github.com/Robertcl795/umbra-bootstrapper/internal/plan"
 	"github.com/Robertcl795/umbra-bootstrapper/internal/screens"
 )
 
@@ -38,26 +40,40 @@ func run() int {
 		fmt.Fprintln(os.Stderr, tr("err.notty"))
 		return 2
 	}
-	envDir := effects.EnvDir(*envFlag)
+	envDir, _ := filepath.Abs(effects.EnvDir(*envFlag))
 	env := effects.FromOS(envDir, version)
-	m := app.New(env, app.Cmds{Init: append(effects.Scan(env), effects.ReadCatalog(envDir)), Glitch: effects.GlitchTick})
-	final, err := tea.NewProgram(m).Run()
+	init := append(effects.Scan(env), effects.ReadCatalog(envDir), effects.Stored)
+	init = append(init, effects.ScanSlow(env)...)
+	cmds := app.Cmds{
+		Init:         init,
+		Glitch:       effects.GlitchTick,
+		Tick:         effects.Tick,
+		SudoValidate: effects.SudoValidate,
+		SudoRefresh:  effects.SudoRefresh,
+		Start:        func(args []string) tea.Cmd { return effects.Start(envDir, args) },
+		Wait:         effects.Wait,
+		ReadEvents:   effects.ReadEvents,
+		Stop:         effects.Stop,
+		Doctor:       func(log string) tea.Cmd { return effects.Doctor(envDir, log) },
+		LogTail:      func(p string) tea.Cmd { return effects.LogTail(p, 10) },
+	}
+	final, err := tea.NewProgram(app.New(env, cmds, effects.Pending()...)).Run()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "umbra-setup:", err)
 		return 1
 	}
 	res := final.(app.Model).Result()
 	switch res.Action {
-	case screens.Install, screens.DryRun:
-		args := res.Args
-		if res.Action == screens.DryRun {
-			args = append([]string{"--dry-run"}, args...)
+	case screens.DryRun:
+		// The plan as install.sh sees it, printed to the terminal after the TUI closed.
+		cmd := exec.Command("bash", append([]string{filepath.Join(envDir, "..", "..", "install.sh"), "--dry-run"}, res.Args...)...)
+		cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
+		if err := cmd.Run(); err != nil {
+			return 1
 		}
-		fmt.Println(tr("preview"))
-		fmt.Println("  " + plan.Command(args))
 		return 0
-	default:
+	case screens.Quit:
 		fmt.Println(tr("cancelled"))
-		return 130
 	}
+	return res.Code
 }

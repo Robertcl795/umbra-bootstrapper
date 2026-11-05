@@ -84,3 +84,39 @@ func TestArgs(t *testing.T) {
 		}
 	}
 }
+
+func TestPhasesInChezmoiOrder(t *testing.T) {
+	c, _ := load(t)
+	got := Phases(c, "wsl-arch", []string{"umbra-ai", "prompt", "packages"})
+	want := []string{
+		"run_onchange_before_10-packages.sh", "run_onchange_before_30-prompt.sh", "run_onchange_before_80-ai-cli.sh",
+		"run_onchange_after_10-ai-standard.sh", "run_onchange_after_40-umbra-ai.sh", Summary, Doctor,
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("phases\n %v\nwant\n %v", got, want)
+	}
+	if got := Phases(c, "omarchy", []string{"shell"}); !slices.Equal(got, []string{"run_onchange_before_20-shell.sh", Doctor}) {
+		t.Errorf("omarchy: %v (no summary outside WSL)", got)
+	}
+}
+
+// A stored chezmoi selection reads back as the same items.
+func TestItemsFromComponentsRoundTrip(t *testing.T) {
+	c, _ := load(t)
+	for _, p := range []string{"wsl-ubuntu", "wsl-arch", "ubuntu", "arch", "omarchy"} {
+		ids := c.Defaults(p, true, true)
+		comps, _ := Components(c, p, ids)
+		if got := ItemsFromComponents(c, p, comps); !slices.Equal(got, ids) {
+			t.Errorf("%s: %v -> %v -> %v", p, ids, comps, got)
+		}
+	}
+	if got := ItemsFromComponents(c, "wsl-arch", []string{"um", "shell"}); !slices.Equal(got, []string{"shell"}) {
+		t.Errorf("partial umbra-ai is not the item: %v", got)
+	}
+}
+
+func TestShort(t *testing.T) {
+	if Short("run_onchange_before_30-prompt.sh") != "before_30-prompt" || Short("P1") != "P1" {
+		t.Error("Short")
+	}
+}

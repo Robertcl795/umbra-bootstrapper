@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 {{ template "um-env.sh" . }}
 # phase: {{ include "wsl/install/zellij.sh" | sha256sum }} zellij.sh
-component_enabled zellij || exit 0
+component_enabled zellij || phase_skip
 bash "$UM_ENV_DIR/install/zellij.sh" --run
 phase_gate zellij "zellij is missing" have_cmds zellij
 {{- end }}

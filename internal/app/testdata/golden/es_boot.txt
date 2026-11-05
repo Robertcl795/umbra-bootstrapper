@@ -6,17 +6,17 @@
   Dark by default. Sharp by design.                                             
                                                                                 
  ┌─ ESCANEO DEL SISTEMA ──────────────────────────────────────────────────────┐ 
+ │ [ OK ] systemd     activo (PID 1)                                          │ 
+ │ [ OK ] sudo        pide tu contraseña una vez                              │ 
+ │ [ OK ] red         84ms · github.com accesible                             │ 
+ │ [ OK ] umbra-ai    acceso confirmado                                       │ 
  │ [ OK ] plataforma  wsl-arch                                                │ 
  │ [ OK ] usuario     rocker                                                  │ 
  │ [ -- ] escritorio  ninguno · WSL no tiene sesión de escritorio             │ 
  │ [ OK ] terminal    Windows Terminal · NO_COLOR                             │ 
- │ [ OK ] umbra-ai    acceso confirmado                                       │ 
  └────────────────────────────────────────────────────────────────────────────┘ 
                                                                                 
  El escaneo solo lee. No se instala nada antes de Revisar.                      
-                                                                                
-                                                                                
-                                                                                
                                                                                 
                                                                                 
                                                                                 

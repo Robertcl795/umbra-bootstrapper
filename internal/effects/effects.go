@@ -50,6 +50,8 @@ func FromOS(envDir, version string) sys.Env {
 		NoMotion: sys.NoMotion(get, p),
 		EnvDir:   envDir,
 		Version:  version,
+		Distro:   get("WSL_DISTRO_NAME"),
+		ThemeSet: get("UM_THEME") != "",
 	}
 	if !ok {
 		e.ThemeBad = get("UM_THEME")
@@ -95,8 +97,7 @@ func ReadCatalog(envDir string) tea.Cmd {
 	}
 }
 
-// Scan returns one command per scan fact. In G3 every fact comes from the Env already read;
-// systemd, sudo, network and the Umbra AI access check are G4 effects.
+// Scan returns one command per fast scan fact, read from the Env; ScanSlow has the others.
 func Scan(e sys.Env) []tea.Cmd {
 	fact := func(f msgs.ScanFact) tea.Cmd { return func() tea.Msg { return f } }
 	user := msgs.ScanFact{Key: "scan.user", Value: e.User, State: msgs.FactOK}
@@ -110,18 +111,11 @@ func Scan(e sys.Env) []tea.Cmd {
 	case strings.HasPrefix(e.Platform, "wsl-"):
 		desktop.ValueKey = "scan.desktop.wsl"
 	}
-	access := msgs.ScanFact{Key: "scan.access", ValueKey: "scan.access.unchecked", State: msgs.FactNA}
-	if e.Access != nil && *e.Access {
-		access.ValueKey, access.State = "scan.access.yes", msgs.FactOK
-	} else if e.Access != nil {
-		access.ValueKey = "scan.access.no"
-	}
 	return []tea.Cmd{
 		fact(msgs.ScanFact{Key: "scan.platform", Value: e.Platform, State: okIf(e.Platform != "")}),
 		fact(user),
 		fact(desktop),
 		fact(msgs.ScanFact{Key: "scan.terminal", Value: e.Terminal + " · " + profileName(e.Theme.Profile), State: msgs.FactOK}),
-		fact(access),
 	}
 }
 

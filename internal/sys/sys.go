@@ -6,24 +6,26 @@ package sys
 import (
 	"strings"
 
+	"github.com/Robertcl795/umbra-bootstrapper/internal/msgs"
 	"github.com/Robertcl795/umbra-bootstrapper/internal/theme"
 )
 
 // Env is everything the screens may know about the machine.
 type Env struct {
-	Platform  string // wsl-ubuntu, wsl-arch, ubuntu, arch, omarchy; "" when unsupported
-	User      string
-	Root      bool
-	Desktop   bool  // a graphical session runs
-	Access    *bool // Umbra AI access; nil = not checked
-	Terminal  string
-	Lang      string
-	Theme     theme.T
-	ThemeBad  string // an unknown UM_THEME value, for one warning
-	NoMotion  bool   // no glitch: NO_COLOR, no TTY, TERM=dumb or UM_REDUCED_MOTION=1
-	EnvDir    string // the bootstrapper's env/wsl
-	Version   string
-	DryRunCmd string // "install.sh" path shown in "Next time" (always install.sh)
+	Platform string // wsl-ubuntu, wsl-arch, ubuntu, arch, omarchy; "" when unsupported
+	User     string
+	Root     bool
+	Desktop  bool  // a graphical session runs
+	Access   *bool // Umbra AI access; nil = not checked
+	Terminal string
+	Lang     string
+	Theme    theme.T
+	ThemeBad string // an unknown UM_THEME value, for one warning
+	NoMotion bool   // no glitch: NO_COLOR, no TTY, TERM=dumb or UM_REDUCED_MOTION=1
+	EnvDir   string // the bootstrapper's env/wsl
+	Version  string
+	Distro   string // WSL_DISTRO_NAME, for the restart commands
+	ThemeSet bool   // UM_THEME was given: it wins over the stored theme of a re-run
 }
 
 // Platform mirrors um_platform in selector.sh: UM_OS and UM_IS_WSL override the detection.
@@ -101,4 +103,34 @@ func Terminal(get func(string) string) string {
 // NoMotion reports whether animations are off (ux-spec §6.3).
 func NoMotion(get func(string) string, p theme.Profile) bool {
 	return p == theme.None || get("UM_REDUCED_MOTION") == "1"
+}
+
+// ParseStored reads profile, theme and components from the [data] table of chezmoi's config, as
+// .chezmoi.toml.tmpl writes it (one `key = "value"` per line).
+func ParseStored(text string) msgs.Stored {
+	var st msgs.Stored
+	inData := false
+	for _, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "[") {
+			inData = line == "[data]"
+			continue
+		}
+		k, v, ok := strings.Cut(line, "=")
+		if !inData || !ok {
+			continue
+		}
+		v = strings.Trim(strings.TrimSpace(v), `"`)
+		switch strings.TrimSpace(k) {
+		case "profile":
+			st.Profile, st.Found = v, true
+		case "theme":
+			st.Theme = v
+		case "components":
+			if v != "" {
+				st.Components = strings.Split(v, ",")
+			}
+		}
+	}
+	return st
 }

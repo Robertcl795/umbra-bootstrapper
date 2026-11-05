@@ -42,10 +42,36 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $*" >&2; um_event log "${UM_PHASE:--}
 log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; um_event log "${UM_PHASE:--}" error "$*"; }
 log_step() { echo -e "${CYAN}==>${NC} $*" >&2; um_event log "${UM_PHASE:--}" info "$*"; }
 
-# phase_start <id>: marks the start of a phase for front ends (ADR 0040); prints nothing.
+# phase_start <id>: marks the start of a phase for front ends (ADR 0040); prints nothing. When the
+# script exits without a gate event, the EXIT trap ends the phase: ok on exit 0, fail otherwise.
+# A front end asks to stop between phases by creating the file UM_STOP names: no phase starts after
+# it exists (exit 130), and the phase that is running always finishes (ux-spec §3.1).
+UM_PHASE_ENDED=0
 phase_start() {
+  if [ -n "${UM_STOP:-}" ] && [ -e "$UM_STOP" ]; then
+    UM_EVENTS='' log_warn "Stopped before $1 (asked by umbra-setup)."
+    exit 130
+  fi
   UM_PHASE="$1"
+  UM_PHASE_ENDED=0
   um_event phase "$1" start
+  trap '_um_phase_exit $?' EXIT
+}
+
+_um_phase_exit() {
+  [ "$UM_PHASE_ENDED" = 1 ] && return 0
+  if [ "$1" -eq 0 ]; then
+    um_event phase "$UM_PHASE" ok
+  else
+    um_event phase "$UM_PHASE" fail "exit $1"
+  fi
+}
+
+# phase_skip: the phase's component is not selected; end the phase as skipped and exit 0.
+phase_skip() {
+  UM_PHASE_ENDED=1
+  um_event phase "${UM_PHASE:--}" skip
+  exit 0
 }
 
 die() { log_error "$*"; exit 1; }
@@ -88,10 +114,12 @@ phase_gate() {
   if "$@" >/dev/null 2>&1; then
     UM_EVENTS='' log_info "gate $id: ok"
     um_event phase "${UM_PHASE:-$id}" ok "gate $id"
+    UM_PHASE_ENDED=1
     return 0
   fi
   UM_EVENTS='' log_error "gate $id failed: $msg"
   um_event phase "${UM_PHASE:-$id}" fail "$msg"
+  UM_PHASE_ENDED=1
   return 1
 }
 

@@ -36,6 +36,11 @@ type Data struct {
 	Ready  bool // the catalog is in
 	CatErr string
 	Sel    Selection
+
+	Installed    map[string]bool // items a previous run installed (re-run); cannot be unticked
+	Passwordless bool            // sudo needs no password now (or root)
+	SudoErr      string          // the last sudo -v failure, shown on review
+	Spin         int             // spinner frame
 }
 
 // Selection is what the user picked so far.
@@ -87,7 +92,7 @@ func BootView(c ui.Ctx, d Data, glitch int) []string {
 	for _, f := range d.Facts {
 		badge := map[msgs.FactState][2]string{
 			msgs.FactOK: {"ok", "[ OK ]"}, msgs.FactNA: {"fgMuted", "[ -- ]"},
-			msgs.FactPending: {"info", "[ ⠋  ]"}, msgs.FactBad: {"error", "[ !! ]"},
+			msgs.FactPending: {"info", "[ " + spinner[d.Spin%len(spinner)] + "  ]"}, msgs.FactBad: {"error", "[ !! ]"},
 		}[f.State]
 		val := f.Value
 		if f.ValueKey != "" {
@@ -126,8 +131,16 @@ func BootKeys(c ui.Ctx, d Data) []ui.Key {
 	return []ui.Key{{Key: "enter", Desc: c.T("key.continue")}, {Key: "q", Desc: c.T("key.quit")}}
 }
 
-// BootCanContinue: the platform is supported and the catalog is in.
-func BootCanContinue(d Data) bool { return d.Env.Platform != "" && d.Ready && d.CatErr == "" }
+// BootCanContinue: the platform is supported, the catalog is in and no scan line is pending
+// (the Umbra AI access decides which items are offered).
+func BootCanContinue(d Data) bool {
+	for _, f := range d.Facts {
+		if f.State == msgs.FactPending {
+			return false
+		}
+	}
+	return d.Env.Platform != "" && d.Ready && d.CatErr == ""
+}
 
 // BootKey handles a key on boot.
 func BootKey(key string, d Data) Action {
@@ -210,7 +223,13 @@ func ComponentsView(c ui.Ctx, d Data, cursor int) []string {
 			n++
 		}
 		label := it.Label[d.Env.Lang]
-		left = append(left, ui.Row(c, i == cursor, c.Th.R(role, box+label), box+label, lw-4))
+		styled := c.Th.R(role, box+label)
+		if d.Installed[it.ID] {
+			tag := " · " + c.T("comp.installed")
+			label += tag
+			styled += c.Th.R("fgMuted", tag)
+		}
+		left = append(left, ui.Row(c, i == cursor, styled, box+label, lw-4))
 	}
 	left = append(left, "", c.Th.R("fgMuted", c.T("comp.count", "n", itoa(n), "total", itoa(len(d.Items)))))
 	var right []string
@@ -229,7 +248,7 @@ func ComponentsView(c ui.Ctx, d Data, cursor int) []string {
 			"",
 			kv(c, c.T("comp.installs"), dash(it.Installs), "fg", kw),
 			kv(c, c.T("comp.deploys"), dash(it.Deploys), "info", kw),
-			kv(c, c.T("comp.phase"), phaseName(it.Scripts), "fg", kw),
+			kv(c, c.T("comp.phase"), scriptsName(it.Scripts), "fg", kw),
 			kv(c, c.T("comp.check"), dash(it.Check), "fg", kw),
 			kv(c, c.T("comp.work"), c.T("comp.work."+it.Work), map[bool]string{true: "warn", false: "fg"}[it.Work != "same"], kw),
 			"",
@@ -242,7 +261,7 @@ func ComponentsView(c ui.Ctx, d Data, cursor int) []string {
 		ui.Panel(c, c.T("comp.detail"), right, rw, h, false), 1)...)
 }
 
-func phaseName(scripts []string) string {
+func scriptsName(scripts []string) string {
 	if len(scripts) == 0 {
 		return "—"
 	}
@@ -284,7 +303,7 @@ func ComponentsKey(key string, cursor int, d Data) (int, map[string]bool, Action
 	case "down", "j":
 		return (cursor + 1) % max(n, 1), chosen, None
 	case "space":
-		if cursor < n {
+		if cursor < n && !d.Installed[d.Items[cursor].ID] {
 			id := d.Items[cursor].ID
 			chosen[id] = !chosen[id]
 		}
@@ -294,6 +313,9 @@ func ComponentsKey(key string, cursor int, d Data) (int, map[string]bool, Action
 		}
 	case "n":
 		chosen = map[string]bool{}
+		for id := range d.Installed {
+			chosen[id] = true
+		}
 	case "enter":
 		return cursor, chosen, Next
 	case "esc":
@@ -379,8 +401,11 @@ func ReviewView(c ui.Ctx, d Data, button int) []string {
 		skip, skipRole = c.T("review.nothing"), "fgMuted"
 	}
 	sudo := c.T("review.sudo.once")
-	if d.Env.Root {
+	switch {
+	case d.Env.Root:
 		sudo = c.T("review.sudo.root")
+	case d.Passwordless:
+		sudo = c.T("review.sudo.free")
 	}
 	lines := []string{
 		kv(c, c.T("review.platform"), d.Env.Platform, "fg", kw),
@@ -400,6 +425,9 @@ func ReviewView(c ui.Ctx, d Data, button int) []string {
 		kv(c, c.T("review.rerun"), c.T("review.rerun.safe"), "fgMuted", kw),
 		"",
 	)
+	if d.SudoErr != "" {
+		lines = append(lines, c.Th.R("error", "! "+c.T("review.sudo.failed", "err", d.SudoErr)))
+	}
 	if len(p.Items) == 0 {
 		lines = append(lines, c.Th.R("error", "! "+c.T("review.empty")))
 	} else {
