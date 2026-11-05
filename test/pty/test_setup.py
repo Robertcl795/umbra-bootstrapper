@@ -33,6 +33,21 @@ def check(name, cond, detail=""):
 ISOLATED = tempfile.mkdtemp(prefix="setup-pty-home-")
 
 
+def tools_without(*names):
+    """A PATH dir with every command of /usr/bin and /bin except names: a cosign or gh installed on
+    this machine must not stand in for the cases that expect them missing."""
+    d = os.path.join(ISOLATED, "tools")
+    if not os.path.isdir(d):
+        os.makedirs(d)
+        for src in ("/usr/bin", "/bin"):
+            for name in os.listdir(src):
+                if name not in names and not os.path.lexists(os.path.join(d, name)):
+                    os.symlink(os.path.join(src, name), os.path.join(d, name))
+    return d
+
+
+
+
 def env(**extra):
     # Never the user's chezmoi data or state: a re-run would start from them.
     e = {
@@ -187,7 +202,7 @@ def h1_install_opens_umbra_setup():
     tmp = tempfile.mkdtemp(prefix="setup-pty-")
     rel, pins = fake_release(tmp)
     e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION="9.9.9", UM_CHECKSUMS=pins,
-            UM_SETUP_DOWNLOAD_BASE="file://" + rel, UM_ENV_DIR=None, PATH="/usr/bin:/bin")
+            UM_SETUP_DOWNLOAD_BASE="file://" + rel, UM_ENV_DIR=None, PATH=tools_without("cosign", "gh"))
     os.makedirs(e["HOME"])
     code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [("enter continue", "q")], e, timeout=40)
     installed = os.path.join(e["HOME"], ".local", "bin", "umbra-setup")
@@ -204,7 +219,7 @@ def h2_tampered_release_stops():
         with open(os.path.join(rel, f), "ab") as fh:
             fh.write(b"x")
     e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION="9.9.9", UM_CHECKSUMS=pins,
-            UM_SETUP_DOWNLOAD_BASE="file://" + rel, UM_ENV_DIR=None, PATH="/usr/bin:/bin")
+            UM_SETUP_DOWNLOAD_BASE="file://" + rel, UM_ENV_DIR=None, PATH=tools_without("cosign", "gh"))
     os.makedirs(e["HOME"])
     code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [], e, timeout=40)
     check("H2 a tampered release: install.sh stops (exit 1), no TUI, no gum",
@@ -214,7 +229,7 @@ def h2_tampered_release_stops():
 
 def h3_no_release_says_gum():
     tmp = tempfile.mkdtemp(prefix="setup-pty-")
-    e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION=None, UM_ENV_DIR=None, PATH="/usr/bin:/bin")
+    e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION=None, UM_ENV_DIR=None, PATH=tools_without("cosign", "gh"))
     os.makedirs(e["HOME"])
     code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [("Umbra profile", CTRL_C)], e, timeout=40)
     check("H3 no pinned release: install.sh says so and falls back to gum (or says why gum is unavailable)",

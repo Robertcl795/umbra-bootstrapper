@@ -31,9 +31,20 @@ printf '%s  %s\n' "$sha" "$asset" >"$t/rel/checksums.txt"
 : >"$t/rel/checksums.txt.sigstore.json"
 printf '%s  %s\n' "$sha" "$canon" >"$t/env/install/checksums.sha256"
 
+# The tools the tests may use: every command in /usr/bin and /bin except cosign and gh, so a
+# cosign or gh installed on this machine never stands in for the fakes below (a real cosign
+# rejects the fake release's bundle). The fakes go in $t/bin, first on PATH.
+mkdir -p "$t/sys"
+for f in /usr/bin/* /bin/*; do
+  name="${f##*/}"
+  case "$name" in cosign | gh) continue ;; esac
+  [ -e "$t/sys/$name" ] || ln -s "$f" "$t/sys/$name"
+done
+TOOLS="$t/sys"
+
 # fetch <env...>: runs fetch_setup in a clean shell; prints "path=<file>" or the messages.
 fetch() {
-  env -i PATH="$t/bin:/usr/bin:/bin" HOME="$t/home" UM_GUM_DIR="$t/gum" UM_ENV_DIR="$t/env" \
+  env -i PATH="$t/bin:$TOOLS" HOME="$t/home" UM_GUM_DIR="$t/gum" UM_ENV_DIR="$t/env" \
     UM_SETUP_DOWNLOAD_BASE="file://$t/rel" "$@" bash -c '
     mkdir -p "$UM_GUM_DIR"
     source "'"$ENV_DIR"'/install/common.sh"; UM_ENV_DIR="'"$t"'/env"
@@ -95,7 +106,7 @@ rm "$t/bin/gh"
 
 echo "# install into ~/.local/bin"
 inst() {
-  env -i PATH="/usr/bin:/bin" HOME="$t/home" bash -c '
+  env -i PATH="$TOOLS" HOME="$t/home" bash -c '
     source "'"$ENV_DIR"'/install/common.sh"; source "'"$ENV_DIR"'/install/selector.sh"
     install_setup_bin "$1"' _ "$1" 2>&1
 }
