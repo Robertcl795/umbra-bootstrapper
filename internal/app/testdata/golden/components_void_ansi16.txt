@@ -1,0 +1,24 @@
+[35m◢◤ [m[1mUMBRA[m[35m//[mSETUP                          [37mwsl-arch · personal · void · 0.0.0-test[m
+[37m■ SCAN[m  [37m■ PROFILE[m  [1m◆ COMPONENTS[m  [37m◇ THEME[m  [37m◇ REVIEW[m  [37m◇ RUN[m  [37m◇ DONE[m               
+[90m────────────────────────────────────────────────────────────────────────────────[m
+                                                                                
+ [1;34m┏[m[1;34m━[m[1m COMPONENTS [m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m┓[m [90m┌[m[90m─[m[37m DETAIL [m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┐[m 
+ [1;34m┃[m [1;34m› [m[7m[■] Packages and base tools       [m [1;34m┃[m [90m│[m [1mPACKAGES[m                          [90m│[m 
+ [1;34m┃[m   [■] Shell: zsh (fish theme-only)   [1;34m┃[m [90m│[m Base packages from the distro's … [90m│[m 
+ [1;34m┃[m   [■] Prompt: Starship               [1;34m┃[m [90m│[m                                   [90m│[m 
+ [1;34m┃[m   [■] Neovim                         [1;34m┃[m [90m│[m [37minstalls   [mapt or pacman packages [90m│[m 
+ [1;34m┃[m   [■] Kubernetes tools               [1;34m┃[m [90m│[m [37mdeploys    [m[36m—[m                      [90m│[m 
+ [1;34m┃[m   [■] Zellij                         [1;34m┃[m [90m│[m [37mphase      [mbefore_10-packages     [90m│[m 
+ [1;34m┃[m   [■] Language toolchains            [1;34m┃[m [90m│[m [37mcheck      [m01_packages.sh         [90m│[m 
+ [1;34m┃[m   [■] fastfetch                      [1;34m┃[m [90m│[m [37mwork       [msame as personal       [90m│[m 
+ [1;34m┃[m   [■] WSL tuning                     [1;34m┃[m [90m│[m                                   [90m│[m 
+ [1;34m┃[m   [■] Umbra AI: um · vault · AI sta… [1;34m┃[m [90m│[m [37madd        [m[34m--components packages[m  [90m│[m 
+ [1;34m┃[m                                      [1;34m┃[m [90m│[m [37mskip       [m[34m--skip packages[m        [90m│[m 
+ [1;34m┃[m [37m10 of 10 selected[m                    [1;34m┃[m [90m│[m                                   [90m│[m 
+ [1;34m┗[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m┛[m [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+[1m↑↓[m [37mmove[m[90m  ·  [m[1mspace[m [37mtoggle[m[90m  ·  [m[1ma[m [37mall[m[90m  ·  [m[1mn[m [37mnone[m[90m  ·  [m[1menter[m [37mnext[m[90m  ·  [m[1mesc[m [37mback[m       

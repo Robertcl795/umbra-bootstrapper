@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                           wsl-arch · personal · lux · 0.0.0-test
+■ SCAN  ■ PROFILE  ■ COMPONENTS  ■ THEME  ◆ REVIEW  ◇ RUN  ◇ DONE               
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┌─ PLAN ─────────────────────────────────────────────────────────────────────┐ 
+ │ platform   wsl-arch                                                        │ 
+ │ profile    personal                                                        │ 
+ │ theme      lux                                                             │ 
+ │ install    packages · shell · prompt · nvim · k8s · zellij · lang          │ 
+ │            fastfetch · wsl · umbra-ai                                      │ 
+ │ skip       nothing                                                         │ 
+ │ sudo       asks once for your password                                     │ 
+ │ re-run     safe: a second run changes nothing                              │ 
+ │                                                                            │ 
+ │ Next time: install.sh --yes --profile personal --components packages,      │ 
+ │            shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,ai-cli,         │ 
+ │            ai-standard,um,vault,ollama --theme lux --enable-k8s            │ 
+ │                                                                            │ 
+ │ › [ Install ]   [ Dry run ]   [ Back ]                                     │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+←→ move  ·  enter confirm  ·  esc back  ·  q quit                               

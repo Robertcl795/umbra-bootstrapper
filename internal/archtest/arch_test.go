@@ -17,7 +17,8 @@ import (
 
 const module = "github.com/Robertcl795/umbra-bootstrapper/"
 
-var pure = []string{"internal/catalog", "internal/plan", "internal/events"}
+var pure = []string{"internal/catalog", "internal/plan", "internal/events", "internal/sys", "internal/msgs",
+	"internal/theme", "internal/i18n", "internal/ui", "internal/screens", "internal/app"}
 
 var banned = map[string]bool{"os": true, "os/exec": true, "io/fs": true, "io/ioutil": true,
 	"net": true, "net/http": true, "syscall": true}
@@ -120,4 +121,47 @@ func TestNoComponentIDsInGo(t *testing.T) {
 		})
 		return nil
 	})
+}
+
+// Elm rule E3: the TUI packages keep no mutable package state. A package var may only hold a
+// table of literals (menu order, glyphs); anything else belongs in the model.
+func TestTUIHasNoPackageState(t *testing.T) {
+	for _, dir := range []string{"internal/app", "internal/screens", "internal/ui", "internal/msgs", "internal/sys"} {
+		for _, f := range goFiles(t, dir) {
+			file, err := parser.ParseFile(token.NewFileSet(), f, nil, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, d := range file.Decls {
+				g, ok := d.(*ast.GenDecl)
+				if !ok || g.Tok != token.VAR {
+					continue
+				}
+				for _, sp := range g.Specs {
+					v := sp.(*ast.ValueSpec)
+					if len(v.Values) == 0 || !literalTable(v.Values[0]) {
+						t.Errorf("%s: package variable %s is not a literal table (keep state in the model)", f, v.Names[0])
+					}
+				}
+			}
+		}
+	}
+}
+
+func literalTable(e ast.Expr) bool {
+	switch x := e.(type) {
+	case *ast.BasicLit:
+		return true
+	case *ast.CompositeLit:
+		for _, el := range x.Elts {
+			if kv, ok := el.(*ast.KeyValueExpr); ok {
+				el = kv.Value
+			}
+			if !literalTable(el) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }

@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ ESCANEO  ■ PERFIL  ■ COMPONENTES  ■ TEMA  ◆ REVISAR  ◇ EJECUTAR  ◇ LISTO      
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┌─ PLAN ─────────────────────────────────────────────────────────────────────┐ 
+ │ plataforma wsl-arch                                                        │ 
+ │ perfil     personal                                                        │ 
+ │ tema       umbra                                                           │ 
+ │ instalar   packages · shell · prompt · nvim · k8s · zellij · lang          │ 
+ │            fastfetch · wsl · umbra-ai                                      │ 
+ │ omitir     nada                                                            │ 
+ │ sudo       pide tu contraseña una vez                                      │ 
+ │ re-ejecutarseguro: una segunda ejecución no cambia nada                    │ 
+ │                                                                            │ 
+ │ La próxima vez: install.sh --yes --profile personal --components packages, │ 
+ │                 shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,ai-cli,    │ 
+ │                 ai-standard,um,vault,ollama --theme umbra --enable-k8s     │ 
+ │                                                                            │ 
+ │ › [ Instalar ]   [ Simular ]   [ Volver ]                                  │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+←→ mover  ·  enter confirmar  ·  esc volver  ·  q salir                         

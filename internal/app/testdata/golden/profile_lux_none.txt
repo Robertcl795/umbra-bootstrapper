@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                           wsl-arch · personal · lux · 0.0.0-test
+■ SCAN  ◆ PROFILE  ◇ COMPONENTS  ◇ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE               
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┌─ PROFILE ──────────────────────────────────────────────────────────────────┐ 
+ │ Which profile is this machine?                                             │ 
+ │                                                                            │ 
+ │ › ● personal  your own accounts and local models                           │ 
+ │               vault: read and write · integrations: as you choose          │ 
+ │                                                                            │ 
+ │   ○ work      only the AI tools company policy allows                      │ 
+ │               vault: work-readable/ only · no external MCP servers         │ 
+ │                                                                            │ 
+ │                                                                            │ 
+ │                                                                            │ 
+ │ Next time: install.sh --profile personal                                   │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ move  ·  enter choose  ·  esc back  ·  q quit                                

@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+◆ ESCANEO  ◇ PERFIL  ◇ COMPONENTES  ◇ TEMA  ◇ REVISAR  ◇ EJECUTAR  ◇ LISTO      
+────────────────────────────────────────────────────────────────────────────────
+  █ █ █▀▄▀█ █▄▄ █▀█ ▄▀█                                                         
+  █▄█ █ ▀ █ █▄█ █▀▄ █▀█                                                         
+  Dark by default. Sharp by design.                                             
+                                                                                
+ ┌─ ESCANEO DEL SISTEMA ──────────────────────────────────────────────────────┐ 
+ │ [ OK ] plataforma  wsl-arch                                                │ 
+ │ [ OK ] usuario     rocker                                                  │ 
+ │ [ -- ] escritorio  ninguno · WSL no tiene sesión de escritorio             │ 
+ │ [ OK ] terminal    Windows Terminal · NO_COLOR                             │ 
+ │ [ OK ] umbra-ai    acceso confirmado                                       │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+ El escaneo solo lee. No se instala nada antes de Revisar.                      
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+enter continuar  ·  q salir                                                     

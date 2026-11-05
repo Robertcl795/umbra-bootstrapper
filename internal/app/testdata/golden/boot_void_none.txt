@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                          wsl-arch · personal · void · 0.0.0-test
+◆ SCAN  ◇ PROFILE  ◇ COMPONENTS  ◇ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE               
+────────────────────────────────────────────────────────────────────────────────
+  █ █ █▀▄▀█ █▄▄ █▀█ ▄▀█                                                         
+  █▄█ █ ▀ █ █▄█ █▀▄ █▀█                                                         
+  Dark by default. Sharp by design.                                             
+                                                                                
+ ┌─ SYSTEM SCAN ──────────────────────────────────────────────────────────────┐ 
+ │ [ OK ] platform    wsl-arch                                                │ 
+ │ [ OK ] user        rocker                                                  │ 
+ │ [ -- ] desktop     none · WSL has no desktop session                       │ 
+ │ [ OK ] terminal    Windows Terminal · NO_COLOR                             │ 
+ │ [ OK ] umbra-ai    access confirmed                                        │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+ The scan is read-only. Nothing is installed before Review.                     
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+enter continue  ·  q quit                                                       

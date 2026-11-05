@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ ESCANEO  ■ PERFIL  ◆ COMPONENTES  ◇ TEMA  ◇ REVISAR  ◇ EJECUTAR  ◇ LISTO      
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┏━ COMPONENTES ━━━━━━━━━━━━━━━━━━━━━━━━┓ ┌─ DETALLE ─────────────────────────┐ 
+ ┃ › [■] Paquetes y herramientas base   ┃ │ PACKAGES                          │ 
+ ┃   [■] Shell: zsh (fish solo con tem… ┃ │ Paquetes base del gestor de paqu… │ 
+ ┃   [■] Prompt: Starship               ┃ │                                   │ 
+ ┃   [■] Neovim                         ┃ │ instala    apt or pacman packages │ 
+ ┃   [■] Herramientas de Kubernetes     ┃ │ despliega  —                      │ 
+ ┃   [■] Zellij                         ┃ │ fase       before_10-packages     │ 
+ ┃   [■] Toolchains de lenguajes        ┃ │ prueba     01_packages.sh         │ 
+ ┃   [■] fastfetch                      ┃ │ work       igual que personal     │ 
+ ┃   [■] Ajustes de WSL                 ┃ │                                   │ 
+ ┃   [■] Umbra AI: um · vault · estánd… ┃ │ agregar    --components packages  │ 
+ ┃                                      ┃ │ omitir     --skip packages        │ 
+ ┃ 10 de 10 seleccionados               ┃ │                                   │ 
+ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ mover  ·  space marcar  ·  a todos  ·  n ninguno  ·  enter siguiente  ·  esc…

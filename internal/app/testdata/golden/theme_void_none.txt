@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                          wsl-arch · personal · void · 0.0.0-test
+■ SCAN  ■ PROFILE  ■ COMPONENTS  ◆ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE               
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ Pick a variant. The whole screen redraws in the one under the cursor.          
+                                                                                
+ ┌─ UMBRA ───────────────┐ ┏━ VOID ━━━━━━━━━━━━━━━━┓ ┌─ LUX ─────────────────┐  
+ │ dark · default        │ ┃ darkest background    ┃ │ light                 │  
+ │                       │ ┃                       ┃ │                       │  
+ │ ██ ██ ██ ██ ██ ██     │ ┃ ██ ██ ██ ██ ██ ██     ┃ │ ██ ██ ██ ██ ██ ██     │  
+ │ ██ ██ ██ ██ ██ ██     │ ┃ ██ ██ ██ ██ ██ ██     ┃ │ ██ ██ ██ ██ ██ ██     │  
+ │                       │ ┃                       ┃ │                       │  
+ │ ❯ ~/dev main ✓        │ ┃ ❯ ~/dev main ✓        ┃ │ ❯ ~/dev main ✓        │  
+ └───────────────────────┘ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────┘  
+                                                                                
+ Follows it: prompt, zsh/fish, fzf, bat, zellij, Ghostty, Neovim.               
+ Other apps get all three theme files.                                          
+                                                                                
+ Next time: UM_THEME=void chezmoi init --apply                                  
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+←→ move  ·  enter choose  ·  esc back                                           

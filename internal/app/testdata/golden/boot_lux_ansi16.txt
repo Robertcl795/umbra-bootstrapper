@@ -1,0 +1,24 @@
+[35m◢◤ [m[1mUMBRA[m[35m//[mSETUP                           [37mwsl-arch · personal · lux · 0.0.0-test[m
+[1m◆ SCAN[m  [37m◇ PROFILE[m  [37m◇ COMPONENTS[m  [37m◇ THEME[m  [37m◇ REVIEW[m  [37m◇ RUN[m  [37m◇ DONE[m               
+[90m────────────────────────────────────────────────────────────────────────────────[m
+  [1m█ █ █▀▄▀█ █▄▄ █▀█ ▄▀█[m                                                         
+  [1m█▄█ █ ▀ █ █▄█ █▀▄ █▀█[m                                                         
+  [37mDark by default. Sharp by design.[m                                             
+                                                                                
+ [90m┌[m[90m─[m[37m SYSTEM SCAN [m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┐[m 
+ [90m│[m [32m[ OK ][m [1mplatform    [mwsl-arch                                                [90m│[m 
+ [90m│[m [32m[ OK ][m [1muser        [mrocker                                                  [90m│[m 
+ [90m│[m [37m[ -- ][m [1mdesktop     [m[37mnone · WSL has no desktop session[m                       [90m│[m 
+ [90m│[m [32m[ OK ][m [1mterminal    [mWindows Terminal · ANSI-16                              [90m│[m 
+ [90m│[m [32m[ OK ][m [1mumbra-ai    [maccess confirmed                                        [90m│[m 
+ [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 
+                                                                                
+ [37mThe scan is read-only. Nothing is installed before Review.[m                     
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+[1menter[m [37mcontinue[m[90m  ·  [m[1mq[m [37mquit[m                                                       

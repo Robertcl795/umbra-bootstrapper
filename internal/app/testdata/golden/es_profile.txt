@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ ESCANEO  ◆ PERFIL  ◇ COMPONENTES  ◇ TEMA  ◇ REVISAR  ◇ EJECUTAR  ◇ LISTO      
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┌─ PERFIL ───────────────────────────────────────────────────────────────────┐ 
+ │ ¿Qué perfil tiene esta máquina?                                            │ 
+ │                                                                            │ 
+ │ › ● personal  tus propias cuentas y modelos locales                        │ 
+ │               vault: lectura y escritura · integraciones: las que elijas   │ 
+ │                                                                            │ 
+ │   ○ work      solo las herramientas de AI que permite tu empresa           │ 
+ │               vault: solo work-readable/ · sin servidores MCP externos     │ 
+ │                                                                            │ 
+ │                                                                            │ 
+ │                                                                            │ 
+ │ La próxima vez: install.sh --profile personal                              │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ mover  ·  enter elegir  ·  esc volver  ·  q salir                            

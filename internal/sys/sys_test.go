@@ -1,0 +1,52 @@
+package sys
+
+import (
+	"testing"
+
+	"github.com/Robertcl795/umbra-bootstrapper/internal/theme"
+)
+
+func getter(m map[string]string) func(string) string { return func(k string) string { return m[k] } }
+
+func files(m map[string]string) func(string) (string, bool) {
+	return func(p string) (string, bool) { v, ok := m[p]; return v, ok }
+}
+
+func TestPlatform(t *testing.T) {
+	cases := []struct {
+		name string
+		env  map[string]string
+		fs   map[string]string
+		want string
+	}{
+		{"override wsl ubuntu", map[string]string{"UM_OS": "ubuntu", "UM_IS_WSL": "1"}, nil, "wsl-ubuntu"},
+		{"override native arch", map[string]string{"UM_OS": "arch", "UM_IS_WSL": "0"}, map[string]string{"/proc/version": "Microsoft"}, "arch"},
+		{"os-release + WSLInterop", nil, map[string]string{"/etc/os-release": "NAME=\"Arch\"\nID=arch\n", "/proc/sys/fs/binfmt_misc/WSLInterop": ""}, "wsl-arch"},
+		{"proc/version microsoft", nil, map[string]string{"/etc/os-release": "ID=\"ubuntu\"\n", "/proc/version": "Linux 6.18-microsoft-standard-WSL2"}, "wsl-ubuntu"},
+		{"omarchy", map[string]string{"UM_OS": "omarchy"}, nil, "omarchy"},
+		{"unsupported", nil, map[string]string{"/etc/os-release": "ID=fedora\n"}, ""},
+	}
+	for _, tc := range cases {
+		if got := Platform(getter(tc.env), files(tc.fs)); got != tc.want {
+			t.Errorf("%s: %q, want %q", tc.name, got, tc.want)
+		}
+	}
+}
+
+func TestSmallDetectors(t *testing.T) {
+	if !DesktopSession(getter(map[string]string{"WAYLAND_DISPLAY": "wayland-0"})) || DesktopSession(getter(nil)) {
+		t.Error("DesktopSession")
+	}
+	if a := AccessOverride(getter(map[string]string{"UM_AI_ACCESS": "1"})); a == nil || !*a {
+		t.Error("AccessOverride 1")
+	}
+	if AccessOverride(getter(nil)) != nil {
+		t.Error("AccessOverride unset")
+	}
+	if Terminal(getter(map[string]string{"WT_SESSION": "x", "TERM": "xterm"})) != "Windows Terminal" {
+		t.Error("Terminal")
+	}
+	if !NoMotion(getter(nil), theme.None) || !NoMotion(getter(map[string]string{"UM_REDUCED_MOTION": "1"}), theme.TrueColor) || NoMotion(getter(nil), theme.TrueColor) {
+		t.Error("NoMotion")
+	}
+}

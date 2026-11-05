@@ -38,6 +38,11 @@ func Components(c catalog.Catalog, platform string, items []string) (comps, unkn
 	return comps, unknown
 }
 
+// Command is the "Next time" line of Review: install.sh with exactly the arguments umbra-setup
+// gives bootstrap.sh. install.sh forwards the flags it does not know (--theme, --enable-k8s), so
+// running it gives the same chezmoi data as the TUI (contract C5).
+func Command(args []string) string { return "install.sh " + strings.Join(args, " ") }
+
 // Args returns the bootstrap.sh arguments for a selection. They equal the flags of
 // `install.sh --yes --profile P --components C [--skip S] --theme V`, the "Next time" command of
 // Review; Kubernetes is passed explicitly, as install.sh does after its menu.

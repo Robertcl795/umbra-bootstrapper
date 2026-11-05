@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                          wsl-arch · personal · void · 0.0.0-test
+■ SCAN  ■ PROFILE  ◆ COMPONENTS  ◇ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE               
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┏━ COMPONENTS ━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┌─ DETAIL ──────────────────────────┐ 
+ ┃ › [■] Packages and base tools        ┃ │ PACKAGES                          │ 
+ ┃   [■] Shell: zsh (fish theme-only)   ┃ │ Base packages from the distro's … │ 
+ ┃   [■] Prompt: Starship               ┃ │                                   │ 
+ ┃   [■] Neovim                         ┃ │ installs   apt or pacman packages │ 
+ ┃   [■] Kubernetes tools               ┃ │ deploys    —                      │ 
+ ┃   [■] Zellij                         ┃ │ phase      before_10-packages     │ 
+ ┃   [■] Language toolchains            ┃ │ check      01_packages.sh         │ 
+ ┃   [■] fastfetch                      ┃ │ work       same as personal       │ 
+ ┃   [■] WSL tuning                     ┃ │                                   │ 
+ ┃   [■] Umbra AI: um · vault · AI sta… ┃ │ add        --components packages  │ 
+ ┃                                      ┃ │ skip       --skip packages        │ 
+ ┃ 10 of 10 selected                    ┃ │                                   │ 
+ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ move  ·  space toggle  ·  a all  ·  n none  ·  enter next  ·  esc back       

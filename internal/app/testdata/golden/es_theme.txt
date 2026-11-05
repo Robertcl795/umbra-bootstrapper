@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ ESCANEO  ■ PERFIL  ■ COMPONENTES  ◆ TEMA  ◇ REVISAR  ◇ EJECUTAR  ◇ LISTO      
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ Elige una variante. Toda la pantalla se redibuja con la que está bajo el curso…
+                                                                                
+ ┏━ UMBRA ━━━━━━━━━━━━━━━┓ ┌─ VOID ────────────────┐ ┌─ LUX ─────────────────┐  
+ ┃ oscuro · por defecto  ┃ │ fondo más oscuro      │ │ claro                 │  
+ ┃                       ┃ │                       │ │                       │  
+ ┃ ██ ██ ██ ██ ██ ██     ┃ │ ██ ██ ██ ██ ██ ██     │ │ ██ ██ ██ ██ ██ ██     │  
+ ┃ ██ ██ ██ ██ ██ ██     ┃ │ ██ ██ ██ ██ ██ ██     │ │ ██ ██ ██ ██ ██ ██     │  
+ ┃                       ┃ │                       │ │                       │  
+ ┃ ❯ ~/dev main ✓        ┃ │ ❯ ~/dev main ✓        │ │ ❯ ~/dev main ✓        │  
+ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────┘ └───────────────────────┘  
+                                                                                
+ La siguen: prompt, zsh/fish, fzf, bat, zellij, Ghostty, Neovim.                
+ Las demás apps reciben los tres archivos de tema.                              
+                                                                                
+ La próxima vez: UM_THEME=umbra chezmoi init --apply                            
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+←→ mover  ·  enter elegir  ·  esc volver                                        

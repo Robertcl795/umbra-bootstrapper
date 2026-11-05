@@ -65,8 +65,8 @@ check_guards() {
   bash env/wsl/tests/unit_events.sh
 }
 
-# go: umbra-setup's Go packages (ADR 0037): gofmt, vet and tests, including the bash parity tests
-# (contracts C1-C4 of the setup-tui spec).
+# go: umbra-setup (ADR 0037): gofmt, vet, tests (with the bash parity tests, contracts C1-C6) and
+# the PTY flows of the built binary.
 check_go() {
   command -v go >/dev/null || { echo "go not installed"; return 1; }
   local unformatted
@@ -74,6 +74,10 @@ check_go() {
   [ -z "$unformatted" ] || { echo "gofmt: $unformatted"; return 1; }
   go vet ./... >&2 || { echo "go vet failed"; return 1; }
   go test -count=1 ./... >&2 || { echo "go test failed (go test ./...)"; return 1; }
+  go build -o build/umbra-setup ./cmd/umbra-setup || { echo "go build failed"; return 1; }
+  local last
+  last=$(python3 -I test/pty/test_setup.py 2>&1 | tail -n 1) || true
+  [[ $last == *", 0 failed" ]] || { echo "pty ended with: $last"; return 1; }
 }
 
 rc=0; out=$(check_env_syntax 2>&1) || rc=$?; report env-syntax "$rc" "$out"

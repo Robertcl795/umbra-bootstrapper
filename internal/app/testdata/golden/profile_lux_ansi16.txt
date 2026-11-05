@@ -1,0 +1,24 @@
+[35m◢◤ [m[1mUMBRA[m[35m//[mSETUP                           [37mwsl-arch · personal · lux · 0.0.0-test[m
+[37m■ SCAN[m  [1m◆ PROFILE[m  [37m◇ COMPONENTS[m  [37m◇ THEME[m  [37m◇ REVIEW[m  [37m◇ RUN[m  [37m◇ DONE[m               
+[90m────────────────────────────────────────────────────────────────────────────────[m
+                                                                                
+ [90m┌[m[90m─[m[37m PROFILE [m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┐[m 
+ [90m│[m [1mWhich profile is this machine?[m                                             [90m│[m 
+ [90m│[m                                                                            [90m│[m 
+ [90m│[m [1;34m› [m[7m● personal  your own accounts and local models                          [m [90m│[m 
+ [90m│[m               [37mvault: read and write · integrations: as you choose[m          [90m│[m 
+ [90m│[m                                                                            [90m│[m 
+ [90m│[m   ○ [1mwork      [monly the AI tools company policy allows                      [90m│[m 
+ [90m│[m               [37mvault: work-readable/ only · no external MCP servers[m         [90m│[m 
+ [90m│[m                                                                            [90m│[m 
+ [90m│[m                                                                            [90m│[m 
+ [90m│[m                                                                            [90m│[m 
+ [90m│[m [37mNext time: [m[36minstall.sh --profile personal[m                                   [90m│[m 
+ [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+[1m↑↓[m [37mmove[m[90m  ·  [m[1menter[m [37mchoose[m[90m  ·  [m[1mesc[m [37mback[m[90m  ·  [m[1mq[m [37mquit[m                                
