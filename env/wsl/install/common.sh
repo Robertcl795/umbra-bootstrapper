@@ -20,10 +20,33 @@ UM_SKIP="${UM_SKIP:-}"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
 
-log_info() { echo -e "${BLUE}[INFO]${NC} $*" >&2; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $*" >&2; }
-log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
-log_step() { echo -e "${CYAN}==>${NC} $*" >&2; }
+# Phase event stream (ADR 0040): when UM_EVENTS names a writable file or FIFO, the helpers below
+# also append one event per line, "v1<TAB>timestamp<TAB>kind<TAB>phase<TAB>state<TAB>message".
+# Without UM_EVENTS nothing else changes. UM_PHASE is the phase set by phase_start.
+UM_PHASE="${UM_PHASE:-}"
+
+# um_event <kind> <phase> <state> [message]: append one event; never fails the caller.
+um_event() {
+  [ -n "${UM_EVENTS:-}" ] || return 0
+  local LC_ALL=C msg="${4:-}" ts
+  msg="${msg//$'\t'/ }"
+  msg="${msg//$'\n'/ }"
+  msg="${msg//$'\r'/ }"
+  msg="${msg:0:512}"
+  ts="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
+  { printf 'v1\t%s\t%s\t%s\t%s\t%s\n' "$ts" "$1" "$2" "$3" "$msg" >>"$UM_EVENTS"; } 2>/dev/null || true
+}
+
+log_info() { echo -e "${BLUE}[INFO]${NC} $*" >&2; um_event log "${UM_PHASE:--}" info "$*"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $*" >&2; um_event log "${UM_PHASE:--}" warn "$*"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; um_event log "${UM_PHASE:--}" error "$*"; }
+log_step() { echo -e "${CYAN}==>${NC} $*" >&2; um_event log "${UM_PHASE:--}" info "$*"; }
+
+# phase_start <id>: marks the start of a phase for front ends (ADR 0040); prints nothing.
+phase_start() {
+  UM_PHASE="$1"
+  um_event phase "$1" start
+}
 
 die() { log_error "$*"; exit 1; }
 
@@ -63,10 +86,12 @@ phase_gate() {
   local id="$1" msg="$2"
   shift 2
   if "$@" >/dev/null 2>&1; then
-    log_info "gate $id: ok"
+    UM_EVENTS='' log_info "gate $id: ok"
+    um_event phase "${UM_PHASE:-$id}" ok "gate $id"
     return 0
   fi
-  log_error "gate $id failed: $msg"
+  UM_EVENTS='' log_error "gate $id failed: $msg"
+  um_event phase "${UM_PHASE:-$id}" fail "$msg"
   return 1
 }
 

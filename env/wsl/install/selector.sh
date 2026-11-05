@@ -50,42 +50,53 @@ umbra_ai_access() {
     git ls-remote -q "$UM_AI_REPO_SSH" HEAD >/dev/null 2>&1
 }
 
+# The one list of components (ADR 0039): tab-separated, '-' for empty, '#' comments, a header row.
+UM_CATALOG="${UM_CATALOG:-$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)/components.tsv}"
+
+# catalog_platform_matches <platform> <set>: set is "all", "!<platform>" or a comma list.
+catalog_platform_matches() {
+  case "$2" in
+    all) return 0 ;;
+    '!'*) [ "$1" != "${2#!}" ] ;;
+    *) [[ ",$2," == *",$1,"* ]] ;;
+  esac
+}
+
+# catalog_rows <platform>: the catalog rows offered on that platform, in file (menu) order.
+catalog_rows() {
+  local p="$1" line id plats
+  [ -r "$UM_CATALOG" ] || { log_error "Component catalog not readable: $UM_CATALOG"; return 1; }
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in '' | '#'*) continue ;; esac
+    IFS=$'\t' read -r id plats _ <<<"$line"
+    [ "$id" = id ] && continue
+    catalog_platform_matches "$p" "$plats" && printf '%s\n' "$line"
+  done <"$UM_CATALOG"
+}
+
 # selector_items <platform>: "id|label|components" per item offered on that platform, in menu order.
 # Labels hold no "," (gum --selected) and no "=" (gum --label-delimiter).
 selector_items() {
-  local p="$1"
-  if [ "$p" = omarchy ]; then
-    echo "packages|Extra tools (pacman -S --needed; Omarchy keeps its own)|packages"
-  else
-    echo "packages|Packages and base tools|packages"
-  fi
-  echo "shell|Shell: zsh (fish theme-only)|shell"
-  echo "prompt|Prompt: Starship|prompt"
-  if [ "$p" != omarchy ]; then
-    echo "nvim|Neovim|nvim"
-    echo "k8s|Kubernetes tools|k8s"
-    echo "zellij|Zellij|zellij"
-    echo "lang|Language toolchains|lang"
-    echo "fastfetch|fastfetch|fastfetch"
-  fi
-  case "$p" in
-    wsl-*) echo "wsl|WSL tuning|wsl" ;;
-    ubuntu|arch) echo "desktop|Desktop: Ghostty + JetBrainsMono Nerd Font|desktop" ;;
-  esac
-  echo "umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama"
+  local id comps label
+  while IFS=$'\t' read -r id _ comps _ label _; do
+    printf '%s|%s|%s\n' "$id" "$label" "$comps"
+  done < <(catalog_rows "$1")
 }
 
 # selector_defaults <platform> <ai_access 0|1>: item ids pre-selected (both profiles; the work
-# profile's limits are applied by the phases, ADR 0007). Comma-separated.
+# profile's limits are applied by the phases, ADR 0007). Comma-separated. The catalog's default
+# column: yes, desktop-session (only with a desktop session), ai-access (only with Umbra AI access), no.
 selector_defaults() {
-  local p="$1" access="$2" id out=()
-  while IFS='|' read -r id _ _; do
-    case "$id" in
-      desktop) desktop_session || continue ;;
-      umbra-ai) [ "$access" = 1 ] || continue ;;
+  local p="$1" access="$2" id def out=()
+  while IFS=$'\t' read -r id _ _ def _; do
+    case "$def" in
+      yes) ;;
+      desktop-session) desktop_session || continue ;;
+      ai-access) [ "$access" = 1 ] || continue ;;
+      *) continue ;;
     esac
     out+=("$id")
-  done < <(selector_items "$p")
+  done < <(catalog_rows "$p")
   (IFS=,; echo "${out[*]}")
 }
 

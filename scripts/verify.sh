@@ -50,7 +50,8 @@ check_new_code() {
   for f in env/wsl/install/stage1.sh env/wsl/install/stage1_pacman.sh env/wsl/install/stage1_apt.sh \
     env/wsl/install/finish.sh env/wsl/install/wsl_detect.sh \
     env/wsl/bin/umbra env/wsl/tests/unit_guards.sh env/wsl/tests/unit_phase.sh \
-    env/wsl/tests/unit_wsl_detect.sh; do
+    env/wsl/tests/unit_wsl_detect.sh env/wsl/tests/unit_catalog.sh env/wsl/tests/unit_events.sh \
+    env/wsl/tests/selector_dump.sh; do
     bash -n "$f" || { echo "bash -n $f"; return 1; }
     shellcheck -f gcc "$f" >&2 || { echo "shellcheck $f"; return 1; }
   done
@@ -60,11 +61,25 @@ check_guards() {
   bash env/wsl/tests/unit_guards.sh
   bash env/wsl/tests/unit_phase.sh
   bash env/wsl/tests/unit_wsl_detect.sh
+  bash env/wsl/tests/unit_catalog.sh
+  bash env/wsl/tests/unit_events.sh
+}
+
+# go: umbra-setup's Go packages (ADR 0037): gofmt, vet and tests, including the bash parity tests
+# (contracts C1-C4 of the setup-tui spec).
+check_go() {
+  command -v go >/dev/null || { echo "go not installed"; return 1; }
+  local unformatted
+  unformatted="$(gofmt -l cmd internal 2>/dev/null)"
+  [ -z "$unformatted" ] || { echo "gofmt: $unformatted"; return 1; }
+  go vet ./... >&2 || { echo "go vet failed"; return 1; }
+  go test -count=1 ./... >&2 || { echo "go test failed (go test ./...)"; return 1; }
 }
 
 rc=0; out=$(check_env_syntax 2>&1) || rc=$?; report env-syntax "$rc" "$out"
 rc=0; out=$(check_layout 2>&1) || rc=$?; report layout "$rc" "$out"
 rc=0; out=$(check_new_code 2>&1) || rc=$?; report new-code "$rc" "$out"
 rc=0; out=$(check_guards 2>&1) || rc=$?; report guards "$rc" "$out"
+rc=0; out=$(check_go 2>&1) || rc=$?; report go "$rc" "$out"
 
 exit $((failed > 0))

@@ -1,0 +1,152 @@
+## wsl-ubuntu items
+packages|Packages and base tools|packages
+shell|Shell: zsh (fish theme-only)|shell
+prompt|Prompt: Starship|prompt
+nvim|Neovim|nvim
+k8s|Kubernetes tools|k8s
+zellij|Zellij|zellij
+lang|Language toolchains|lang
+fastfetch|fastfetch|fastfetch
+wsl|WSL tuning|wsl
+umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
+## wsl-ubuntu defaults access=0
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl
+## wsl-ubuntu defaults access=0 desktop-session
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl
+## wsl-ubuntu defaults access=1
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
+## wsl-ubuntu defaults access=1 desktop-session
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
+## wsl-ubuntu items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,ai-cli,ai-standard,um,vault,ollama
+## wsl-ubuntu items_to_components packages
+packages
+## wsl-ubuntu items_to_components umbra-ai,shell,packages
+packages,shell,ai-cli,ai-standard,um,vault,ollama
+## wsl-ubuntu items_to_components nvim,desktop,wsl,k8s
+[1;33m[WARN][0m Selector: 'desktop' is not offered on wsl-ubuntu; ignored.
+nvim,k8s,wsl
+## wsl-ubuntu items_to_components typo,shell
+[1;33m[WARN][0m Selector: 'typo' is not offered on wsl-ubuntu; ignored.
+shell
+## wsl-arch items
+packages|Packages and base tools|packages
+shell|Shell: zsh (fish theme-only)|shell
+prompt|Prompt: Starship|prompt
+nvim|Neovim|nvim
+k8s|Kubernetes tools|k8s
+zellij|Zellij|zellij
+lang|Language toolchains|lang
+fastfetch|fastfetch|fastfetch
+wsl|WSL tuning|wsl
+umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
+## wsl-arch defaults access=0
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl
+## wsl-arch defaults access=0 desktop-session
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl
+## wsl-arch defaults access=1
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
+## wsl-arch defaults access=1 desktop-session
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
+## wsl-arch items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,ai-cli,ai-standard,um,vault,ollama
+## wsl-arch items_to_components packages
+packages
+## wsl-arch items_to_components umbra-ai,shell,packages
+packages,shell,ai-cli,ai-standard,um,vault,ollama
+## wsl-arch items_to_components nvim,desktop,wsl,k8s
+[1;33m[WARN][0m Selector: 'desktop' is not offered on wsl-arch; ignored.
+nvim,k8s,wsl
+## wsl-arch items_to_components typo,shell
+[1;33m[WARN][0m Selector: 'typo' is not offered on wsl-arch; ignored.
+shell
+## ubuntu items
+packages|Packages and base tools|packages
+shell|Shell: zsh (fish theme-only)|shell
+prompt|Prompt: Starship|prompt
+nvim|Neovim|nvim
+k8s|Kubernetes tools|k8s
+zellij|Zellij|zellij
+lang|Language toolchains|lang
+fastfetch|fastfetch|fastfetch
+desktop|Desktop: Ghostty + JetBrainsMono Nerd Font|desktop
+umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
+## ubuntu defaults access=0
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch
+## ubuntu defaults access=0 desktop-session
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,desktop
+## ubuntu defaults access=1
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,umbra-ai
+## ubuntu defaults access=1 desktop-session
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,desktop,umbra-ai
+## ubuntu items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,desktop,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,desktop,ai-cli,ai-standard,um,vault,ollama
+## ubuntu items_to_components packages
+packages
+## ubuntu items_to_components umbra-ai,shell,packages
+packages,shell,ai-cli,ai-standard,um,vault,ollama
+## ubuntu items_to_components nvim,desktop,wsl,k8s
+[1;33m[WARN][0m Selector: 'wsl' is not offered on ubuntu; ignored.
+nvim,k8s,desktop
+## ubuntu items_to_components typo,shell
+[1;33m[WARN][0m Selector: 'typo' is not offered on ubuntu; ignored.
+shell
+## arch items
+packages|Packages and base tools|packages
+shell|Shell: zsh (fish theme-only)|shell
+prompt|Prompt: Starship|prompt
+nvim|Neovim|nvim
+k8s|Kubernetes tools|k8s
+zellij|Zellij|zellij
+lang|Language toolchains|lang
+fastfetch|fastfetch|fastfetch
+desktop|Desktop: Ghostty + JetBrainsMono Nerd Font|desktop
+umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
+## arch defaults access=0
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch
+## arch defaults access=0 desktop-session
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,desktop
+## arch defaults access=1
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,umbra-ai
+## arch defaults access=1 desktop-session
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,desktop,umbra-ai
+## arch items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,desktop,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,desktop,ai-cli,ai-standard,um,vault,ollama
+## arch items_to_components packages
+packages
+## arch items_to_components umbra-ai,shell,packages
+packages,shell,ai-cli,ai-standard,um,vault,ollama
+## arch items_to_components nvim,desktop,wsl,k8s
+[1;33m[WARN][0m Selector: 'wsl' is not offered on arch; ignored.
+nvim,k8s,desktop
+## arch items_to_components typo,shell
+[1;33m[WARN][0m Selector: 'typo' is not offered on arch; ignored.
+shell
+## omarchy items
+packages|Extra tools (pacman -S --needed; Omarchy keeps its own)|packages
+shell|Shell: zsh (fish theme-only)|shell
+prompt|Prompt: Starship|prompt
+umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
+## omarchy defaults access=0
+packages,shell,prompt
+## omarchy defaults access=0 desktop-session
+packages,shell,prompt
+## omarchy defaults access=1
+packages,shell,prompt,umbra-ai
+## omarchy defaults access=1 desktop-session
+packages,shell,prompt,umbra-ai
+## omarchy items_to_components packages,shell,prompt,umbra-ai
+packages,shell,prompt,ai-cli,ai-standard,um,vault,ollama
+## omarchy items_to_components packages
+packages
+## omarchy items_to_components umbra-ai,shell,packages
+packages,shell,ai-cli,ai-standard,um,vault,ollama
+## omarchy items_to_components nvim,desktop,wsl,k8s
+[1;33m[WARN][0m Selector: 'nvim' is not offered on omarchy; ignored.
+[1;33m[WARN][0m Selector: 'desktop' is not offered on omarchy; ignored.
+[1;33m[WARN][0m Selector: 'wsl' is not offered on omarchy; ignored.
+[1;33m[WARN][0m Selector: 'k8s' is not offered on omarchy; ignored.
+
+## omarchy items_to_components typo,shell
+[1;33m[WARN][0m Selector: 'typo' is not offered on omarchy; ignored.
+shell
