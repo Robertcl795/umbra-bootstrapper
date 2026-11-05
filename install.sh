@@ -3,9 +3,9 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/Robertcl795/umbra-bootstrapper/main/install.sh | bash
 #
-# Detects the platform (WSL Ubuntu/Arch, native Ubuntu/Arch, Omarchy) and opens umbra-setup, the TUI
-# (pinned and verified, ADR 0038), or else the gum selector; the selection goes to env/wsl/bootstrap.sh.
-# Flags (no selector, no gum download): --yes, --profile personal|work, --components a,b,
+# Detects the platform (WSL Ubuntu/Arch, native Ubuntu/Arch, Omarchy) and, in a terminal, opens
+# umbra-setup, the TUI (pinned and verified, ADR 0038); the selection goes to env/wsl/bootstrap.sh.
+# Flags (no TUI, no download): --yes, --profile personal|work, --components a,b,
 # --skip c. UM_SELECT=<item ids> selects items without a menu. --dry-run prints the platform and
 # the selection and changes nothing. Other flags (--user, --shell, --theme, …) go to bootstrap.sh.
 set -euo pipefail
@@ -82,7 +82,7 @@ source "$UM_ENV_DIR/install/selector.sh"
 # ---------------------------------------------------------------------------
 # Flags
 # ---------------------------------------------------------------------------
-explicit=0 yes=0 dry_run=0 fetch_only=0 profile="${UM_MODE:-}" comps="" skip="${UM_SKIP:-}"
+explicit=0 yes=0 dry_run=0 profile="${UM_MODE:-}" comps="" skip="${UM_SKIP:-}"
 pass=()
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -96,7 +96,6 @@ while [ $# -gt 0 ]; do
     --components) comps="${2:?--components needs a list}"; explicit=1; shift 2 ;;
     --skip) skip="${2:?--skip needs a list}"; explicit=1; shift 2 ;;
     --dry-run) dry_run=1; shift ;;
-    --fetch-gum) fetch_only=1; shift ;;
     -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
     *) pass+=("$1"); shift ;;
   esac
@@ -109,50 +108,33 @@ if [ "$explicit" = 0 ] && [ "$yes" = 0 ] && [ -t 1 ] && { : </dev/tty; } 2>/dev/
   interactive=1
 fi
 
-UM_GUM_DIR="$(mktemp -d)"
-export UM_GUM_DIR
-trap 'rm -rf "$UM_GUM_DIR"' EXIT
-
-# Test hook: download and check gum only.
-if [ "$fetch_only" = 1 ]; then
-  gum_bin="$(fetch_gum)" || exit 1
-  "$gum_bin" --version
-  exit 0
-fi
+UM_SETUP_DIR="$(mktemp -d)"
+export UM_SETUP_DIR
+trap 'rm -rf "$UM_SETUP_DIR"' EXIT
 
 platform="$(um_platform)" || die "Unsupported system. Umbra supports Ubuntu and Arch (WSL or native) and Omarchy."
 log_info "Platform: $platform"
 
 # umbra-setup, the TUI (ADR 0037, 0038): pinned, sha256-checked, signature and attestation checked
 # when cosign or gh are here. It asks everything, then runs this script again with explicit flags.
-# Not available (no pinned release, download failed): the gum menu below. A failed check: stop.
+# Not available (no pinned release, download failed) or a failed check: stop and name the flags.
 if [ "$interactive" = 1 ] && [ "$dry_run" = 0 ]; then
   rc=0
   setup_bin="$(fetch_setup)" || rc=$?
   if [ "$rc" = 2 ]; then
     die "umbra-setup failed a check (see above). Run again with --yes --components … to install without it."
   fi
-  if [ "$rc" = 0 ]; then
-    setup_bin="$(install_setup_bin "$setup_bin")"
-    rc=0
-    "$setup_bin" --env-dir "$UM_ENV_DIR" </dev/tty || rc=$?
-    exit "$rc"
+  if [ "$rc" != 0 ]; then
+    die "umbra-setup is not available (see above). Run again with --yes (and --profile, --components) to install without it."
   fi
+  setup_bin="$(install_setup_bin "$setup_bin")"
+  rc=0
+  "$setup_bin" --env-dir "$UM_ENV_DIR" </dev/tty || rc=$?
+  exit "$rc"
 fi
 
-gum_bin=""
-if [ "$interactive" = 1 ]; then
-  gum_bin="$(fetch_gum)" || die "Could not get a verified gum $UM_GUM_VERSION; run again with --yes (and --components) to skip the menu."
-fi
-
-# Profile: flag, UM_MODE, the menu, or personal.
-if [ -z "$profile" ]; then
-  if [ "$interactive" = 1 ]; then
-    profile="$("$gum_bin" choose --header="Umbra profile" personal work </dev/tty)" || exit 1
-  else
-    profile=personal
-  fi
-fi
+# Without the TUI (flags, no terminal, --dry-run): profile from the flag, UM_MODE, or personal.
+[ -n "$profile" ] || profile=personal
 
 # ---------------------------------------------------------------------------
 # Selection → --components
@@ -163,8 +145,6 @@ if umbra_ai_access; then access=1; fi
 if [ -z "$comps" ]; then
   if [ -n "${UM_SELECT:-}" ]; then
     ids="$UM_SELECT"
-  elif [ "$interactive" = 1 ]; then
-    ids="$(select_with_gum "$gum_bin" "$platform" "$(selector_defaults "$platform" "$access")" "$access")" || exit 1
   else
     ids="$(selector_defaults "$platform" "$access")"
   fi

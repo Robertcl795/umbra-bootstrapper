@@ -2,11 +2,12 @@
 # selector.sh — platform detection and the component selector of install.sh
 # (ADR 0016, docs/plans/platform.md §3-4 in the Umbra umbrella). Sourced after common.sh.
 
-UM_GUM_VERSION="2.0.2"
-# umbra-setup (ADR 0038): the release install.sh fetches. Empty until the operator publishes one;
-# then set it here and add the asset's sha256 to checksums.sha256. Empty means the gum menu.
-UM_SETUP_VERSION="${UM_SETUP_VERSION:-}"
+# umbra-setup (ADR 0038): the release install.sh fetches, pinned with its sha256 lines in
+# checksums.sha256. A bump changes both (docs/setup-tui/release.md). An empty UM_SETUP_VERSION
+# means no pin, for tests.
+UM_SETUP_VERSION="${UM_SETUP_VERSION-0.3.0}"
 UM_SETUP_REPO_URL="https://github.com/Robertcl795/umbra-bootstrapper"
+# shellcheck disable=SC2034  # used by install.sh, which sources this file
 UM_AI_PRIVATE_MSG="Umbra AI is private: log in with \`gh auth login\` or add an SSH key with access, then run the command again."
 
 # um_platform: wsl-ubuntu, wsl-arch, ubuntu, arch or omarchy. UM_OS (ubuntu|arch|omarchy) and
@@ -79,7 +80,6 @@ catalog_rows() {
 }
 
 # selector_items <platform>: "id|label|components" per item offered on that platform, in menu order.
-# Labels hold no "," (gum --selected) and no "=" (gum --label-delimiter).
 selector_items() {
   local id comps label
   while IFS=$'\t' read -r id _ comps _ label _; do
@@ -119,52 +119,6 @@ items_to_components() {
   (IFS=,; echo "${out[*]}")
 }
 
-# fetch_gum: prints the path of gum $UM_GUM_VERSION: the one on PATH if it is that version,
-# otherwise the pinned release, checked against install/checksums.sha256 (ADR 0016) and
-# unpacked into UM_GUM_DIR (a temp dir the caller removes). Returns 1 on any failure.
-fetch_gum() {
-  if command -v gum >/dev/null 2>&1 && grep -q "version v\{0,1\}$UM_GUM_VERSION\b" <<<"$(gum --version 2>/dev/null || true)"; then
-    command -v gum
-    return 0
-  fi
-  local a url sha
-  case "$(uname -m)" in
-    aarch64|arm64) a=arm64 ;;
-    *) a=x86_64 ;;
-  esac
-  url="https://github.com/charmbracelet/gum/releases/download/v${UM_GUM_VERSION}/gum_${UM_GUM_VERSION}_Linux_${a}.tar.gz"
-  sha="$(pinned_sha256 "$url")"
-  [ -n "$sha" ] || { log_error "No pinned sha256 for $url."; return 1; }
-  : "${UM_GUM_DIR:?UM_GUM_DIR must name a temp dir}"
-  curl -fsSL -o "$UM_GUM_DIR/gum.tar.gz" "$url" || { log_error "Download failed: $url"; return 1; }
-  if ! verify_sha256 "$UM_GUM_DIR/gum.tar.gz" "$sha"; then
-    log_error "sha256 mismatch for $url; not running gum."
-    return 1
-  fi
-  tar -xz -C "$UM_GUM_DIR" -f "$UM_GUM_DIR/gum.tar.gz" || { log_error "Unpacking gum failed."; return 1; }
-  echo "$UM_GUM_DIR/gum_${UM_GUM_VERSION}_Linux_${a}/gum"
-}
-
-# select_with_gum <gum> <platform> <defaults> <ai_access>: interactive multi-select; prints the
-# chosen ids, comma-separated. Umbra AI without access is shown with the reason and not selectable.
-select_with_gum() {
-  local gum="$1" p="$2" defaults=",$3," access="$4" id label opts=() sel=() chosen
-  while IFS='|' read -r id label _; do
-    if [ "$id" = umbra-ai ] && [ "$access" != 1 ]; then
-      continue
-    fi
-    opts+=("$label=$id")
-    [[ $defaults == *",$id,"* ]] && sel+=("$label")
-  done < <(selector_items "$p")
-  if [ "$access" != 1 ]; then
-    log_warn "$UM_AI_PRIVATE_MSG"
-  fi
-  chosen="$("$gum" choose --no-limit --label-delimiter="=" \
-    --header="Umbra · $p — space to toggle, enter to install" \
-    --selected="$(IFS=,; echo "${sel[*]}")" "${opts[@]}" </dev/tty)" || return 1
-  echo "$chosen" | paste -sd, -
-}
-
 # setup_arch: the GoReleaser arch name of this machine.
 setup_arch() {
   case "$(uname -m)" in
@@ -174,8 +128,8 @@ setup_arch() {
 }
 
 # fetch_setup: prints the path of a verified umbra-setup $UM_SETUP_VERSION, unpacked into
-# UM_GUM_DIR. Returns 1 when it is not available (no pin, download failed): the caller uses the gum
-# menu. Returns 2 when a check fails (sha256, signature, attestation): a sign of tampering, so the
+# UM_SETUP_DIR. Returns 1 when it is not available (no pin, download failed): the caller stops and
+# names the flags. Returns 2 when a check fails (sha256, signature, attestation): a sign of tampering, so the
 # caller stops instead of falling back. Required: the
 # sha256 pinned in checksums.sha256 for the release URL. When installed: cosign checks the keyless
 # signature of checksums.txt (identity: the release workflow at the tag), and gh checks the build
@@ -184,21 +138,21 @@ setup_arch() {
 fetch_setup() {
   local ver="$UM_SETUP_VERSION" asset url sha base dir
   if [ -z "$ver" ]; then
-    log_info "umbra-setup has no pinned release yet; using the gum menu."
+    log_warn "umbra-setup has no pinned release."
     return 1
   fi
   asset="umbra-setup_${ver}_linux_$(setup_arch).tar.gz"
   url="$UM_SETUP_REPO_URL/releases/download/v$ver/$asset"
   sha="$(pinned_sha256 "$url")"
   if [ -z "$sha" ]; then
-    log_warn "No pinned sha256 for $url; using the gum menu."
+    log_warn "No pinned sha256 for $url."
     return 1
   fi
   base="${UM_SETUP_DOWNLOAD_BASE:-$UM_SETUP_REPO_URL/releases/download/v$ver}"
-  : "${UM_GUM_DIR:?UM_GUM_DIR must name a temp dir}"
-  dir="$UM_GUM_DIR/setup"
+  : "${UM_SETUP_DIR:?UM_SETUP_DIR must name a temp dir}"
+  dir="$UM_SETUP_DIR/setup"
   mkdir -p "$dir"
-  curl -fsSL -o "$dir/$asset" "$base/$asset" || { log_warn "Download failed: $base/$asset; using the gum menu."; return 1; }
+  curl -fsSL -o "$dir/$asset" "$base/$asset" || { log_warn "Download failed: $base/$asset."; return 1; }
   if ! verify_sha256 "$dir/$asset" "$sha"; then
     log_error "sha256 mismatch for $asset; not running it."
     return 2

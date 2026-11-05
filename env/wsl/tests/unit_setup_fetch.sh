@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # unit_setup_fetch.sh — install.sh's download of umbra-setup (ADR 0038): the pinned sha256 is
 # required; cosign and gh checks run when the tool is there and stop the install when they fail;
-# anything missing falls back to the gum menu. A fake release is built from the real binary.
+# anything missing returns 1 (install.sh then stops and names the flags). A fake release is built from the real binary.
 # Needs go. No sudo, no network (file:// downloads).
 # shellcheck disable=SC2016,SC1091,SC2034
 set -uo pipefail
@@ -44,22 +44,25 @@ TOOLS="$t/sys"
 
 # fetch <env...>: runs fetch_setup in a clean shell; prints "path=<file>" or the messages.
 fetch() {
-  env -i PATH="$t/bin:$TOOLS" HOME="$t/home" UM_GUM_DIR="$t/gum" UM_ENV_DIR="$t/env" \
+  env -i PATH="$t/bin:$TOOLS" HOME="$t/home" UM_SETUP_DIR="$t/dl" UM_ENV_DIR="$t/env" \
     UM_SETUP_DOWNLOAD_BASE="file://$t/rel" "$@" bash -c '
-    mkdir -p "$UM_GUM_DIR"
+    mkdir -p "$UM_SETUP_DIR"
     source "'"$ENV_DIR"'/install/common.sh"; UM_ENV_DIR="'"$t"'/env"
     source "'"$ENV_DIR"'/install/selector.sh"
     set +e; p="$(fetch_setup)"; rc=$?; [ "$rc" -eq 0 ] && echo "path=$p" || echo "rc=$rc"' 2>&1
 }
 
 echo "# pinning"
-out="$(fetch)"
-expect "no pinned version: gum fallback (1), said once" '[[ $out == *"no pinned release"* && $out == *rc=1* ]]'
+out="$(env -i PATH="$TOOLS" HOME="$t/home" bash -c 'source "'"$ENV_DIR"'/install/common.sh"; source "'"$ENV_DIR"'/install/selector.sh"; echo "$UM_SETUP_VERSION"')"
+expect "the default pin is 0.3.0" '[ "$out" = 0.3.0 ]'
+expect "both 0.3.0 archives have a sha256 line" '(for a in amd64 arm64; do grep -Eq "^[0-9a-f]{64}  https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v0.3.0/umbra-setup_0.3.0_linux_$a.tar.gz\$" "$ENV_DIR/install/checksums.sha256" || exit 1; done)'
+out="$(fetch UM_SETUP_VERSION=)"
+expect "no pinned version: not available (1), said once" '[[ $out == *"no pinned release"* && $out == *rc=1* && $out != *gum* ]]'
 out="$(fetch UM_SETUP_VERSION=1.0.0)"
-expect "a version with no sha256 line: gum fallback (1)" '[[ $out == *"No pinned sha256"* && $out == *rc=1* ]]'
+expect "a version with no sha256 line: not available (1)" '[[ $out == *"No pinned sha256"* && $out == *rc=1* ]]'
 out="$(fetch UM_SETUP_VERSION=$ver)"
-expect "pinned and matching: the binary path" '[[ $out == *"path=$t/gum/setup/umbra-setup"* ]]'
-expect "the fetched binary is the release" '[[ $("$t/gum/setup/umbra-setup" --version) == "umbra-setup $ver (Umbra bootstrapper)" ]]'
+expect "pinned and matching: the binary path" '[[ $out == *"path=$t/dl/setup/umbra-setup"* ]]'
+expect "the fetched binary is the release" '[[ $("$t/dl/setup/umbra-setup" --version) == "umbra-setup $ver (Umbra bootstrapper)" ]]'
 expect "without cosign and gh: both skips are said" '[[ $out == *"cosign not installed"* && $out == *"gh not logged in"* ]]'
 
 cp "$t/rel/$asset" "$t/good.tgz"

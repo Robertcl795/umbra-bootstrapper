@@ -54,7 +54,7 @@ As in the [overview](README.md#themes). In Windows Terminal, add the scheme `the
 
 - Keep projects under `~/`: cross-OS I/O under `/mnt/c` is 10–20× slower.
 - After a full Arch bootstrap, `metadata` on `/mnt/*` needs one more restart.
-- A real terminal is still a manual check: typed passwords, the gum menu, and the restart by hand.
+- A real terminal is still a manual check: typed passwords, the umbra-setup screens, and the restart by hand.
 
 ## Tests
 

@@ -184,7 +184,7 @@ def g4_rerun_shows_installed():
     shutil.rmtree(tmp, ignore_errors=True)
 
 
-# ── G5: install.sh opens the verified umbra-setup, or says it uses gum ───────────
+# ── G5: install.sh opens the verified umbra-setup, or says why not and stops ────
 def fake_release(tmp, ver="9.9.9"):
     arch = "arm64" if os.uname().machine in ("aarch64", "arm64") else "amd64"
     asset = f"umbra-setup_{ver}_linux_{arch}.tar.gz"
@@ -222,18 +222,19 @@ def h2_tampered_release_stops():
             UM_SETUP_DOWNLOAD_BASE="file://" + rel, UM_ENV_DIR=None, PATH=tools_without("cosign", "gh"))
     os.makedirs(e["HOME"])
     code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [], e, timeout=40)
-    check("H2 a tampered release: install.sh stops (exit 1), no TUI, no gum",
-          code == 1 and "sha256 mismatch" in text and "SYSTEM SCAN" not in text and "Umbra profile" not in text, text[-1500:])
+    check("H2 a tampered release: install.sh stops (exit 1), no TUI",
+          code == 1 and "sha256 mismatch" in text and "SYSTEM SCAN" not in text and "gum" not in text, text[-1500:])
     shutil.rmtree(tmp, ignore_errors=True)
 
 
-def h3_no_release_says_gum():
+def h3_no_release_stops():
     tmp = tempfile.mkdtemp(prefix="setup-pty-")
-    e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION=None, UM_ENV_DIR=None, PATH=tools_without("cosign", "gh"))
+    e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION="", UM_ENV_DIR=None, PATH=tools_without("cosign", "gh"))
     os.makedirs(e["HOME"])
-    code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [("Umbra profile", CTRL_C)], e, timeout=40)
-    check("H3 no pinned release: install.sh says so and falls back to gum (or says why gum is unavailable)",
-          "no pinned release yet; using the gum menu." in text and "SYSTEM SCAN" not in text, text[-1500:])
+    code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [], e, timeout=40)
+    check("H3 no pinned release: install.sh says so and stops (exit 1), no menu, no gum",
+          code == 1 and "no pinned release" in text and "umbra-setup is not available" in text
+          and "--yes" in text and "SYSTEM SCAN" not in text and "gum" not in text, text[-1500:])
     shutil.rmtree(tmp, ignore_errors=True)
 
 
@@ -264,7 +265,7 @@ if __name__ == "__main__":
         sys.exit(f"build the binary first: go build -o build/umbra-setup ./cmd/umbra-setup ({BIN})")
     for f in (f1_defaults_dry_run, f2_work_untick_void, f3_cancel, f4_small, f5_no_tty, f6_no_color, f7_spanish, f8_ansi16,
               g1_run_with_sudo_and_doctor, g2_failed_phase, g3_stop_after_phase, g4_rerun_shows_installed,
-              h1_install_opens_umbra_setup, h2_tampered_release_stops, h3_no_release_says_gum, h4_rerun_finds_the_checkout, h5_titles_drive_the_flow):
+              h1_install_opens_umbra_setup, h2_tampered_release_stops, h3_no_release_stops, h4_rerun_finds_the_checkout, h5_titles_drive_the_flow):
         f()
     shutil.rmtree(ISOLATED, ignore_errors=True)
     ok = sum(results)

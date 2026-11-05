@@ -54,7 +54,7 @@ enabled() {
 }
 check "desktop, um, vault, ollama off without --components" '! enabled "" desktop && ! enabled "" um && ! enabled "" vault && ! enabled "" ollama'
 check "opt-in components on when listed" 'enabled "desktop,um" desktop && enabled "desktop,um" um && ! enabled "desktop,um" ollama'
-check "gum and the new downloads are pinned" 'for u in gum_2.0.2_Linux_x86_64.tar.gz gum_2.0.2_Linux_arm64.tar.gz JetBrainsMono.tar.xz ollama-linux-amd64.tar.zst ollama-linux-arm64.tar.zst; do grep -Eq "^[0-9a-f]{64}  https://github.com/.*/$u\$" "$ENV_DIR/install/checksums.sha256" || exit 1; done'
+check "the new downloads are pinned, gum is gone" '(! grep -q gum_ "$ENV_DIR/install/checksums.sha256" || exit 1; for u in JetBrainsMono.tar.xz ollama-linux-amd64.tar.zst ollama-linux-arm64.tar.zst; do grep -Eq "^[0-9a-f]{64}  https://github.com/.*/$u\$" "$ENV_DIR/install/checksums.sha256" || exit 1; done)'
 
 echo "unit_install: $pass ok, $fails failed"
 exit $((fails > 0))

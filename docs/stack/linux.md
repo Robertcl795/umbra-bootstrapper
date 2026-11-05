@@ -31,4 +31,4 @@ As in the [overview](README.md#themes). With `desktop`, Ghostty uses the chosen 
 
 - Container tests on `ubuntu:26.04` and `archlinux:latest`: the full bootstrap twice, for the personal and work profiles, with every checkpoint and the variant switch.
 - Container scenario `desktop`: Ghostty, the font and its config are installed natively, and skipped on WSL.
-- Container scenario `selector`: the menu-free path gives the same chezmoi data as the flags, and a gum with a wrong sha256 is refused.
+- Container scenario `selector`: the menu-free path gives the same chezmoi data as the flags.

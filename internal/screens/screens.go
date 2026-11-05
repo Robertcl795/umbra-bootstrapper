@@ -550,7 +550,7 @@ func Defaults(d Data) Selection {
 	return Selection{Profile: "personal", Chosen: chosen, Variant: d.Env.Theme.Name}
 }
 
-// Offered keeps the items the user may see: Umbra AI needs access (as select_with_gum).
+// Offered keeps the items the user may see: Umbra AI needs access (as selector_defaults in selector.sh).
 func Offered(cat catalog.Catalog, e sys.Env) []catalog.Item {
 	access := e.Access != nil && *e.Access
 	items := cat.For(e.Platform)

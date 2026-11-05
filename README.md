@@ -24,7 +24,7 @@ less install.sh && bash install.sh
 What happens:
 
 1. The installer clones this repo to `~/.local/share/umbra/bootstrapper`.
-2. It detects the system and opens **umbra-setup**, the installer's TUI: a system scan, then profile, components, variant and a review of the plan. Before the first umbra-setup release, and whenever its download is not available, it shows the [gum](https://github.com/charmbracelet/gum) menu instead (pinned and sha256-checked). Either way it offers:
+2. It detects the system and opens **umbra-setup**, the installer's TUI: a system scan, then profile, components, variant and a review of the plan. If umbra-setup cannot be downloaded or verified, the installer stops and says so; run it with `--yes` (and `--profile`, `--components`) to install without the TUI. It offers:
 
    | System | The menu offers |
    |---|---|
@@ -114,7 +114,7 @@ Each of these came from a real run on a fresh distro.
 
 | Path | What it holds |
 |---|---|
-| `install.sh` | the single command: platform detection, umbra-setup or the gum selector, hand-over to `env/wsl/bootstrap.sh` |
+| `install.sh` | the single command: platform detection, umbra-setup, hand-over to `env/wsl/bootstrap.sh` |
 | `cmd/`, `internal/` | umbra-setup, the TUI (Go, Bubble Tea); `env/wsl/install/components.tsv` is its component list |
 | `.goreleaser.yaml`, `.github/workflows/release.yml` | the umbra-setup release: checksums, cosign signature, SBOMs, provenance |
 | `.chezmoiroot` | points chezmoi at `env/`, so the repo root is the chezmoi source |
