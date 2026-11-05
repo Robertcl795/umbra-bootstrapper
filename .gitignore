@@ -8,3 +8,4 @@
 runs/
 test-runs/
 build/
+__pycache__/
