@@ -261,8 +261,9 @@ detect_arch() {
 }
 
 # pin-downloads (ADR 0006): sha256 of a pinned URL, from install/checksums.sha256; empty if absent.
+# UM_CHECKSUMS replaces the file for tests (whoever sets the environment already runs the code).
 pinned_sha256() {
-  awk -v url="$1" '$2 == url { print $1; exit }' "$UM_ENV_DIR/install/checksums.sha256" 2>/dev/null
+  awk -v url="$1" '$2 == url { print $1; exit }' "${UM_CHECKSUMS:-$UM_ENV_DIR/install/checksums.sha256}" 2>/dev/null
 }
 
 # verify_sha256 <file> <expected>: true only when the file's sha256 is the expected one.

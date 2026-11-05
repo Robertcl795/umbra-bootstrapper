@@ -120,3 +120,13 @@ func TestShort(t *testing.T) {
 		t.Error("Short")
 	}
 }
+
+// The doctor checks only what was selected, as finish.sh does (it runs with the selection set).
+func TestDoctorEnv(t *testing.T) {
+	c, _ := load(t)
+	got := DoctorEnv(c, "wsl-ubuntu", Selection{Profile: "work", Items: []string{"prompt", "packages"}})
+	want := []string{"UM_COMPONENTS=packages,prompt", "UM_SKIP=", "UM_MODE=work"}
+	if !slices.Equal(got, want) {
+		t.Errorf("%v, want %v", got, want)
+	}
+}

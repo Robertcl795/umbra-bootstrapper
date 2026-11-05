@@ -50,3 +50,15 @@ func TestSmallDetectors(t *testing.T) {
 		t.Error("NoMotion")
 	}
 }
+
+func TestRegularUsersAndNames(t *testing.T) {
+	got := RegularUsers("root:x:0:0::/root:/bin/bash\nnobody:x:65534:65534::/:/usr/bin/nologin\numbra:x:1000:1000::/home/umbra:/bin/bash\nbad\n")
+	if len(got) != 1 || got[0] != "umbra" {
+		t.Errorf("RegularUsers: %v", got)
+	}
+	for u, want := range map[string]bool{"umbra": true, "_x": true, "a-1": true, "1a": false, "Umbra": false, "": false, "a b": false, "-a": false} {
+		if ValidUsername(u) != want {
+			t.Errorf("ValidUsername(%q) != %v", u, want)
+		}
+	}
+}

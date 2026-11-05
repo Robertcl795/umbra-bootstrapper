@@ -1,6 +1,9 @@
 """PTY driver for umbra-setup's tests. Copied from umbra-ai cli/test/pty/driver.py (the bootstrapper
-stands alone, ADR 0014), with one change: the child's terminal gets the size from COLUMNS/LINES,
-so Bubble Tea reads a real window size.
+stands alone, ADR 0014), with two changes: the child's terminal gets the size from COLUMNS/LINES,
+so Bubble Tea reads a real window size; the screen follows CSI d (line position absolute), which
+Bubble Tea v2 sends when rows move; and a step prompt "title:<text>" waits for that exact window
+title. Bubble Tea writes only the cells that change, so on-screen text can arrive in pieces that
+this small emulator does not always rebuild (seen in real WSL runs, 2026-11-05); a title is whole.
 
 Original notes (um, PROMPT §5, with one change for Bubble Tea):
 
@@ -98,6 +101,8 @@ class Screen:
             self.r, self.c = max(0, self.r - n), 0
         elif final == "G":
             self.c = min(self.W - 1, n - 1)
+        elif final == "d":  # VPA, used by Bubble Tea v2's renderer (added for umbra-setup)
+            self.r = min(self.H - 1, n - 1)
         elif final in "Hf":
             r = (ps[0] if ps and ps[0] else 1) - 1
             c = (ps[1] if len(ps) > 1 and ps[1] else 1) - 1
@@ -191,7 +196,12 @@ def run(argv, steps, env, timeout=10, settle=0.15, cwd=None):
             screen.feed(chunk)
         if i < len(steps):
             fresh = len(raw) > mark or (i > 0 and steps[i - 1][1] == "")  # after an empty step, the screen is enough
-            if seen_at is None and fresh and (steps[i][0] in clean(raw[mark:]) or steps[i][0] in screen.text()):
+            want = steps[i][0]
+            if want.startswith("title:"):  # an OSC 0/2 window title, written whole on each change
+                hit = bool(re.search(rb"\x1b\][02];" + re.escape(want[6:].encode()) + rb"(?:\x07|\x1b\\)", raw[mark:]))
+            else:
+                hit = want in clean(raw[mark:]) or want in screen.text()
+            if seen_at is None and fresh and hit:
                 seen_at = time.time()
             # let the frame finish drawing before typing
             if seen_at is not None and time.time() - seen_at >= settle:

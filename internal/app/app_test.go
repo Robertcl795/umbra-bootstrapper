@@ -110,7 +110,7 @@ func TestKeyNamesMatchBubbleTea(t *testing.T) {
 // Install starts install.sh with exactly plan.Args for the same picks (contract C5/C6).
 func TestFlowToInstallGivesPlanArgs(t *testing.T) {
 	var got []string
-	cmds := Cmds{Start: func(args []string) tea.Cmd { got = args; return nil }}
+	cmds := Cmds{Start: func(args []string, _ string) tea.Cmd { got = args; return nil }}
 	env := fixtureEnv("umbra", theme.TrueColor, "en")
 	m := started(t, env, 80, 24, cmds)
 	m, _ = press(m, "enter")                                                   // boot → profile
@@ -360,4 +360,15 @@ func cells(content string, neutral map[string]bool) (accent, border, drawn int) 
 
 func visibleWidth(s string) int {
 	return len([]rune(sgrRe.ReplaceAllString(s, "")))
+}
+
+func TestTitleNamesTheScreenAndState(t *testing.T) {
+	m := started(t, fixtureEnv("umbra", theme.None, "en"), 80, 24)
+	want := []string{"Umbra setup · scan ready", "Umbra setup · profile", "Umbra setup · components 10/10", "Umbra setup · theme umbra", "Umbra setup · review install"}
+	for _, w := range want {
+		if got := m.View().WindowTitle; got != w {
+			t.Errorf("title %q, want %q", got, w)
+		}
+		m, _ = press(m, "enter")
+	}
 }

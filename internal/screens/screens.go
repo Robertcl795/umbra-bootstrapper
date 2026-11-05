@@ -41,6 +41,7 @@ type Data struct {
 	Passwordless bool            // sudo needs no password now (or root)
 	SudoErr      string          // the last sudo -v failure, shown on review
 	Spin         int             // spinner frame
+	Extra        []string        // arguments the app adds (--user for stage 1)
 }
 
 // Selection is what the user picked so far.
@@ -61,8 +62,8 @@ func (d Data) Plan() plan.Selection {
 	return plan.Selection{Profile: d.Sel.Profile, Items: ids, Variant: d.Sel.Variant}
 }
 
-// Args are the bootstrap.sh arguments for the current picks.
-func (d Data) Args() []string { return plan.Args(d.Cat, d.Env.Platform, d.Plan()) }
+// Args are the install.sh arguments for the current picks, plus Extra.
+func (d Data) Args() []string { return append(plan.Args(d.Cat, d.Env.Platform, d.Plan()), d.Extra...) }
 
 func bodyW(c ui.Ctx) int { return c.W - 2 }
 
@@ -114,6 +115,8 @@ func BootView(c ui.Ctx, d Data, glitch int) []string {
 		out = append(out, c.Th.R("error", "! "+c.T("err.platform")))
 	case d.CatErr != "":
 		out = append(out, c.Th.R("error", "! "+c.T("err.catalog", "err", d.CatErr)))
+	case rootOutsideWSL(d):
+		out = append(out, c.Th.R("error", "! "+c.T("err.root")))
 	default:
 		out = append(out, c.Th.R("fgMuted", c.T("boot.readonly")))
 	}
@@ -139,8 +142,11 @@ func BootCanContinue(d Data) bool {
 			return false
 		}
 	}
-	return d.Env.Platform != "" && d.Ready && d.CatErr == ""
+	return d.Env.Platform != "" && d.Ready && d.CatErr == "" && !rootOutsideWSL(d)
 }
+
+// rootOutsideWSL: bootstrap.sh refuses root unless it is a WSL distro's stage 1.
+func rootOutsideWSL(d Data) bool { return d.Env.Root && !strings.HasPrefix(d.Env.Platform, "wsl-") }
 
 // BootKey handles a key on boot.
 func BootKey(key string, d Data) Action {

@@ -4,6 +4,8 @@ package app
 
 import (
 	"slices"
+	"strconv"
+	"strings"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -23,6 +25,7 @@ type Screen int
 const (
 	Boot Screen = iota
 	Profile
+	Account // only as root on WSL: the user stage 1 creates
 	Components
 	Theme
 	Review
@@ -33,7 +36,7 @@ const (
 )
 
 // step is the step-row position of each screen.
-var step = map[Screen]int{Boot: 0, Profile: 1, Components: 2, Theme: 3, Review: 4, Run: 5, Done: 6, Restart: 6, Failed: 5}
+var step = map[Screen]int{Boot: 0, Profile: 1, Account: 1, Components: 2, Theme: 3, Review: 4, Run: 5, Done: 6, Restart: 6, Failed: 5}
 
 // MinW and MinH are the smallest terminal the screens are drawn for.
 const (
@@ -49,11 +52,11 @@ type Cmds struct {
 	Tick         func() tea.Cmd          // 100 ms, only while something is pending or running
 	SudoValidate func() tea.Cmd
 	SudoRefresh  func() tea.Cmd
-	Start        func(args []string) tea.Cmd
+	Start        func(args []string, password string) tea.Cmd // password: for stage 1's new user, or ""
 	Wait         func(pid int) tea.Cmd
 	ReadEvents   func(path string, offset int64) tea.Cmd
 	Stop         func(stopFile string) tea.Cmd
-	Doctor       func(logPath string) tea.Cmd
+	Doctor       func(logPath string, env []string) tea.Cmd // env: plan.DoctorEnv
 	LogTail      func(path string) tea.Cmd
 }
 
@@ -79,6 +82,8 @@ type Model struct {
 	w, h   int
 	result Result
 
+	acct      screens.Account
+	users     []string
 	stored    msgs.Stored
 	touched   bool // the user changed the selection: stored data and defaults no longer apply
 	ticking   bool
@@ -145,6 +150,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case msgs.Stored:
 		m.stored = msg
 		m.defaults()
+	case msgs.Users:
+		m.users = msg.Names
+		if m.acct.User == "" {
+			m.acct = screens.AccountFor(msg.Names)
+		}
 	case msgs.GlitchTick:
 		if m.glitch < 0 || msg.Frame >= 3 {
 			m.glitch = 0
@@ -287,6 +297,11 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 		if k == "space" || k == "a" || k == "n" || before != len(m.d.Sel.Chosen) {
 			m.touched = true
 		}
+	case Account:
+		m.acct, a = screens.AccountKey(k, m.acct)
+		if a == screens.Next {
+			m.d.Extra = []string{"--user", m.acct.User}
+		}
 	case Theme:
 		m.tcur, a = screens.ThemeKey(k, m.tcur)
 		m.d.Sel.Variant = theme.Variants[m.tcur]
@@ -313,14 +328,25 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 		return m, m.cmds.SudoValidate()
 	case screens.Next:
 		m.screen++
+		if m.screen == Account && !m.needAccount() {
+			m.screen++
+		}
 		m.enter()
 	case screens.Back:
 		if m.screen > Boot {
 			m.screen--
+			if m.screen == Account && !m.needAccount() {
+				m.screen--
+			}
 			m.enter()
 		}
 	}
 	return m, nil
+}
+
+// needAccount: root on WSL runs stage 1, which must be told the user (stage1.sh p2_pre).
+func (m Model) needAccount() bool {
+	return m.d.Env.Root && strings.HasPrefix(m.d.Env.Platform, "wsl-")
 }
 
 func (m Model) quit(a screens.Action, code int) (tea.Model, tea.Cmd) {
@@ -350,7 +376,11 @@ func (m *Model) start() tea.Cmd {
 	if m.cmds.Start == nil {
 		return nil
 	}
-	return m.cmds.Start(m.args)
+	password := ""
+	if m.needAccount() {
+		password = m.acct.Pass
+	}
+	return m.cmds.Start(m.args, password)
 }
 
 func (m Model) refresh() tea.Cmd {
@@ -448,7 +478,7 @@ func (m *Model) finish() tea.Cmd {
 	m.r.Phases[i].State, m.r.Phases[i].Start = screens.Running, m.r.Now
 	m.r.Current = plan.Doctor
 	m.doctoring = true
-	return m.cmds.Doctor(m.r.LogPath)
+	return m.cmds.Doctor(m.r.LogPath, plan.DoctorEnv(m.d.Cat, m.d.Env.Platform, m.d.Plan()))
 }
 
 func callTail(f func(string) tea.Cmd, p string) tea.Cmd {
@@ -528,6 +558,8 @@ func (m Model) Content() string {
 		body, keys = screens.BootView(c, m.d, max(m.glitch, 0)), screens.BootKeys(c, m.d)
 	case Profile:
 		body, keys = screens.ProfileView(c, m.d, m.pcur), screens.ProfileKeys(c)
+	case Account:
+		body, keys = screens.AccountView(c, m.acct, m.users), screens.AccountKeys(c)
 	case Components:
 		body, keys = screens.ComponentsView(c, m.d, m.ccur), screens.ComponentsKeys(c)
 	case Theme:
@@ -556,10 +588,44 @@ func umbraAI(d screens.Data) string {
 	return ""
 }
 
-// View draws the model in the alternate screen, on the variant's background (truecolor).
+// View draws the model in the alternate screen, on the variant's background (truecolor). The
+// window title names the screen and its state; the terminal tab shows the step, and tests can
+// wait on it (an OSC title is written whole, unlike cells the renderer only changes).
 func (m Model) View() tea.View {
 	v := tea.NewView(m.Content())
 	v.AltScreen = true
 	v.BackgroundColor = m.d.Env.Theme.With(m.d.Sel.Variant).Background()
+	v.WindowTitle = m.Title()
 	return v
+}
+
+// Title is "Umbra setup · <screen>[ <state>]".
+func (m Model) Title() string {
+	name := map[Screen]string{Boot: "scan", Profile: "profile", Account: "account", Components: "components",
+		Theme: "theme", Review: "review", Run: "run", Done: "done", Restart: "restart", Failed: "failed"}[m.screen]
+	state := ""
+	switch m.screen {
+	case Boot:
+		if screens.BootCanContinue(m.d) {
+			state = "ready"
+		}
+	case Account:
+		state = []string{"user", "password", "again"}[m.acct.Field]
+	case Components:
+		n := 0
+		for _, it := range m.d.Items {
+			if m.d.Sel.Chosen[it.ID] {
+				n++
+			}
+		}
+		state = strconv.Itoa(n) + "/" + strconv.Itoa(len(m.d.Items))
+	case Theme:
+		state = m.d.Sel.Variant
+	case Review:
+		state = strings.TrimPrefix(screens.Buttons[m.bcur], "btn.")
+	}
+	if state != "" {
+		return "Umbra setup · " + name + " " + state
+	}
+	return "Umbra setup · " + name
 }

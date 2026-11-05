@@ -134,3 +134,43 @@ func ParseStored(text string) msgs.Stored {
 	}
 	return st
 }
+
+// RegularUsers lists the users with uid 1000–65533 in /etc/passwd text, as regular_users in
+// stage1.sh does with getent.
+func RegularUsers(passwd string) []string {
+	var out []string
+	for _, line := range strings.Split(passwd, "\n") {
+		f := strings.Split(line, ":")
+		if len(f) < 3 {
+			continue
+		}
+		uid := 0
+		for _, r := range f[2] {
+			if r < '0' || r > '9' {
+				uid = -1
+				break
+			}
+			uid = uid*10 + int(r-'0')
+		}
+		if uid >= 1000 && uid < 65534 {
+			out = append(out, f[0])
+		}
+	}
+	return out
+}
+
+// ValidUsername is stage1.sh's valid_username: ^[a-z_][a-z0-9_-]{0,31}$.
+func ValidUsername(u string) bool {
+	if len(u) == 0 || len(u) > 32 {
+		return false
+	}
+	for i, r := range u {
+		switch {
+		case r >= 'a' && r <= 'z', r == '_':
+		case i > 0 && (r >= '0' && r <= '9' || r == '-'):
+		default:
+			return false
+		}
+	}
+	return true
+}

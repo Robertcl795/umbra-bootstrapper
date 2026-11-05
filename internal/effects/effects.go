@@ -63,19 +63,27 @@ func FromOS(envDir, version string) sys.Env {
 }
 
 // EnvDir finds the bootstrapper's env/wsl: the flag, then UM_ENV_DIR, then next to the binary
-// (<root>/bin/umbra-setup or <root>/umbra-setup), then the working directory.
+// (<root>/build/umbra-setup), then the working directory, then where install.sh leaves the
+// checkout (~/.local/share/umbra/bootstrapper, or ~/dev/umbra-bootstrapper after a WSL stage 1).
 func EnvDir(flag string) string {
 	for _, d := range []string{flag, os.Getenv("UM_ENV_DIR")} {
 		if d != "" {
 			return d
 		}
 	}
+	var candidates []string
 	if exe, err := os.Executable(); err == nil {
 		dir := filepath.Dir(exe)
-		for _, d := range []string{filepath.Join(dir, "..", "env/wsl"), filepath.Join(dir, "env/wsl")} {
-			if _, err := os.Stat(filepath.Join(d, "install", "components.tsv")); err == nil {
-				return filepath.Clean(d)
-			}
+		candidates = append(candidates, filepath.Join(dir, "..", "env/wsl"), filepath.Join(dir, "env/wsl"))
+	}
+	candidates = append(candidates, filepath.FromSlash("env/wsl"))
+	if home, err := os.UserHomeDir(); err == nil {
+		candidates = append(candidates, filepath.Join(home, ".local/share/umbra/bootstrapper/env/wsl"),
+			filepath.Join(home, "dev/umbra-bootstrapper/env/wsl"))
+	}
+	for _, d := range candidates {
+		if _, err := os.Stat(filepath.Join(d, "install", "components.tsv")); err == nil {
+			return filepath.Clean(d)
 		}
 	}
 	return filepath.FromSlash("env/wsl")

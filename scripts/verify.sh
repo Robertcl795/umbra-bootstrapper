@@ -51,7 +51,8 @@ check_new_code() {
     env/wsl/install/finish.sh env/wsl/install/wsl_detect.sh \
     env/wsl/bin/umbra env/wsl/tests/unit_guards.sh env/wsl/tests/unit_phase.sh \
     env/wsl/tests/unit_wsl_detect.sh env/wsl/tests/unit_catalog.sh env/wsl/tests/unit_events.sh \
-    env/wsl/tests/selector_dump.sh; do
+    env/wsl/tests/selector_dump.sh env/wsl/tests/unit_setup_fetch.sh \
+    test/pty/fakes/install.sh test/pty/fakes/doctor.sh test/pty/fakes/bin/sudo; do
     bash -n "$f" || { echo "bash -n $f"; return 1; }
     shellcheck -f gcc "$f" >&2 || { echo "shellcheck $f"; return 1; }
   done
@@ -63,6 +64,12 @@ check_guards() {
   bash env/wsl/tests/unit_wsl_detect.sh
   bash env/wsl/tests/unit_catalog.sh
   bash env/wsl/tests/unit_events.sh
+}
+
+# setup-fetch: install.sh's verified download of umbra-setup (ADR 0038); needs go for the fake release.
+check_setup_fetch() {
+  command -v go >/dev/null || { echo "go not installed"; return 1; }
+  bash env/wsl/tests/unit_setup_fetch.sh
 }
 
 # go: umbra-setup (ADR 0037): gofmt, vet, tests (with the bash parity tests, contracts C1-C6) and
@@ -84,6 +91,7 @@ rc=0; out=$(check_env_syntax 2>&1) || rc=$?; report env-syntax "$rc" "$out"
 rc=0; out=$(check_layout 2>&1) || rc=$?; report layout "$rc" "$out"
 rc=0; out=$(check_new_code 2>&1) || rc=$?; report new-code "$rc" "$out"
 rc=0; out=$(check_guards 2>&1) || rc=$?; report guards "$rc" "$out"
+rc=0; out=$(check_setup_fetch 2>&1) || rc=$?; report setup-fetch "$rc" "$out"
 rc=0; out=$(check_go 2>&1) || rc=$?; report go "$rc" "$out"
 
 exit $((failed > 0))

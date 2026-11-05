@@ -169,11 +169,87 @@ def g4_rerun_shows_installed():
     shutil.rmtree(tmp, ignore_errors=True)
 
 
+# ── G5: install.sh opens the verified umbra-setup, or says it uses gum ───────────
+def fake_release(tmp, ver="9.9.9"):
+    arch = "arm64" if os.uname().machine in ("aarch64", "arm64") else "amd64"
+    asset = f"umbra-setup_{ver}_linux_{arch}.tar.gz"
+    rel = os.path.join(tmp, "rel")
+    os.makedirs(rel)
+    subprocess.run(["tar", "-czf", os.path.join(rel, asset), "-C", os.path.dirname(BIN), "umbra-setup"], check=True)
+    sha = subprocess.run(["sha256sum", os.path.join(rel, asset)], capture_output=True, text=True).stdout.split()[0]
+    pins = os.path.join(tmp, "checksums.sha256")
+    with open(pins, "w") as f:
+        f.write(f"{sha}  https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v{ver}/{asset}\n")
+    return rel, pins
+
+
+def h1_install_opens_umbra_setup():
+    tmp = tempfile.mkdtemp(prefix="setup-pty-")
+    rel, pins = fake_release(tmp)
+    e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION="9.9.9", UM_CHECKSUMS=pins,
+            UM_SETUP_DOWNLOAD_BASE="file://" + rel, UM_ENV_DIR=None, PATH="/usr/bin:/bin")
+    os.makedirs(e["HOME"])
+    code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [("enter continue", "q")], e, timeout=40)
+    installed = os.path.join(e["HOME"], ".local", "bin", "umbra-setup")
+    check("H1 install.sh: pinned release fetched, checked, installed to ~/.local/bin and opened",
+          code == 130 and "SYSTEM SCAN" in text and os.access(installed, os.X_OK), text[-2000:])
+    check("H1 the missing cosign and gh are said, not hidden", "cosign not installed" in text and "gh not logged in" in text, text[:1500])
+    shutil.rmtree(tmp, ignore_errors=True)
+
+
+def h2_tampered_release_stops():
+    tmp = tempfile.mkdtemp(prefix="setup-pty-")
+    rel, pins = fake_release(tmp)
+    for f in os.listdir(rel):
+        with open(os.path.join(rel, f), "ab") as fh:
+            fh.write(b"x")
+    e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION="9.9.9", UM_CHECKSUMS=pins,
+            UM_SETUP_DOWNLOAD_BASE="file://" + rel, UM_ENV_DIR=None, PATH="/usr/bin:/bin")
+    os.makedirs(e["HOME"])
+    code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [], e, timeout=40)
+    check("H2 a tampered release: install.sh stops (exit 1), no TUI, no gum",
+          code == 1 and "sha256 mismatch" in text and "SYSTEM SCAN" not in text and "Umbra profile" not in text, text[-1500:])
+    shutil.rmtree(tmp, ignore_errors=True)
+
+
+def h3_no_release_says_gum():
+    tmp = tempfile.mkdtemp(prefix="setup-pty-")
+    e = env(HOME=os.path.join(tmp, "home"), UM_SETUP_VERSION=None, UM_ENV_DIR=None, PATH="/usr/bin:/bin")
+    os.makedirs(e["HOME"])
+    code, text, _ = driver.run(["bash", os.path.join(ROOT, "install.sh")], [("Umbra profile", CTRL_C)], e, timeout=40)
+    check("H3 no pinned release: install.sh says so and falls back to gum (or says why gum is unavailable)",
+          "no pinned release yet; using the gum menu." in text and "SYSTEM SCAN" not in text, text[-1500:])
+    shutil.rmtree(tmp, ignore_errors=True)
+
+
+def h4_rerun_finds_the_checkout():
+    tmp = tempfile.mkdtemp(prefix="setup-pty-")
+    home = os.path.join(tmp, "home")
+    os.makedirs(os.path.join(home, ".local", "share", "umbra"))
+    os.symlink(ROOT, os.path.join(home, ".local", "share", "umbra", "bootstrapper"))
+    copy = os.path.join(tmp, "umbra-setup")
+    shutil.copy(BIN, copy)  # as ~/.local/bin/umbra-setup: not next to a checkout
+    code, text, _ = driver.run([copy], [("enter continue", "q")], env(HOME=home, UM_ENV_DIR=None), timeout=30, cwd=tmp)
+    check("H4 umbra-setup run alone finds ~/.local/share/umbra/bootstrapper", code == 130 and "cannot read the component catalog" not in text, text[-1500:])
+    shutil.rmtree(tmp, ignore_errors=True)
+
+
+def h5_titles_drive_the_flow():
+    t = "title:Umbra setup · "
+    steps = [(t + "scan ready", ENTER), (t + "profile", ENTER), (t + "components 10/10", "n"), (t + "components 0/10", SPACE),
+             (t + "components 1/10", ENTER), (t + "theme umbra", RIGHT), (t + "theme void", ENTER),
+             (t + "review install", RIGHT), (t + "review dry", ENTER)]
+    code, text, _ = driver.run([BIN], steps, env(), timeout=30)
+    check("H5 the window title names each screen and its state; a flow driven only by titles reaches Dry run",
+          code == 0 and "profile=personal components=packages skip=" in text, text[-1500:])
+
+
 if __name__ == "__main__":
     if not os.access(BIN, os.X_OK):
         sys.exit(f"build the binary first: go build -o build/umbra-setup ./cmd/umbra-setup ({BIN})")
     for f in (f1_defaults_dry_run, f2_work_untick_void, f3_cancel, f4_small, f5_no_tty, f6_no_color, f7_spanish, f8_ansi16,
-              g1_run_with_sudo_and_doctor, g2_failed_phase, g3_stop_after_phase, g4_rerun_shows_installed):
+              g1_run_with_sudo_and_doctor, g2_failed_phase, g3_stop_after_phase, g4_rerun_shows_installed,
+              h1_install_opens_umbra_setup, h2_tampered_release_stops, h3_no_release_says_gum, h4_rerun_finds_the_checkout, h5_titles_drive_the_flow):
         f()
     shutil.rmtree(ISOLATED, ignore_errors=True)
     ok = sum(results)

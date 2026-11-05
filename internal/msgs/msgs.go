@@ -93,3 +93,6 @@ type Batch []any
 
 // SudoRefreshed says the 60 s sudo refresh ran.
 type SudoRefreshed struct{}
+
+// Users are the regular users of the machine (uid 1000–65533), read when running as root.
+type Users struct{ Names []string }

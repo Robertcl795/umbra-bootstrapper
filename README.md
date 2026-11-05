@@ -24,7 +24,7 @@ less install.sh && bash install.sh
 What happens:
 
 1. The installer clones this repo to `~/.local/share/umbra/bootstrapper`.
-2. It detects the system and shows a menu ([gum](https://github.com/charmbracelet/gum), pinned and sha256-checked):
+2. It detects the system and opens **umbra-setup**, the installer's TUI: a system scan, then profile, components, variant and a review of the plan. Before the first umbra-setup release, and whenever its download is not available, it shows the [gum](https://github.com/charmbracelet/gum) menu instead (pinned and sha256-checked). Either way it offers:
 
    | System | The menu offers |
    |---|---|
@@ -32,8 +32,10 @@ What happens:
    | Arch, Ubuntu (native) | every component, plus Ghostty and JetBrainsMono Nerd Font (pre-selected when a desktop session runs) |
    | Omarchy | the Umbra Omarchy theme, zsh, Starship and the tools Omarchy lacks; Omarchy keeps everything else |
 
-3. It installs what you picked, and chezmoi deploys the dotfiles.
+3. It installs what you picked, and chezmoi deploys the dotfiles. umbra-setup shows each phase with its log; `ctrl+c` stops after the running phase, never in the middle of one. The log is kept in `~/.local/state/um/setup-<time>.log`.
 4. The last phase runs the doctor (`env/wsl/tests/99_smoke.sh`). The run fails if any check fails.
+
+Run `umbra-setup` again at any time to add components or change the variant or the profile; it opens with what you installed. It needs a terminal of at least 80×24.
 
 To skip the menu, pass `--yes`, and optionally `--profile personal|work`, `--components a,b` or `--skip c`. `--dry-run` prints the plan without running it.
 
@@ -65,9 +67,27 @@ bash ~/.local/share/umbra/bootstrapper/env/wsl/tests/99_smoke.sh
 
 After a fresh-WSL stage 1, the checkout is `~/dev/umbra-bootstrapper` instead. With Umbra AI installed, `um doctor` also checks the `um` CLI and the vault.
 
+### Verify umbra-setup
+
+`install.sh` runs umbra-setup only when its download matches the sha256 pinned in this repo (`env/wsl/install/checksums.sha256`). When `cosign` is installed it also checks the release's signature, and when `gh` is logged in, its build provenance. A failed check stops the install. To check a release by hand:
+
+```sh
+v=X.Y.Z
+base=https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v$v
+curl -fsSLO "$base/checksums.txt" -O "$base/checksums.txt.sigstore.json" -O "$base/umbra-setup_${v}_linux_amd64.tar.gz"
+cosign verify-blob \
+  --certificate-identity "https://github.com/Robertcl795/umbra-bootstrapper/.github/workflows/release.yml@refs/tags/v$v" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --bundle checksums.txt.sigstore.json checksums.txt
+sha256sum --check --ignore-missing checksums.txt
+gh attestation verify "umbra-setup_${v}_linux_amd64.tar.gz" -R Robertcl795/umbra-bootstrapper
+```
+
+Every release also carries SBOMs of the archives and the source.
+
 ### Pick a variant
 
-The menu asks for umbra (dark, default), void (darkest background) or lux (light). To switch later:
+The menu asks for umbra (dark, default), void (darkest background) or lux (light). In umbra-setup the whole screen redraws in the variant under the cursor. To switch later:
 
 ```sh
 UM_THEME=lux chezmoi init --apply
@@ -94,12 +114,15 @@ Each of these came from a real run on a fresh distro.
 
 | Path | What it holds |
 |---|---|
-| `install.sh` | the single command: platform detection, selector, hand-over to `env/wsl/bootstrap.sh` |
+| `install.sh` | the single command: platform detection, umbra-setup or the gum selector, hand-over to `env/wsl/bootstrap.sh` |
+| `cmd/`, `internal/` | umbra-setup, the TUI (Go, Bubble Tea); `env/wsl/install/components.tsv` is its component list |
+| `.goreleaser.yaml`, `.github/workflows/release.yml` | the umbra-setup release: checksums, cosign signature, SBOMs, provenance |
 | `.chezmoiroot` | points chezmoi at `env/`, so the repo root is the chezmoi source |
 | `env/` | dotfiles, install phases (`.chezmoiscripts/`), the installer and its tests in `env/wsl/` |
 | `themes/` | generated theme files that chezmoi includes; never edited by hand |
 | `docs/` | philosophy and stack pages |
-| `scripts/verify.sh` | static checks, no containers |
+| `scripts/verify.sh` | static checks, unit, Go and PTY tests; no containers |
+| `test/pty/` | PTY tests of umbra-setup, and the real-install gate it runs inside a test distro |
 
 Umbra AI (the `um` CLI, vault, AI standard, AI CLIs, Ollama) appears in the menu when the installer can reach its public repo; `UM_AI_ACCESS=0` hides it. What `um` does for you, and how to use it: [the `um` docs](https://github.com/Robertcl795/umbra-ai/tree/main/docs).
 

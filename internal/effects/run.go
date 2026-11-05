@@ -92,6 +92,12 @@ func access(e sys.Env) tea.Cmd {
 	}
 }
 
+// Users reads the regular users from /etc/passwd (the account screen, as root).
+func Users() tea.Msg {
+	text, _ := readFile("/etc/passwd")
+	return msgs.Users{Names: sys.RegularUsers(text)}
+}
+
 // ── stored selection (re-run) ────────────────────────────────────────────────
 
 // Stored reads the [data] of chezmoi's config, where bootstrap.sh's selection is kept.
@@ -150,7 +156,9 @@ func installer(envDir string) string {
 // Start runs install.sh with args (the clock for the file names is read here, an effect). stdin is /dev/null, so nothing can wait for input behind the
 // TUI; stdout and stderr go to the log; events go to a file next to it (ADR 0040); UM_STOP names
 // the stop file. The child gets its own process group, so a terminal ctrl+c reaches only the TUI.
-func Start(envDir string, args []string) tea.Cmd {
+// A password (stage 1's new user, as root) goes in a 0600 file in a 0700 temp dir, named by
+// UM_USER_PASSWORD_FILE (stage1.sh set_password) and removed when the child exits.
+func Start(envDir string, args []string, password string) tea.Cmd {
 	return func() tea.Msg {
 		dir := stateDir()
 		if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -173,20 +181,39 @@ func Start(envDir string, args []string) tea.Cmd {
 		cmd.Env = append(os.Environ(), "UM_EVENTS="+evPath, "UM_STOP="+stopPath, "UM_ENV_DIR="+envDir, "GIT_TERMINAL_PROMPT=0")
 		cmd.Stdout, cmd.Stderr = logf, logf
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		secret := ""
+		if password != "" {
+			d, err := os.MkdirTemp("", "umbra-setup-")
+			if err != nil {
+				_ = logf.Close()
+				return msgs.RunErr{Err: err.Error()}
+			}
+			if err := os.WriteFile(filepath.Join(d, "password"), []byte(password+"\n"), 0o600); err != nil {
+				_ = os.RemoveAll(d)
+				_ = logf.Close()
+				return msgs.RunErr{Err: err.Error()}
+			}
+			secret = d
+			cmd.Env = append(cmd.Env, "UM_USER_PASSWORD_FILE="+filepath.Join(d, "password"))
+		}
 		if err := cmd.Start(); err != nil {
 			_ = logf.Close()
+			if secret != "" {
+				_ = os.RemoveAll(secret)
+			}
 			return msgs.RunErr{Err: err.Error()}
 		}
 		mu.Lock()
-		running[cmd.Process.Pid] = proc{cmd: cmd, log: logf}
+		running[cmd.Process.Pid] = proc{cmd: cmd, log: logf, secret: secret}
 		mu.Unlock()
 		return msgs.RunStarted{PID: cmd.Process.Pid, Log: logPath, Events: evPath, Stop: stopPath}
 	}
 }
 
 type proc struct {
-	cmd *exec.Cmd
-	log *os.File
+	cmd    *exec.Cmd
+	log    *os.File
+	secret string // temp dir holding the password file, removed after Wait
 }
 
 // running holds the started children for Wait. It lives here, in the effects package, so the
@@ -207,6 +234,9 @@ func Wait(pid int) tea.Cmd {
 		}
 		err := p.cmd.Wait()
 		_ = p.log.Close()
+		if p.secret != "" {
+			_ = os.RemoveAll(p.secret)
+		}
 		mu.Lock()
 		delete(running, pid)
 		mu.Unlock()
@@ -258,8 +288,9 @@ func Stop(path string) tea.Cmd {
 	}
 }
 
-// Doctor runs tests/99_smoke.sh (or UM_SETUP_DOCTOR in tests), appending to the run's log.
-func Doctor(envDir, logPath string) tea.Cmd {
+// Doctor runs tests/99_smoke.sh (or UM_SETUP_DOCTOR in tests) with the selection in env
+// (plan.DoctorEnv), appending to the run's log.
+func Doctor(envDir, logPath string, env []string) tea.Cmd {
 	return func() tea.Msg {
 		script := os.Getenv("UM_SETUP_DOCTOR")
 		if script == "" {
@@ -270,6 +301,7 @@ func Doctor(envDir, logPath string) tea.Cmd {
 		// As finish.sh does: tools installed by the run are on PATH for the doctor.
 		cmd.Env = append(os.Environ(), "UM_ENV_DIR="+envDir, "UM_NO_FASTFETCH=1",
 			"PATH="+filepath.Join(home, ".local", "bin")+":"+filepath.Join(home, ".cargo", "bin")+":"+os.Getenv("PATH"))
+		cmd.Env = append(cmd.Env, env...)
 		out, err := cmd.CombinedOutput()
 		if f, ferr := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0o644); ferr == nil {
 			_, _ = f.Write(out)

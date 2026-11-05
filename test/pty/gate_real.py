@@ -1,0 +1,96 @@
+"""Real-install gate of umbra-setup (setup-tui G5): run INSIDE a disposable WSL distro by the
+umbrella's scripts/wsl-gate-setup.sh. It drives the real binary through a real install of
+packages, shell and prompt (sudo password typed on the terminal, the doctor at the end), then a
+second run that must start from the stored selection and pass again.
+
+Usage: python3 -I gate_real.py <checkout> <password-file> [user|root|rerun]
+  user   a regular user: a real install, then a re-run (Ubuntu with its user)
+  root   a fresh distro as root: the account screen, stage 1, the restart point (Arch)
+  rerun  after stage 2: umbra-setup opens with the stored selection and installs again
+Prints one line per check and "gate-real: N ok, M failed"; exits 1 on any failure.
+"""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import driver  # noqa: E402
+
+ENTER, DOWN, SPACE = "\r", "\x1b[B", " "
+# "assword" matches both prompts: sudo's "[sudo] password for <user>:" and sudo-rs's
+# "[sudo: authenticate] Password:" (Ubuntu 26.04 ships sudo-rs 0.2.13, seen 2026-11-05).
+results = []
+
+
+def check(name, cond, detail=""):
+    results.append(bool(cond))
+    print(("  ok   " if cond else "  FAIL ") + name, flush=True)
+    if not cond and detail:
+        print("       " + detail.replace("\n", "\n       ")[-3000:], flush=True)
+
+
+def env_for(checkout):
+    return {
+        "PATH": os.environ["PATH"], "HOME": os.environ["HOME"], "USER": os.environ.get("USER", "umbra"),
+        "TERM": "xterm-256color", "COLORTERM": "truecolor", "COLUMNS": "100", "LINES": "30",
+        "LANG": "C.UTF-8", "UM_LANG": "en", "UM_THEME": "umbra", "UM_AI_ACCESS": "0", "UM_REDUCED_MOTION": "1",
+        "WSL_DISTRO_NAME": os.environ.get("WSL_DISTRO_NAME", ""),
+    }
+
+
+T = "title:Umbra setup · "  # steps wait on umbra-setup's window title (driver.py)
+
+
+def titled(raw, name):
+    """The window title "Umbra setup · <name>" was set at some point of the run."""
+    return ("\x1b]2;Umbra setup · " + name).encode() in raw or ("\x1b]0;Umbra setup · " + name).encode() in raw
+
+
+# n clears; the cursor stays on packages: packages, shell, prompt.
+PICK = [(T + "components 9/9", "n"), (T + "components 0/9", SPACE), (T + "components 1/9", DOWN + SPACE),
+        (T + "components 2/9", DOWN + SPACE), (T + "components 3/9", ENTER), (T + "theme umbra", ENTER)]
+
+
+def user_runs(argv, env, password):
+    steps = [(T + "scan ready", ENTER), (T + "profile", ENTER)] + PICK + [
+        (T + "review install", ENTER), ("assword", password + "\r"), (T + "done", ENTER)]
+    code, text, raw = driver.run(argv, steps, env, timeout=2400, settle=0.4)
+    check("run 1: real install of packages, shell, prompt through umbra-setup; doctor passes; exit 0",
+          code == 0 and titled(raw, "done"), text[-4000:])
+    check("run 1: the run screen was shown", titled(raw, "run"), text[-3000:])
+    rerun(argv, env, password)
+
+
+def rerun(argv, env, password):
+    # The stored selection (3 of 9) opens the components screen. sudo keeps its timestamp per
+    # terminal, and this is a new one, so it asks again.
+    steps = [(T + "scan ready", ENTER), (T + "profile", ENTER), (T + "components 3/9", ENTER),
+             (T + "theme umbra", ENTER), (T + "review install", ENTER), ("assword", password + "\r"), (T + "done", ENTER)]
+    code, text, raw = driver.run(argv, steps, env, timeout=1800, settle=0.4)
+    check("re-run: opens with the stored selection (components 3/9)", titled(raw, "components 3/9"), text[-3000:])
+    check("re-run: passes again, exit 0", code == 0 and titled(raw, "done"), text[-4000:])
+
+
+def root_run(argv, env, password):
+    # A fresh distro as root: the account screen, then stage 1 and the restart point.
+    steps = [(T + "scan ready", ENTER), (T + "profile", ENTER),
+             (T + "account user", "umbra\t" + password + "\t" + password + "\r")] + PICK + [
+        (T + "review install", ENTER), (T + "restart", ENTER)]
+    code, text, raw = driver.run(argv, steps, env, timeout=2400, settle=0.4)
+    check("root: account screen, stage 1 through umbra-setup, the restart point, exit 0",
+          code == 0 and titled(raw, "account user") and titled(raw, "restart"), text[-4000:])
+    check("root: the password is never drawn", password.encode() not in raw, "the password appeared in the output")
+
+
+def main():
+    checkout, pwfile = sys.argv[1], sys.argv[2]
+    mode = sys.argv[3] if len(sys.argv) > 3 else "user"
+    password = open(pwfile).read().strip()
+    argv = [os.path.join(checkout, "build", "umbra-setup"), "--env-dir", os.path.join(checkout, "env", "wsl")]
+    {"user": user_runs, "rerun": rerun, "root": root_run}[mode](argv, env_for(checkout), password)
+    ok = sum(results)
+    print(f"gate-real: {ok} ok, {len(results) - ok} failed", flush=True)
+    sys.exit(0 if ok == len(results) else 1)
+
+
+if __name__ == "__main__":
+    main()

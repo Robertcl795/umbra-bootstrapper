@@ -74,3 +74,10 @@ func Short(id string) string {
 	}
 	return id
 }
+
+// DoctorEnv is the selection the doctor (tests/99_smoke.sh) needs, as finish.sh has it: without
+// UM_COMPONENTS it checks every component, also the ones nobody chose.
+func DoctorEnv(c catalog.Catalog, platform string, s Selection) []string {
+	comps, _ := Components(c, platform, s.Items)
+	return []string{"UM_COMPONENTS=" + strings.Join(comps, ","), "UM_SKIP=" + strings.Join(s.Skip, ","), "UM_MODE=" + s.Profile}
+}

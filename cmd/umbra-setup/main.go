@@ -44,17 +44,20 @@ func run() int {
 	env := effects.FromOS(envDir, version)
 	init := append(effects.Scan(env), effects.ReadCatalog(envDir), effects.Stored)
 	init = append(init, effects.ScanSlow(env)...)
+	if env.Root {
+		init = append(init, effects.Users)
+	}
 	cmds := app.Cmds{
 		Init:         init,
 		Glitch:       effects.GlitchTick,
 		Tick:         effects.Tick,
 		SudoValidate: effects.SudoValidate,
 		SudoRefresh:  effects.SudoRefresh,
-		Start:        func(args []string) tea.Cmd { return effects.Start(envDir, args) },
+		Start:        func(args []string, pw string) tea.Cmd { return effects.Start(envDir, args, pw) },
 		Wait:         effects.Wait,
 		ReadEvents:   effects.ReadEvents,
 		Stop:         effects.Stop,
-		Doctor:       func(log string) tea.Cmd { return effects.Doctor(envDir, log) },
+		Doctor:       func(log string, env []string) tea.Cmd { return effects.Doctor(envDir, log, env) },
 		LogTail:      func(p string) tea.Cmd { return effects.LogTail(p, 10) },
 	}
 	final, err := tea.NewProgram(app.New(env, cmds, effects.Pending()...)).Run()

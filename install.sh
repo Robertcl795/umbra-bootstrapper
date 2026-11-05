@@ -3,8 +3,8 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/Robertcl795/umbra-bootstrapper/main/install.sh | bash
 #
-# Detects the platform (WSL Ubuntu/Arch, native Ubuntu/Arch, Omarchy), shows a component selector
-# (gum, pinned and sha256-checked) and hands the selection to env/wsl/bootstrap.sh.
+# Detects the platform (WSL Ubuntu/Arch, native Ubuntu/Arch, Omarchy) and opens umbra-setup, the TUI
+# (pinned and verified, ADR 0038), or else the gum selector; the selection goes to env/wsl/bootstrap.sh.
 # Flags (no selector, no gum download): --yes, --profile personal|work, --components a,b,
 # --skip c. UM_SELECT=<item ids> selects items without a menu. --dry-run prints the platform and
 # the selection and changes nothing. Other flags (--user, --shell, --theme, …) go to bootstrap.sh.
@@ -122,6 +122,23 @@ fi
 
 platform="$(um_platform)" || die "Unsupported system. Umbra supports Ubuntu and Arch (WSL or native) and Omarchy."
 log_info "Platform: $platform"
+
+# umbra-setup, the TUI (ADR 0037, 0038): pinned, sha256-checked, signature and attestation checked
+# when cosign or gh are here. It asks everything, then runs this script again with explicit flags.
+# Not available (no pinned release, download failed): the gum menu below. A failed check: stop.
+if [ "$interactive" = 1 ] && [ "$dry_run" = 0 ]; then
+  rc=0
+  setup_bin="$(fetch_setup)" || rc=$?
+  if [ "$rc" = 2 ]; then
+    die "umbra-setup failed a check (see above). Run again with --yes --components … to install without it."
+  fi
+  if [ "$rc" = 0 ]; then
+    setup_bin="$(install_setup_bin "$setup_bin")"
+    rc=0
+    "$setup_bin" --env-dir "$UM_ENV_DIR" </dev/tty || rc=$?
+    exit "$rc"
+  fi
+fi
 
 gum_bin=""
 if [ "$interactive" = 1 ]; then

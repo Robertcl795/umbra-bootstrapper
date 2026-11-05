@@ -1,6 +1,7 @@
 package app
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -18,14 +19,16 @@ import (
 type calls struct {
 	start, sudo, doctor, tail, stop int
 	stopFile                        string
+	doctorEnv                       []string
+	password                        string
 }
 
 func fakeCmds(c *calls) Cmds {
 	none := func() tea.Msg { return nil }
 	return Cmds{
-		Start:        func([]string) tea.Cmd { c.start++; return none },
+		Start:        func(_ []string, pw string) tea.Cmd { c.start++; c.password = pw; return none },
 		SudoValidate: func() tea.Cmd { c.sudo++; return none },
-		Doctor:       func(string) tea.Cmd { c.doctor++; return none },
+		Doctor:       func(_ string, env []string) tea.Cmd { c.doctor++; c.doctorEnv = env; return none },
 		LogTail:      func(string) tea.Cmd { c.tail++; return none },
 		Stop:         func(f string) tea.Cmd { c.stop++; c.stopFile = f; return none },
 		Wait:         func(int) tea.Cmd { return none },
@@ -83,6 +86,9 @@ func TestRunSucceedsThroughTheDoctor(t *testing.T) {
 	m = send(m, msgs.RunExited{Code: 0}, msgs.EventsRead{Offset: 100})
 	if c.doctor != 1 || m.r.Current != plan.Doctor {
 		t.Fatalf("doctor not started: %d %q", c.doctor, m.r.Current)
+	}
+	if want := []string{"UM_COMPONENTS=shell,prompt", "UM_SKIP=", "UM_MODE=personal"}; !slices.Equal(c.doctorEnv, want) {
+		t.Errorf("doctor env %v, want %v (only what was selected)", c.doctorEnv, want)
 	}
 	m = send(m, msgs.DoctorDone{OK: true, Tail: []string{"all good"}})
 	if m.screen != Done {
@@ -176,14 +182,59 @@ func TestSudoAsksOnceBeforeTheRun(t *testing.T) {
 	}
 }
 
-func TestRootEndsAtTheRestartPoint(t *testing.T) {
+func typeText(m Model, text string) Model {
+	for _, r := range text {
+		var tm tea.Model = m
+		tm, _ = tm.Update(tea.KeyPressMsg{Code: r, Text: string(r)})
+		m = tm.(Model)
+	}
+	return m
+}
+
+// As root on WSL, stage 1 is told the user and gets the password in a file (stage1.sh p2_pre).
+func TestRootAsksForTheAccountAndEndsAtTheRestartPoint(t *testing.T) {
 	c := &calls{}
 	env := fixtureEnv("umbra", theme.TrueColor, "en")
 	env.Root, env.Distro = true, "Arch"
 	m := started(t, env, 80, 24, fakeCmds(c))
-	m, _ = press(m, "enter", "enter", "enter", "enter", "enter")
-	if c.sudo != 0 || c.start != 1 {
-		t.Fatalf("root: sudo %d start %d", c.sudo, c.start)
+	m = send(m, msgs.Users{})
+	m, _ = press(m, "enter", "enter")
+	if m.screen != Account {
+		t.Fatalf("screen %d, want Account", m.screen)
+	}
+	m = typeText(m, "Bad User")
+	m, _ = press(m, "enter", "enter", "enter")
+	if m.acct.Err != "account.bad.user" || m.screen != Account {
+		t.Fatalf("invalid name accepted: %+v", m.acct)
+	}
+	m.acct.User = ""
+	m = typeText(m, "umbra")
+	m, _ = press(m, "tab")
+	m = typeText(m, "s3cret pw")
+	m, _ = press(m, "tab")
+	m = typeText(m, "s3cret px")
+	m, _ = press(m, "enter")
+	if m.acct.Err != "account.bad.match" || m.acct.Again != "" {
+		t.Fatalf("mismatch accepted: %+v", m.acct)
+	}
+	if got := m.Content(); strings.Contains(got, "s3cret") || !strings.Contains(got, "•••••••••") {
+		t.Fatal("the password is drawn, or not masked")
+	}
+	m = typeText(m, "s3cret pw")
+	m, _ = press(m, "enter")
+	if m.screen != Components {
+		t.Fatalf("screen %d, want Components", m.screen)
+	}
+	m, _ = press(m, "enter", "enter")
+	if args := strings.Join(m.d.Args(), " "); !strings.HasSuffix(args, "--user umbra") {
+		t.Errorf("install.sh args lack --user: %s", args)
+	}
+	if review := m.Content(); !strings.Contains(review, "--user") || strings.Contains(review, "s3cret") {
+		t.Errorf("review must show --user and never the password:\n%s", review)
+	}
+	m, _ = press(m, "enter")
+	if c.sudo != 0 || c.start != 1 || c.password != "s3cret pw" {
+		t.Fatalf("root: sudo %d start %d password %q", c.sudo, c.start, c.password)
 	}
 	m = send(m, msgs.RunStarted{PID: 1, Log: "/tmp/l", Events: "/tmp/e"},
 		msgs.EventsRead{Events: []events.Event{ev(0, "phase", "P0", "start", ""), ev(1, "phase", "P0", "ok", "")}},
@@ -193,6 +244,26 @@ func TestRootEndsAtTheRestartPoint(t *testing.T) {
 	}
 	if got := m.Content(); !strings.Contains(got, "wsl.exe --terminate Arch") || !strings.Contains(got, "umbra bootstrap resume") {
 		t.Errorf("restart commands missing:\n%s", got)
+	}
+}
+
+func TestExistingUserIsNamedAndBackSkipsAccountForUsers(t *testing.T) {
+	env := fixtureEnv("umbra", theme.TrueColor, "en")
+	env.Root = true
+	m := send(started(t, env, 80, 24), msgs.Users{Names: []string{"rocker"}})
+	if m.acct.User != "rocker" {
+		t.Errorf("existing user not named: %q", m.acct.User)
+	}
+	n := started(t, fixtureEnv("umbra", theme.TrueColor, "en"), 80, 24)
+	n, _ = press(n, "enter", "enter", "esc")
+	if n.screen != Profile {
+		t.Errorf("a regular user goes back from components to profile, got %d", n.screen)
+	}
+	o := fixtureEnv("umbra", theme.None, "en")
+	o.Root, o.Platform = true, "arch"
+	r, _ := press(started(t, o, 80, 24), "enter")
+	if r.screen != Boot || !strings.Contains(r.Content(), "Running as root outside WSL") {
+		t.Errorf("root on native Arch must stop at boot")
 	}
 }
 
@@ -266,8 +337,15 @@ func runScreens(t *testing.T) map[string]string {
 	out["failed"] = f.Content()
 	env := fixtureEnv("umbra", theme.TrueColor, "en")
 	env.Root, env.Distro = true, "Arch"
-	r := started(t, env, 80, 24, fakeCmds(&calls{}))
-	r, _ = press(r, "enter", "enter", "enter", "enter", "enter")
+	r := send(started(t, env, 80, 24, fakeCmds(&calls{})), msgs.Users{})
+	r, _ = press(r, "enter", "enter")
+	r = typeText(r, "umbra")
+	r, _ = press(r, "tab")
+	r = typeText(r, "pw")
+	r, _ = press(r, "tab")
+	r = typeText(r, "pw")
+	out["account"] = r.Content()
+	r, _ = press(r, "enter", "enter", "enter", "enter")
 	r = send(r, msgs.RunStarted{PID: 1, Log: "/root/.local/state/um/setup-x.log", Events: "/tmp/e"}, msgs.RunExited{Code: 0}, msgs.EventsRead{})
 	out["restart"] = r.Content()
 	return out
