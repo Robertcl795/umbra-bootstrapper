@@ -107,11 +107,53 @@ fragment_write() {
   tmp="$(mktemp "$dir/.umbra.XXXXXX")"
   if WSL_DISTRO_NAME="${WSL_DISTRO_NAME:-}" "$bin" --wt-fragment "${UM_THEME:-umbra}" --wt-font "$font" >"$tmp"; then
     mv "$tmp" "$dir/umbra.json"
-    log_info "Windows Terminal: profile \"Umbra · ${WSL_DISTRO_NAME:-}\" with the ${UM_THEME:-umbra} scheme. Restart Windows Terminal (a running one loads it on its next settings reload), then open it from the tab menu. Your profiles.defaults, if set, outranks its scheme and font."
+    log_info "Windows Terminal: profile \"Umbra · ${WSL_DISTRO_NAME:-}\" with the ${UM_THEME:-umbra} scheme. Restart Windows Terminal (a running one loads it on its next settings reload), then open it from the tab menu."
   else
     rm -f "$tmp"
     log_warn "umbra-setup could not print the Windows Terminal fragment."
   fi
+}
+
+# wt_settings: Windows Terminal's settings.json files here (stable, Preview, unpackaged).
+wt_settings() {
+  local f
+  for f in "$LA_U/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json" \
+    "$LA_U/Packages/Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe/LocalState/settings.json" \
+    "$LA_U/Microsoft/Windows Terminal/settings.json"; do
+    [ -f "$f" ] && echo "$f"
+  done
+  return 0
+}
+
+# wt_defaults <settings.json>: the "profiles.defaults" object, as text (// comments dropped).
+# Read only: Umbra never writes settings.json (ADR 0043, G-B3, operator: tell the user only).
+wt_defaults() {
+  awk '
+    { sub(/^[ \t]*\/\/.*$/, "") }
+    !on && /"defaults"[ \t]*:/ { on = 1; sub(/.*"defaults"[ \t]*:/, "") }
+    on {
+      for (i = 1; i <= length($0); i++) {
+        c = substr($0, i, 1)
+        if (c == "{") d++
+        if (c == "}") { d--; if (d == 0) { print substr($0, 1, i); exit } }
+      }
+      print
+    }' "$1"
+}
+
+# defaults_hint <scheme> <font>: a profiles.defaults scheme or font outranks the fragment's
+# profile (seen on Windows Terminal 1.24); say which and where to change the Umbra profile.
+defaults_hint() {
+  local want="$1" font="$2" f block scheme face
+  while IFS= read -r f; do
+    block="$(wt_defaults "$f")"
+    scheme="$(grep -o '"colorScheme"[[:space:]]*:[[:space:]]*"[^"]*"' <<<"$block" | head -n 1 | sed 's/.*"\([^"]*\)"$/\1/')"
+    face="$(grep -o '"face"[[:space:]]*:[[:space:]]*"[^"]*"\|"fontFace"[[:space:]]*:[[:space:]]*"[^"]*"' <<<"$block" | head -n 1 | sed 's/.*"\([^"]*\)"$/\1/')"
+    [ -n "$scheme$face" ] || continue
+    log_warn "Your Windows Terminal profiles.defaults sets${scheme:+ colorScheme \"$scheme\"}${scheme:+${face:+ and}}${face:+ font \"$face\"}, which outranks the Umbra profile."
+    log_warn "To use Umbra there: Settings > Umbra · ${WSL_DISTRO_NAME:-} > Appearance > Color scheme: $want${face:+, Font face: $font}. Umbra does not edit settings.json."
+    return 0
+  done < <(wt_settings)
 }
 
 terminal_install() {
@@ -123,6 +165,15 @@ terminal_install() {
     log_warn "$UM_NERD_FONT is not installed; the profile uses $UM_FONT_FALLBACK."
   fi
   fragment_write "$font"
+  defaults_hint "$(scheme_name "${UM_THEME:-umbra}")" "$font"
+}
+
+scheme_name() {
+  case "$1" in
+    void) echo "Umbra Void" ;;
+    lux) echo "Umbra Lux" ;;
+    *) echo "Umbra" ;;
+  esac
 }
 
 terminal_remove() {

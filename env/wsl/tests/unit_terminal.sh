@@ -58,6 +58,33 @@ expect "no admin path: nothing under HKLM or C:\\Windows\\Fonts" '! grep -qi "HK
 terminal_install >/dev/null 2>&1
 expect "a second run keeps the font (no registry writes) and rewrites the fragment" '! grep -q "reg.exe add" "$log" && [ -s "$frag" ]'
 
+echo "# terminal: the user's profiles.defaults (read, never written; operator: tell the user only)"
+wtset="$t/la/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
+mkdir -p "$(dirname "$wtset")"
+expect "no settings.json: no hint" '[[ $out != *"profiles.defaults"* ]]'
+cat >"$wtset" <<'J'
+{
+    // a comment, as Windows Terminal writes them
+    "defaultProfile": "{x}",
+    "profiles": {
+        "defaults": {
+            "colorScheme": "tokyonight",
+            "font": { "face": "FiraCode Nerd Font", "size": 11 }
+        },
+        "list": [ { "name": "Ubuntu", "colorScheme": "Campbell" } ]
+    },
+    "schemes": [ { "name": "tokyonight" } ]
+}
+J
+cp "$wtset" "$t/wtset.before"
+out="$(terminal_install 2>&1)"
+expect "defaults with a scheme and a font: both are named, with where to change the Umbra profile" '[[ $out == *"profiles.defaults"* && $out == *"tokyonight"* && $out == *"FiraCode Nerd Font"* && $out == *"Umbra Void"* && $out == *"Umbra · archlinux"* ]]'
+expect "settings.json is not changed" 'cmp -s "$wtset" "$t/wtset.before"'
+sed -i '/"colorScheme": "tokyonight",/d; s/"font": { "face": "FiraCode Nerd Font", "size": 11 }/"opacity": 90/' "$wtset"
+out="$(terminal_install 2>&1)"
+expect "defaults without scheme or font (a profile's own scheme does not count): no hint" '[[ $out != *"profiles.defaults"* ]]'
+rm -rf "$t/la/Packages"
+
 echo "# terminal: the font fails"
 rm -rf "$fonts"
 fetch_font() { return 1; }
