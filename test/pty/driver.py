@@ -198,6 +198,10 @@ def run(argv, steps, env, timeout=10, settle=0.15, cwd=None, tee=None):
             screen.feed(chunk)
             if sink:
                 sink.write(chunk)
+            # A cursor position request (DSR 6) gets its answer, as a terminal gives it: ConPTY
+            # (powershell.exe, wsl.exe started from WSL) sends one at start and waits for it.
+            for _ in range(chunk.count(b"\x1b[6n")):
+                os.write(fd, b"\x1b[%d;%dR" % (screen.r + 1, screen.c + 1))
         if i < len(steps):
             fresh = len(raw) > mark or (i > 0 and steps[i - 1][1] == "")  # after an empty step, the screen is enough
             want = steps[i][0]

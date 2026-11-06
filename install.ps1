@@ -16,6 +16,7 @@
 #   UM_PS1_DISTRO       online name to install (archlinux, Ubuntu-24.04) or an existing distro
 #   UM_PS1_DISTRO_NAME  the name of a new distro (default: the online name)
 #   UM_PS1_URL          install.sh to run in stage 1 (default: the bootstrapper's main branch)
+#   UM_PS1_STAGE1       a bash command run as stage 1 instead of install.sh (the G-A2 gate)
 #   UM_PS1_NO_RUN=1     define the functions only (Pester dot-sources this file)
 # This file stays ASCII: Windows PowerShell 5.1 reads a BOM-less file as ANSI.
 
@@ -75,8 +76,12 @@ function Select-UmDistro([string[]]$Existing) {
 }
 
 # (c) The stage 1 command: install.sh fetched to a file (it reads the terminal), driver mode on.
+# No double quotes: Windows PowerShell 5.1 drops them from a native command's arguments. A
+# mktemp path has no spaces. UM_PS1_STAGE1 replaces the fetch with a command of its own (the
+# G-A2 gate runs a local build: install.sh only runs the pinned release).
 function Get-UmStage1Command([string]$Url) {
-  return "f=`$(mktemp) && curl -fsSL '$Url' -o `"`$f`" && UM_DRIVER=ps1 bash `"`$f`"; rc=`$?; rm -f `"`$f`"; exit `$rc"
+  if ($env:UM_PS1_STAGE1) { return "export UM_DRIVER=ps1; $($env:UM_PS1_STAGE1)" }
+  return "f=`$(mktemp) && curl -fsSL '$Url' -o `$f && UM_DRIVER=ps1 bash `$f; rc=`$?; rm -f `$f; exit `$rc"
 }
 
 function Install-Umbra {

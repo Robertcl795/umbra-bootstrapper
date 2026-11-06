@@ -45,6 +45,21 @@ Describe 'install.ps1' {
     $script:Calls[5] | Should Be '-d umbra-test --cd ~ --exec bash -lc umbra bootstrap resume'
   }
 
+  It 'passes no double quote to wsl.exe (Windows PowerShell 5.1 drops them from native arguments)' {
+    Use-FakeWsl @{ stage1 = 10 }
+    Install-Umbra
+    ($script:Calls | Where-Object { $_ -match '"' }) | Should BeNullOrEmpty
+  }
+
+  It 'UM_PS1_STAGE1 replaces the install.sh fetch; UM_DRIVER=ps1 is still exported first' {
+    $env:UM_PS1_STAGE1 = '/opt/gate/stage1 --env-dir /opt/gate/env'
+    try {
+      Use-FakeWsl @{ stage1 = 10 }
+      Install-Umbra
+      $script:Calls[3] | Should Be '-d umbra-test -u root --exec bash -lc export UM_DRIVER=ps1; /opt/gate/stage1 --env-dir /opt/gate/env'
+    } finally { Remove-Item Env:UM_PS1_STAGE1 }
+  }
+
   It 'reuses an existing distro without installing it' {
     Use-FakeWsl @{ stage1 = 10 } @('umbra-test')
     Install-Umbra
