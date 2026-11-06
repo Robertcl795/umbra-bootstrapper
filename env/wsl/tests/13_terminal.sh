@@ -2,7 +2,10 @@
 # The Windows Terminal fragment (ADR 0043): it exists and its profile names one of its schemes.
 # Without interop (the Windows side out of reach) it warns and passes.
 set -euo pipefail
-la_w="${UM_WIN_LOCALAPPDATA_W:-$(cd /mnt/c 2>/dev/null && cmd.exe /c 'echo %LOCALAPPDATA%' 2>/dev/null | tr -d '\r' || true)}"
+la_w="${UM_WIN_LOCALAPPDATA_W:-}"
+if [ -z "$la_w" ]; then
+  la_w="$(cd /mnt/c 2>/dev/null; cmd.exe /c 'echo %LOCALAPPDATA%' 2>/dev/null | tr -d '\r')" || la_w=""
+fi
 la_u="${UM_WIN_LOCALAPPDATA_U:-$( [ -z "$la_w" ] || wslpath -u "$la_w" 2>/dev/null || true)}"
 if [ -z "$la_u" ] || [ ! -d "$la_u" ]; then
   echo "[warn] The Windows side is not reachable; the Windows Terminal fragment is not checked." >&2
