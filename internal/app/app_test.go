@@ -26,14 +26,17 @@ var update = flag.Bool("update", false, "rewrite testdata/golden")
 
 func envDir() string { return filepath.Join("..", "..", "env", "wsl") }
 
-func loadCat(t *testing.T) catalog.Catalog {
+func loadCat(t *testing.T) catalog.Catalog { return loadCatalog(t).Cat }
+
+// loadCatalog is the catalog and package table, as ReadCatalog sends them.
+func loadCatalog(t *testing.T) msgs.Catalog {
 	t.Helper()
 	msg := effects.ReadCatalog(envDir())()
 	c, ok := msg.(msgs.Catalog)
 	if !ok {
 		t.Fatalf("catalog: %+v", msg)
 	}
-	return c.Cat
+	return c
 }
 
 func fixtureEnv(variant string, p theme.Profile, lang string) sys.Env {
@@ -63,7 +66,7 @@ func started(t *testing.T, env sys.Env, w, h int, cmds ...Cmds) Model {
 	for _, c := range effects.Scan(env) {
 		m, _ = m.Update(c())
 	}
-	m, _ = m.Update(msgs.Catalog{Cat: loadCat(t)})
+	m, _ = m.Update(loadCatalog(t))
 	m, _ = m.Update(msgs.Batch(slowFacts))
 	return m.(Model)
 }

@@ -6,19 +6,19 @@
  ┃ › [■] Paquetes y herramientas base   ┃ │ PACKAGES                          │ 
  ┃   [■] Shell: zsh (fish solo con tem… ┃ │ Paquetes base del gestor de paqu… │ 
  ┃   [■] Prompt: Starship               ┃ │                                   │ 
- ┃   [■] Neovim                         ┃ │ instala    apt or pacman packages │ 
- ┃   [■] Herramientas de Kubernetes     ┃ │ despliega  —                      │ 
- ┃   [■] Zellij                         ┃ │ fase       before_10-packages     │ 
- ┃   [■] Toolchains de lenguajes        ┃ │ prueba     01_packages.sh         │ 
- ┃   [■] fastfetch                      ┃ │ work       igual que personal     │ 
- ┃   [■] Ajustes de WSL                 ┃ │                                   │ 
- ┃   [■] Windows Terminal: tema Umbra   ┃ │ agregar    --components packages  │ 
- ┃   [ ] Prompt de PowerShell: Starship ┃ │ omitir     --skip packages        │ 
- ┃   [■] Umbra AI: um · vault · estánd… ┃ │                                   │ 
- ┃                                      ┃ │                                   │ 
+ ┃   [■] Neovim                         ┃ │ · base-devel: Compiladores y mak… │ 
+ ┃   [■] Herramientas de Kubernetes     ┃ │ · git: Control de versiones; el … │ 
+ ┃   [■] Zellij                         ┃ │ · curl: Descargas por HTTP; el i… │ 
+ ┃   [■] Toolchains de lenguajes        ┃ │ · wget: Descarga archivos de la … │ 
+ ┃   [■] fastfetch                      ┃ │ · unzip: Extrae archivos .zip     │ 
+ ┃   [■] Ajustes de WSL                 ┃ │ · ca-certificates: Certificados … │ 
+ ┃   [■] Windows Terminal: tema Umbra   ┃ │ · ripgrep: Búsqueda recursiva rá… │ 
+ ┃   [ ] Prompt de PowerShell: Starship ┃ │ · fd: Alternativa rápida y simpl… │ 
+ ┃   [■] Umbra AI: um · vault · estánd… ┃ │ · bat: cat con resaltado de sint… │ 
+ ┃                                      ┃ │ +17 más · e para ver todo y edit… │ 
  ┃ 11 de 12 seleccionados               ┃ │                                   │ 
+ ┃                                      ┃ │ despliega  —                      │ 
+ ┃                                      ┃ │ work       igual que personal     │ 
  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 
-                                                                                
-                                                                                
                                                                                 
 ↑↓ mover  ·  space marcar  ·  a todos  ·  n ninguno  ·  enter siguiente  ·  esc…

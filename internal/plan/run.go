@@ -82,5 +82,6 @@ func Short(id string) string {
 // UM_COMPONENTS it checks every component, also the ones nobody chose.
 func DoctorEnv(c catalog.Catalog, platform string, s Selection) []string {
 	comps, _ := Components(c, platform, s.Items)
-	return []string{"UM_COMPONENTS=" + strings.Join(comps, ","), "UM_SKIP=" + strings.Join(s.Skip, ","), "UM_MODE=" + s.Profile}
+	return []string{"UM_COMPONENTS=" + strings.Join(comps, ","), "UM_SKIP=" + strings.Join(s.Skip, ","),
+		"UM_SKIP_PACKAGES=" + strings.Join(s.SkipPackages, ","), "UM_MODE=" + s.Profile}
 }

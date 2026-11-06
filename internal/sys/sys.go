@@ -131,6 +131,10 @@ func ParseStored(text string) msgs.Stored {
 			if v != "" {
 				st.Components = strings.Split(v, ",")
 			}
+		case "skip_packages":
+			if v != "" {
+				st.SkipPackages = strings.Split(v, ",")
+			}
 		}
 	}
 	return st

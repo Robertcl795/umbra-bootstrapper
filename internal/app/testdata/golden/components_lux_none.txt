@@ -6,19 +6,19 @@
  ┃ › [■] Packages and base tools        ┃ │ PACKAGES                          │ 
  ┃   [■] Shell: zsh (fish theme-only)   ┃ │ Base packages from the distro's … │ 
  ┃   [■] Prompt: Starship               ┃ │                                   │ 
- ┃   [■] Neovim                         ┃ │ installs   apt or pacman packages │ 
- ┃   [■] Kubernetes tools               ┃ │ deploys    —                      │ 
- ┃   [■] Zellij                         ┃ │ phase      before_10-packages     │ 
- ┃   [■] Language toolchains            ┃ │ check      01_packages.sh         │ 
- ┃   [■] fastfetch                      ┃ │ work       same as personal       │ 
- ┃   [■] WSL tuning                     ┃ │                                   │ 
- ┃   [■] Windows Terminal: Umbra theme  ┃ │ add        --components packages  │ 
- ┃   [ ] PowerShell prompt: Starship    ┃ │ skip       --skip packages        │ 
- ┃   [■] Umbra AI: um · vault · AI sta… ┃ │                                   │ 
- ┃                                      ┃ │                                   │ 
+ ┃   [■] Neovim                         ┃ │ · base-devel: Compilers and make… │ 
+ ┃   [■] Kubernetes tools               ┃ │ · git: Version control; the inst… │ 
+ ┃   [■] Zellij                         ┃ │ · curl: Downloads over HTTP; the… │ 
+ ┃   [■] Language toolchains            ┃ │ · wget: Downloads files from the… │ 
+ ┃   [■] fastfetch                      ┃ │ · unzip: Extracts .zip archives   │ 
+ ┃   [■] WSL tuning                     ┃ │ · ca-certificates: Root certific… │ 
+ ┃   [■] Windows Terminal: Umbra theme  ┃ │ · ripgrep: Fast recursive search… │ 
+ ┃   [ ] PowerShell prompt: Starship    ┃ │ · fd: Fast, simple alternative t… │ 
+ ┃   [■] Umbra AI: um · vault · AI sta… ┃ │ · bat: cat with syntax highlight… │ 
+ ┃                                      ┃ │ +17 more · e to see all and edit  │ 
  ┃ 11 of 12 selected                    ┃ │                                   │ 
+ ┃                                      ┃ │ deploys    —                      │ 
+ ┃                                      ┃ │ work       same as personal       │ 
  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 
-                                                                                
-                                                                                
                                                                                 
 ↑↓ move  ·  space toggle  ·  a all  ·  n none  ·  enter next  ·  esc back       

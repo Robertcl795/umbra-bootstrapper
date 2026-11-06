@@ -26,13 +26,15 @@ const (
 	Install
 	DryRun
 	Leave // leave WSL: umbra-setup terminates the distro after it closed
+	Edit  // open the package editor of the item under the cursor
 )
 
 // Data is what the screens read. The app owns it.
 type Data struct {
 	Env    sys.Env
 	Cat    catalog.Catalog
-	Items  []catalog.Item // offered on Env.Platform, menu order
+	Pkgs   catalog.Packages // packages.tsv: what each item installs
+	Items  []catalog.Item   // offered on Env.Platform, menu order
 	Facts  []msgs.ScanFact
 	Ready  bool // the catalog is in
 	CatErr string
@@ -51,17 +53,25 @@ type Selection struct {
 	Profile string // personal or work
 	Chosen  map[string]bool
 	Variant string
+
+	SkipPkgs map[string]bool // packages left out in the editor (only rows with skip=yes count)
 }
 
 // Plan returns the plan.Selection for the current picks, in menu order.
 func (d Data) Plan() plan.Selection {
-	var ids []string
+	var ids, skip []string
 	for _, it := range d.Items {
-		if d.Sel.Chosen[it.ID] {
-			ids = append(ids, it.ID)
+		if !d.Sel.Chosen[it.ID] {
+			continue
+		}
+		ids = append(ids, it.ID)
+		for _, r := range d.Packages(it.ID) {
+			if r.Skip && d.Sel.SkipPkgs[r.Name] && !slices.Contains(skip, r.Name) {
+				skip = append(skip, r.Name)
+			}
 		}
 	}
-	return plan.Selection{Profile: d.Sel.Profile, Items: ids, Variant: d.Sel.Variant}
+	return plan.Selection{Profile: d.Sel.Profile, Items: ids, Variant: d.Sel.Variant, SkipPackages: skip}
 }
 
 // Args are the install.sh arguments for the current picks, plus Extra.
@@ -238,12 +248,18 @@ func ComponentsView(c ui.Ctx, d Data, cursor int) []string {
 			n++
 		}
 		label := it.Label[d.Env.Lang]
-		styled := c.Th.R(role, box+label)
+		tag := ""
 		if d.Installed[it.ID] {
-			tag := " · " + c.T("comp.installed")
-			label += tag
-			styled += c.Th.R("fgMuted", tag)
+			tag += " · " + c.T("comp.installed")
 		}
+		if k := d.leftOut(it.ID); k > 0 && d.Sel.Chosen[it.ID] {
+			tag += " · " + c.T("comp.leftout", "n", itoa(k))
+		}
+		if tag != "" { // the label gives way, so the tag always shows
+			label = ui.Fit(label, min(ui.Width(label), lw-6-ui.Width(box)-ui.Width(tag)))
+		}
+		styled := c.Th.R(role, box+label) + c.Th.R("fgMuted", tag)
+		label += tag
 		left = append(left, ui.Row(c, i == cursor, styled, box+label, lw-4))
 	}
 	left = append(left, "", c.Th.R("fgMuted", c.T("comp.count", "n", itoa(n), "total", itoa(len(d.Items)))))
@@ -257,34 +273,22 @@ func ComponentsView(c ui.Ctx, d Data, cursor int) []string {
 			return s
 		}
 		kw := 11
-		right = []string{
-			c.Th.B("fg", strings.ToUpper(it.ID)),
-			c.Th.R("fg", it.Summary[d.Env.Lang]),
-			"",
-			kv(c, c.T("comp.installs"), dash(it.Installs), "fg", kw),
-			kv(c, c.T("comp.deploys"), dash(it.Deploys), "info", kw),
-			kv(c, c.T("comp.phase"), scriptsName(it.Scripts), "fg", kw),
-			kv(c, c.T("comp.check"), dash(it.Check), "fg", kw),
-			kv(c, c.T("comp.work"), c.T("comp.work."+it.Work), map[bool]string{true: "warn", false: "fg"}[it.Work != "same"], kw),
-			"",
-			kv(c, c.T("comp.add"), "--components "+strings.Join(it.Components, ","), "link", kw),
-			kv(c, c.T("comp.skip"), "--skip "+strings.Join(it.Components, ","), "link", kw),
+		// The package list (packages.tsv) is what the item installs; without rows (an older
+		// checkout, or an item that only writes settings) the catalog's installs column.
+		right = []string{c.Th.B("fg", strings.ToUpper(it.ID)), c.Th.R("fg", it.Summary[d.Env.Lang]), ""}
+		if pkgs := d.Packages(it.ID); len(pkgs) > 0 {
+			right = append(right, pkgLines(c, d, it.ID, room(c)-len(right)-3)...)
+		} else {
+			right = append(right, kv(c, c.T("comp.installs"), dash(it.Installs), "fg", kw))
 		}
+		right = append(right, "",
+			kv(c, c.T("comp.deploys"), dash(it.Deploys), "info", kw),
+			kv(c, c.T("comp.work"), c.T("comp.work."+it.Work), map[bool]string{true: "warn", false: "fg"}[it.Work != "same"], kw),
+		)
 	}
 	h := max(len(left), len(right))
 	return append([]string{""}, ui.Side(ui.Panel(c, c.T("comp.title"), left, lw, h, true), lw,
 		ui.Panel(c, c.T("comp.detail"), right, rw, h, false), 1)...)
-}
-
-func scriptsName(scripts []string) string {
-	if len(scripts) == 0 {
-		return "—"
-	}
-	s := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(scripts[0], "run_onchange_"), "run_once_"), ".sh")
-	if len(scripts) > 1 {
-		s += " +" + itoa(len(scripts)-1)
-	}
-	return s
 }
 
 func itoa(n int) string {
@@ -330,6 +334,10 @@ func ComponentsKey(key string, cursor int, d Data) (int, map[string]bool, Action
 		chosen = map[string]bool{}
 		for id := range d.Installed {
 			chosen[id] = true
+		}
+	case "e":
+		if cursor < n && d.Editable(d.Items[cursor].ID) {
+			return cursor, chosen, Edit
 		}
 	case "enter":
 		return cursor, chosen, Next
@@ -434,8 +442,18 @@ func ReviewView(c ui.Ctx, d Data, button int) []string {
 		}
 		lines = append(lines, kv(c, k, part, "fg", kw))
 	}
+	lines = append(lines, kv(c, c.T("review.skip"), skip, skipRole, kw))
+	for i, part := range wrap(p.SkipPackages, " · ", w-kw) { // none: no line
+		if len(p.SkipPackages) == 0 {
+			break
+		}
+		k := ""
+		if i == 0 {
+			k = c.T("review.pkgs")
+		}
+		lines = append(lines, kv(c, k, part, "fg", kw))
+	}
 	lines = append(lines,
-		kv(c, c.T("review.skip"), skip, skipRole, kw),
 		kv(c, c.T("review.sudo"), sudo, "fg", kw),
 		kv(c, c.T("review.rerun"), c.T("review.rerun.safe"), "fgMuted", kw),
 		"",

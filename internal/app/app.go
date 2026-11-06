@@ -78,6 +78,8 @@ type Model struct {
 	screen  Screen
 	pcur    int
 	ccur    int
+	editing bool // the package editor of the item under ccur is open (on Components)
+	ecur    int
 	tcur    int
 	bcur    int
 	glitch  int
@@ -197,7 +199,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case msgs.ScanFact:
 		m.setFact(msg)
 	case msgs.Catalog:
-		m.d.Cat, m.d.Ready = msg.Cat, true
+		m.d.Cat, m.d.Pkgs, m.d.Ready = msg.Cat, msg.Pkgs, true
 		m.defaults()
 		cmd = m.maybeResume()
 	case msgs.CatalogErr:
@@ -324,6 +326,12 @@ func (m *Model) defaults() {
 		if m.stored.Profile != "" {
 			sel.Profile = m.stored.Profile
 		}
+		if len(m.stored.SkipPackages) > 0 {
+			sel.SkipPkgs = map[string]bool{}
+			for _, name := range m.stored.SkipPackages {
+				sel.SkipPkgs[name] = true
+			}
+		}
 		if m.stored.Theme != "" && !m.d.Env.ThemeSet && slices.Contains(theme.Variants, m.stored.Theme) {
 			sel.Variant = m.stored.Theme
 		}
@@ -366,10 +374,24 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 			m.touched = true
 		}
 	case Components:
+		if m.editing {
+			id := m.d.Items[m.ccur].ID
+			m.ecur, m.d.Sel.SkipPkgs, a = screens.PackagesKey(k, m.ecur, m.d, id)
+			if k == "space" || k == "a" || k == "n" {
+				m.touched = true
+			}
+			if a == screens.Back {
+				m.editing, a = false, screens.None
+			}
+			break
+		}
 		before := len(m.d.Sel.Chosen)
 		m.ccur, m.d.Sel.Chosen, a = screens.ComponentsKey(k, m.ccur, m.d)
 		if k == "space" || k == "a" || k == "n" || before != len(m.d.Sel.Chosen) {
 			m.touched = true
+		}
+		if a == screens.Edit {
+			m.editing, m.ecur, a = true, 0, screens.None
 		}
 	case Account:
 		m.acct, a = screens.AccountKey(k, m.acct)
@@ -680,6 +702,10 @@ func (m Model) Content() string {
 	case Account:
 		body, keys = screens.AccountView(c, m.acct, m.users), screens.AccountKeys(c)
 	case Components:
+		if m.editing {
+			body, keys = screens.PackagesView(c, m.d, m.d.Items[m.ccur].ID, m.ecur), screens.PackagesKeys(c)
+			break
+		}
 		body, keys = screens.ComponentsView(c, m.d, m.ccur), screens.ComponentsKeys(c)
 	case Theme:
 		body, keys = screens.ThemeView(c, m.tcur), screens.ThemeKeys(c)
@@ -756,6 +782,10 @@ func (m Model) Title() string {
 	case Account:
 		state = []string{"user", "password", "again"}[m.acct.Field]
 	case Components:
+		if m.editing {
+			name, state = "editor", m.d.Items[m.ccur].ID
+			break
+		}
 		n := 0
 		for _, it := range m.d.Items {
 			if m.d.Sel.Chosen[it.ID] {

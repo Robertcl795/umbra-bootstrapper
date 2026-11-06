@@ -90,7 +90,8 @@ func EnvDir(flag string) string {
 	return filepath.FromSlash("env/wsl")
 }
 
-// ReadCatalog reads components.tsv under envDir.
+// ReadCatalog reads components.tsv and packages.tsv under envDir. Without packages.tsv (an older
+// checkout) the screens show the catalog's installs column instead of the package list.
 func ReadCatalog(envDir string) tea.Cmd {
 	return func() tea.Msg {
 		f, err := os.Open(filepath.Join(envDir, "install", "components.tsv"))
@@ -102,7 +103,14 @@ func ReadCatalog(envDir string) tea.Cmd {
 		if err != nil {
 			return msgs.CatalogErr{Err: err.Error()}
 		}
-		return msgs.Catalog{Cat: c}
+		var p catalog.Packages
+		if pf, err := os.Open(filepath.Join(envDir, "install", "packages.tsv")); err == nil {
+			defer pf.Close()
+			if p, err = catalog.ParsePackages(pf); err != nil {
+				return msgs.CatalogErr{Err: err.Error()}
+			}
+		}
+		return msgs.Catalog{Cat: c, Pkgs: p}
 	}
 }
 

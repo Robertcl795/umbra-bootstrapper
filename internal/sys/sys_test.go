@@ -1,6 +1,7 @@
 package sys
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/Robertcl795/umbra-bootstrapper/internal/theme"
@@ -60,5 +61,19 @@ func TestRegularUsersAndNames(t *testing.T) {
 		if ValidUsername(u) != want {
 			t.Errorf("ValidUsername(%q) != %v", u, want)
 		}
+	}
+}
+
+func TestParseStored(t *testing.T) {
+	text := "sourceDir = \"/x\"\n\n[data]\n    profile = \"work\"\n    theme = \"lux\"\n    components = \"packages,shell\"\n    skip_packages = \"eza,fzf\"\n"
+	st := ParseStored(text)
+	if !st.Found || st.Profile != "work" || st.Theme != "lux" || strings.Join(st.Components, ",") != "packages,shell" {
+		t.Errorf("%+v", st)
+	}
+	if strings.Join(st.SkipPackages, ",") != "eza,fzf" {
+		t.Errorf("skip_packages: %v", st.SkipPackages)
+	}
+	if st := ParseStored("[data]\n    profile = \"personal\"\n    skip_packages = \"\"\n"); st.SkipPackages != nil {
+		t.Errorf("empty skip_packages: %v", st.SkipPackages)
 	}
 }

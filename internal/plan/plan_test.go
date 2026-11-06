@@ -77,6 +77,9 @@ func TestArgs(t *testing.T) {
 		{"work with skip, no k8s, no variant", "ubuntu",
 			Selection{Profile: "work", Items: []string{"umbra-ai", "prompt"}, Skip: []string{"vault", "ollama"}},
 			"--yes --profile work --components prompt,ai-cli,ai-standard,um,vault,ollama --skip vault,ollama --disable-k8s"},
+		{"packages left out", "wsl-ubuntu",
+			Selection{Profile: "personal", Items: []string{"packages"}, SkipPackages: []string{"eza", "fzf"}, Variant: "umbra"},
+			"--yes --profile personal --components packages --skip-packages eza,fzf --theme umbra --disable-k8s"},
 	}
 	for _, tc := range cases {
 		if got := strings.Join(Args(c, tc.platform, tc.sel), " "); got != tc.want {
@@ -125,8 +128,13 @@ func TestShort(t *testing.T) {
 func TestDoctorEnv(t *testing.T) {
 	c, _ := load(t)
 	got := DoctorEnv(c, "wsl-ubuntu", Selection{Profile: "work", Items: []string{"prompt", "packages"}})
-	want := []string{"UM_COMPONENTS=packages,prompt", "UM_SKIP=", "UM_MODE=work"}
+	want := []string{"UM_COMPONENTS=packages,prompt", "UM_SKIP=", "UM_SKIP_PACKAGES=", "UM_MODE=work"}
 	if !slices.Equal(got, want) {
 		t.Errorf("%v, want %v", got, want)
+	}
+	// The doctor does not check the packages the user left out.
+	got = DoctorEnv(c, "wsl-ubuntu", Selection{Profile: "work", Items: []string{"packages"}, SkipPackages: []string{"fzf"}})
+	if !slices.Contains(got, "UM_SKIP_PACKAGES=fzf") {
+		t.Errorf("%v has no UM_SKIP_PACKAGES=fzf", got)
 	}
 }

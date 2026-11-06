@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ SCAN  ■ PROFILE  ◆ COMPONENTS  ◇ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE               
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┌─ PACKAGES · PACKAGES AND BASE TOOLS ───────────────────────────────────────┐ 
+ │ › [■] base-devel       (needed) Compilers and make, to build software fro… │ 
+ │   [■] git              (needed) Version control; the installer needs it    │ 
+ │   [■] curl             (needed) Downloads over HTTP; the installer needs … │ 
+ │   [■] wget             Downloads files from the web                        │ 
+ │   [■] unzip            Extracts .zip archives                              │ 
+ │   [■] ca-certificates  (needed) Root certificates for HTTPS                │ 
+ │   [■] ripgrep          Fast recursive search (rg)                          │ 
+ │   [■] fd               Fast, simple alternative to find                    │ 
+ │   [■] bat              cat with syntax highlighting                        │ 
+ │   [■] eza              Modern ls with icons and git status                 │ 
+ │   [■] fzf              Fuzzy finder for files, history and more            │ 
+ │   [■] zoxide           A cd that learns your folders (z)                   │ 
+ │   [■] neovim           Text editor; the Neovim component configures it     │ 
+ │   [■] starship         Fast prompt for any shell                           │ 
+ │                                                                            │ 
+ │ 26 of 26 selected · 5 needed · rows 1–14                                   │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+↑↓ move  ·  space toggle  ·  a all  ·  n none  ·  esc done                      

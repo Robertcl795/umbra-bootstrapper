@@ -1,0 +1,24 @@
+[35m◢◤ [m[1mUMBRA[m[35m//[mSETUP                         [37mwsl-arch · personal · umbra · 0.0.0-test[m
+[37m■ SCAN[m  [37m■ PROFILE[m  [1m◆ COMPONENTS[m  [37m◇ THEME[m  [37m◇ REVIEW[m  [37m◇ RUN[m  [37m◇ DONE[m               
+[90m────────────────────────────────────────────────────────────────────────────────[m
+                                                                                
+ [90m┌[m[90m─[m[37m PACKAGES · PACKAGES AND BASE TOOLS [m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┐[m 
+ [90m│[m [1;34m› [m[7m[■] base-devel       (needed) Compilers and make, to build software fro…[m [90m│[m 
+ [90m│[m   [37m[■] [mgit            [33m  (needed) [m[37mVersion control; the installer needs it[m    [90m│[m 
+ [90m│[m   [37m[■] [mcurl           [33m  (needed) [m[37mDownloads over HTTP; the installer needs …[m [90m│[m 
+ [90m│[m   [■] wget           [37m  Downloads files from the web[m                        [90m│[m 
+ [90m│[m   [■] unzip          [37m  Extracts .zip archives[m                              [90m│[m 
+ [90m│[m   [37m[■] [mca-certificates[33m  (needed) [m[37mRoot certificates for HTTPS[m                [90m│[m 
+ [90m│[m   [■] ripgrep        [37m  Fast recursive search (rg)[m                          [90m│[m 
+ [90m│[m   [■] fd             [37m  Fast, simple alternative to find[m                    [90m│[m 
+ [90m│[m   [■] bat            [37m  cat with syntax highlighting[m                        [90m│[m 
+ [90m│[m   [■] eza            [37m  Modern ls with icons and git status[m                 [90m│[m 
+ [90m│[m   [■] fzf            [37m  Fuzzy finder for files, history and more[m            [90m│[m 
+ [90m│[m   [■] zoxide         [37m  A cd that learns your folders (z)[m                   [90m│[m 
+ [90m│[m   [■] neovim         [37m  Text editor; the Neovim component configures it[m     [90m│[m 
+ [90m│[m   [■] starship       [37m  Fast prompt for any shell[m                           [90m│[m 
+ [90m│[m                                                                            [90m│[m 
+ [90m│[m [37m26 of 26 selected · 5 needed · rows 1–14[m                                   [90m│[m 
+ [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 
+                                                                                
+[1m↑↓[m [37mmove[m[90m  ·  [m[1mspace[m [37mtoggle[m[90m  ·  [m[1ma[m [37mall[m[90m  ·  [m[1mn[m [37mnone[m[90m  ·  [m[1mesc[m [37mdone[m                      

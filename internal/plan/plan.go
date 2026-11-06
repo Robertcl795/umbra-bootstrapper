@@ -19,6 +19,8 @@ type Selection struct {
 	Items   []string // catalog ids
 	Skip    []string // components to skip (--skip)
 	Variant string   // umbra, void or lux
+
+	SkipPackages []string // packages.tsv rows left out (--skip-packages), table order
 }
 
 // Components expands item ids into the --components list, in menu order, like
@@ -51,6 +53,9 @@ func Args(c catalog.Catalog, platform string, s Selection) []string {
 	args := []string{"--yes", "--profile", s.Profile, "--components", strings.Join(comps, ",")}
 	if len(s.Skip) > 0 {
 		args = append(args, "--skip", strings.Join(s.Skip, ","))
+	}
+	if len(s.SkipPackages) > 0 {
+		args = append(args, "--skip-packages", strings.Join(s.SkipPackages, ","))
 	}
 	if s.Variant != "" {
 		args = append(args, "--theme", s.Variant)

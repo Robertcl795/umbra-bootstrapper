@@ -27,8 +27,11 @@ type ScanFact struct {
 	State    FactState
 }
 
-// Catalog carries the component catalog once it is read.
-type Catalog struct{ Cat catalog.Catalog }
+// Catalog carries the component catalog and its package table once they are read.
+type Catalog struct {
+	Cat  catalog.Catalog
+	Pkgs catalog.Packages // empty when packages.tsv is missing (an older checkout)
+}
 
 // CatalogErr says the catalog could not be read or parsed.
 type CatalogErr struct{ Err string }
@@ -52,6 +55,8 @@ type Stored struct {
 	Profile    string
 	Theme      string
 	Components []string
+
+	SkipPackages []string // packages.tsv rows left out (skip_packages)
 }
 
 // Tick drives spinners and elapsed times while something runs (no tick at rest).

@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ ESCANEO  ■ PERFIL  ◆ COMPONENTES  ◇ TEMA  ◇ REVISAR  ◇ EJECUTAR  ◇ LISTO      
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┌─ PAQUETES · PAQUETES Y HERRAMIENTAS BASE ──────────────────────────────────┐ 
+ │   [■] neovim           Editor de texto; lo configura el componente Neovim  │ 
+ │   [■] starship         Prompt rápido para cualquier shell                  │ 
+ │   [■] tldr             Páginas de manual cortas, con ejemplos              │ 
+ │   [■] zsh              (necesario) Z shell, el shell principal de Umbra    │ 
+ │   [■] duf              Uso de disco, fácil de leer                         │ 
+ │   [■] just             Ejecuta los comandos con nombre de un proyecto      │ 
+ │   [■] lnav             Visor de archivos de log                            │ 
+ │   [■] lazygit          Interfaz de terminal para git                       │ 
+ │ › [ ] glow             Muestra Markdown en la terminal                     │ 
+ │   [■] lazydocker       Interfaz de terminal para Docker                    │ 
+ │   [■] yazi             Gestor de archivos en la terminal                   │ 
+ │   [■] zellij           Multiplexor de terminal: paneles, pestañas, sesion… │ 
+ │   [■] fastfetch        Resumen del sistema con el logo de Umbra            │ 
+ │   [■] sshs             Elige un host de ~/.ssh/config                      │ 
+ │                                                                            │ 
+ │ 25 de 26 seleccionados · 5 necesarios · filas 13–26                        │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+↑↓ mover  ·  space marcar  ·  a todos  ·  n ninguno  ·  esc listo               
