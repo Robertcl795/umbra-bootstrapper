@@ -2,7 +2,12 @@
 #!/usr/bin/env bash
 {{ template "um-env.sh" . }}
 # phase: {{ include "wsl/install/dev/lang.sh" | sha256sum }} dev/lang.sh
+# phase: {{ include "wsl/install/packages.tsv" | sha256sum }} packages.tsv
 component_enabled lang || phase_skip
 bash "$UM_ENV_DIR/install/dev/lang.sh" --run
-phase_gate lang "a language toolchain is missing" have_cmds rustup fnm uv
+gate=()
+for t in rustup fnm uv; do
+  if pkg_wanted lang "$t"; then gate+=("$t"); fi
+done
+phase_gate lang "a language toolchain is missing" have_cmds "${gate[@]}"
 {{- end }}

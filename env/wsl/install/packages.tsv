@@ -1,0 +1,71 @@
+# schema 1 · every package a component installs (ADR 0039). Tab-separated; '-' is empty; no quotes.
+# os: all, !<os> or a comma list of ubuntu, arch, omarchy (UM_OS). source: pm = the distro's package manager,
+# one batch that must succeed; pm-try = a batch that may fail; code = the install script installs it (fallbacks,
+# release binaries). pkg: the package manager's name when it differs. cmd: what the doctor checks, a|b = either.
+# skip: yes = the user may leave it out (--skip-packages); no = the component needs it.
+name	component	os	source	pkg	cmd	skip	desc_en	desc_es
+build-essential	packages	ubuntu	pm	-	-	no	Compilers and make, to build software from source	Compiladores y make, para compilar software desde el código
+base-devel	packages	arch	pm	-	-	no	Compilers and make, to build software from source	Compiladores y make, para compilar software desde el código
+git	packages	all	pm	-	git	no	Version control; the installer needs it	Control de versiones; el instalador lo necesita
+curl	packages	all	pm	-	curl	no	Downloads over HTTP; the installer needs it	Descargas por HTTP; el instalador lo necesita
+wget	packages	ubuntu,arch	pm	-	wget	yes	Downloads files from the web	Descarga archivos de la web
+unzip	packages	ubuntu,arch	pm	-	unzip	yes	Extracts .zip archives	Extrae archivos .zip
+ca-certificates	packages	ubuntu,arch	pm	-	-	no	Root certificates for HTTPS	Certificados raíz para HTTPS
+ripgrep	packages	all	pm	-	rg	yes	Fast recursive search (rg)	Búsqueda recursiva rápida (rg)
+fd	packages	ubuntu	pm	fd-find	fd|fdfind	yes	Fast, simple alternative to find	Alternativa rápida y simple a find
+fd	packages	arch,omarchy	pm	-	fd	yes	Fast, simple alternative to find	Alternativa rápida y simple a find
+bat	packages	all	pm	-	bat|batcat	yes	cat with syntax highlighting	cat con resaltado de sintaxis
+eza	packages	ubuntu	code	-	eza|exa	yes	Modern ls with icons and git status	ls moderno con íconos y estado de git
+eza	packages	arch,omarchy	pm	-	eza	yes	Modern ls with icons and git status	ls moderno con íconos y estado de git
+fzf	packages	all	pm	-	fzf	yes	Fuzzy finder for files, history and more	Buscador difuso de archivos, historial y más
+zoxide	packages	all	pm	-	zoxide	yes	A cd that learns your folders (z)	Un cd que aprende tus carpetas (z)
+neovim	packages	ubuntu,arch	pm	-	nvim	yes	Text editor; the Neovim component configures it	Editor de texto; lo configura el componente Neovim
+starship	packages	ubuntu	code	-	starship	yes	Fast prompt for any shell	Prompt rápido para cualquier shell
+starship	packages	arch,omarchy	pm	-	starship	yes	Fast prompt for any shell	Prompt rápido para cualquier shell
+tldr	packages	ubuntu	code	-	tldr|tealdeer	yes	Short man pages with examples	Páginas de manual cortas, con ejemplos
+tldr	packages	arch,omarchy	pm	-	tldr	yes	Short man pages with examples	Páginas de manual cortas, con ejemplos
+zsh	packages	all	pm	-	zsh	no	Z shell, Umbra's main shell	Z shell, el shell principal de Umbra
+duf	packages	ubuntu	code	-	duf	yes	Disk usage, easy to read	Uso de disco, fácil de leer
+duf	packages	arch,omarchy	pm	-	duf	yes	Disk usage, easy to read	Uso de disco, fácil de leer
+just	packages	ubuntu	pm-try	-	just	yes	Runs a project's named commands	Ejecuta los comandos con nombre de un proyecto
+just	packages	arch,omarchy	pm	-	just	yes	Runs a project's named commands	Ejecuta los comandos con nombre de un proyecto
+lnav	packages	ubuntu	pm-try	-	lnav	yes	Log file viewer	Visor de archivos de log
+lnav	packages	arch,omarchy	pm	-	lnav	yes	Log file viewer	Visor de archivos de log
+lazygit	packages	ubuntu	code	-	lazygit	yes	Terminal UI for git	Interfaz de terminal para git
+lazygit	packages	arch	pm	-	lazygit	yes	Terminal UI for git	Interfaz de terminal para git
+glow	packages	ubuntu	code	-	glow	yes	Renders Markdown in the terminal	Muestra Markdown en la terminal
+glow	packages	arch,omarchy	pm	-	glow	yes	Renders Markdown in the terminal	Muestra Markdown en la terminal
+lazydocker	packages	ubuntu	code	-	lazydocker	yes	Terminal UI for Docker	Interfaz de terminal para Docker
+lazydocker	packages	arch	pm	-	lazydocker	yes	Terminal UI for Docker	Interfaz de terminal para Docker
+yazi	packages	ubuntu	code	-	yazi	yes	Terminal file manager	Gestor de archivos en la terminal
+yazi	packages	arch	pm	-	yazi	yes	Terminal file manager	Gestor de archivos en la terminal
+zellij	packages	ubuntu	code	-	zellij	yes	Terminal multiplexer: panes, tabs, sessions	Multiplexor de terminal: paneles, pestañas, sesiones
+zellij	packages	arch,omarchy	pm	-	zellij	yes	Terminal multiplexer: panes, tabs, sessions	Multiplexor de terminal: paneles, pestañas, sesiones
+fastfetch	packages	ubuntu	code	-	fastfetch	yes	System summary with the Umbra logo	Resumen del sistema con el logo de Umbra
+fastfetch	packages	arch	pm	-	fastfetch	yes	System summary with the Umbra logo	Resumen del sistema con el logo de Umbra
+sshs	packages	ubuntu,arch	code	-	sshs	yes	Picks a host from ~/.ssh/config	Elige un host de ~/.ssh/config
+zsh	shell	all	code	-	zsh	no	Z shell, Umbra's main shell	Z shell, el shell principal de Umbra
+zsh-autosuggestions	shell	all	code	-	-	no	Suggests commands from your history as you type	Sugiere comandos de tu historial mientras escribes
+zsh-history-substring-search	shell	all	code	-	-	no	Up/Down search history by what you typed	Arriba/Abajo buscan en el historial por lo que escribiste
+zsh-vi-mode	shell	all	code	-	-	no	Vi keys on the command line	Teclas de vi en la línea de comandos
+fast-syntax-highlighting	shell	all	code	-	-	no	Colors commands as you type	Colorea los comandos mientras escribes
+starship	prompt	all	code	-	starship	no	Fast prompt for any shell	Prompt rápido para cualquier shell
+neovim	nvim	!omarchy	code	-	nvim	no	Text editor; the Neovim component configures it	Editor de texto; lo configura el componente Neovim
+kubectl	k8s	!omarchy	code	-	kubectl	yes	Kubernetes command-line client	Cliente de línea de comandos de Kubernetes
+helm	k8s	!omarchy	code	-	helm	yes	Kubernetes package manager	Gestor de paquetes de Kubernetes
+k3d	k8s	!omarchy	code	-	k3d	yes	Local Kubernetes clusters in Docker	Clústeres locales de Kubernetes en Docker
+zellij	zellij	!omarchy	code	-	zellij	no	Terminal multiplexer: panes, tabs, sessions	Multiplexor de terminal: paneles, pestañas, sesiones
+rustup	lang	!omarchy	code	-	rustup	yes	Installs and updates Rust	Instala y actualiza Rust
+fnm	lang	!omarchy	code	-	fnm	yes	Node.js version manager	Gestor de versiones de Node.js
+pnpm	lang	!omarchy	code	-	pnpm	yes	Node.js package manager (needs fnm)	Gestor de paquetes de Node.js (necesita fnm)
+uv	lang	!omarchy	code	-	uv	yes	Python versions, packages and tools	Versiones, paquetes y herramientas de Python
+fastfetch	fastfetch	!omarchy	code	-	fastfetch	no	System summary with the Umbra logo	Resumen del sistema con el logo de Umbra
+JetBrainsMono-Nerd-Font	terminal	ubuntu,arch	code	-	-	no	Font with icons, for your Windows user	Fuente con íconos, para tu usuario de Windows
+starship	pwsh	ubuntu,arch	code	-	-	no	Starship for PowerShell, from winget	Starship para PowerShell, desde winget
+ghostty	desktop	ubuntu,arch	code	-	ghostty	no	GPU terminal with the Umbra theme	Terminal con GPU y el tema de Umbra
+JetBrainsMono-Nerd-Font	desktop	ubuntu,arch	code	-	-	no	Font with icons	Fuente con íconos
+claude-code	umbra-ai	all	code	-	claude	no	Claude Code CLI	CLI de Claude Code
+opencode	umbra-ai	all	code	-	opencode	no	opencode CLI	CLI de opencode
+github-cli	umbra-ai	all	code	-	gh	no	GitHub CLI with Copilot	CLI de GitHub con Copilot
+um	umbra-ai	all	code	-	um	no	Umbra's command-line tool	La herramienta de línea de comandos de Umbra
+ollama	umbra-ai	all	code	-	ollama	no	Local model runtime; nothing is pulled	Ejecuta modelos locales; no descarga ninguno

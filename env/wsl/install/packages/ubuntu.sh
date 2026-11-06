@@ -11,16 +11,16 @@ source "$SCRIPT_DIR/../common.sh"
 install_packages_ubuntu() {
   log_step "Phase 1: System update + base packages (Ubuntu)"
   run_priv apt-get update
-  run_priv apt-get install -y \
-    build-essential git curl wget unzip ca-certificates \
-    ripgrep fd-find bat \
-    fzf zoxide neovim zsh
+  # The rows of install/packages.tsv for ubuntu: one batch that must succeed, then the rest.
+  local -a pkgs
+  mapfile -t pkgs < <(pkg_list packages pm)
+  run_priv apt-get install -y "${pkgs[@]}"
   # ADR 0004: fish only when it is the chosen shell.
   if [ "${UM_SHELL:-zsh}" = "fish" ]; then
     run_priv apt-get install -y fish
   fi
 
-  if ! run_priv apt-get install -y eza; then
+  if pkg_wanted packages eza && ! run_priv apt-get install -y eza; then
     log_warn "eza has no installable candidate; trying exa instead."
     run_priv apt-get install -y exa || log_warn "Neither eza nor exa is installable via apt; skipping."
   fi
@@ -31,14 +31,14 @@ install_packages_ubuntu() {
   # under `set -e` when `apt-get install` then failed. Just attempt the
   # install directly (inside an `if`, so failure never trips errexit) and
   # fall back to tealdeer; skip entirely if neither is installable.
-  if ! run_priv apt-get install -y tldr; then
+  if pkg_wanted packages tldr && ! run_priv apt-get install -y tldr; then
     log_warn "tldr has no installable candidate; trying tealdeer instead."
     if ! run_priv apt-get install -y tealdeer; then
       log_warn "Neither tldr nor tealdeer is installable via apt; skipping (cheat-sheet lookups won't be available)."
     fi
   fi
 
-  if ! ensure_cmd starship; then
+  if pkg_wanted packages starship && ! ensure_cmd starship; then
     # To ~/.local/bin: for /usr/local/bin the installer runs its own `sudo -v`, outside run_priv.
     log_info "Installing Starship via official installer."
     mkdir -p "$HOME/.local/bin"
@@ -72,7 +72,12 @@ install_packages_ubuntu() {
 install_cli_extras_ubuntu() {
   log_step "Core CLI extras (lazygit, glow, duf, lazydocker, yazi, sshs, lnav, just, zellij)"
 
-  run_priv apt-get install -y duf just lnav || log_warn "apt could not install duf/just/lnav; continuing."
+  local -a try
+  mapfile -t try < <(pkg_list packages pm-try)
+  if pkg_wanted packages duf; then try=(duf "${try[@]}"); fi
+  if [ "${#try[@]}" -gt 0 ]; then
+    run_priv apt-get install -y "${try[@]}" || log_warn "apt could not install ${try[*]}; continuing."
+  fi
 
   local arch rust_arch
   arch="$(detect_arch)"
@@ -100,6 +105,9 @@ install_cli_extras_ubuntu() {
     "https://github.com/zellij-org/zellij/releases/download/v${zellij_ver}/zellij-${rust_arch}-unknown-linux-musl.tar.gz" \
     "https://github.com/sxyazi/yazi/releases/download/v${yazi_ver}/yazi-${rust_arch}-unknown-linux-gnu.zip" \
     "https://github.com/quantumsheep/sshs/releases/download/${sshs_ver}/sshs-linux-${arch}"; do
+    local name="${url##*/}"
+    name="${name%%[-_]*}"
+    pkg_wanted packages "$name" || continue
     case "$url" in
       */lazygit_*) install_release_bin lazygit "$url" "$(pinned_sha256 "$url")" ;;
       */glow_*) install_release_bin glow "$url" "$(pinned_sha256 "$url")" ;;
@@ -112,13 +120,13 @@ install_cli_extras_ubuntu() {
 
   # fastfetch entered the Ubuntu archive in 24.10; older releases (and the
   # LTS) need the upstream build. Its arm64 asset is named aarch64.
-  if ! ensure_cmd fastfetch && ! run_priv apt-get install -y fastfetch 2>/dev/null; then
+  if pkg_wanted packages fastfetch && ! ensure_cmd fastfetch && ! run_priv apt-get install -y fastfetch 2>/dev/null; then
     url="https://github.com/fastfetch-cli/fastfetch/releases/download/${fastfetch_ver}/fastfetch-linux-${rust_arch/x86_64/amd64}.tar.gz"
     install_release_bin fastfetch "$url" "$(pinned_sha256 "$url")"
   fi
 
   # duf's release assets are named x86_64/arm64.
-  if ! ensure_cmd duf; then
+  if pkg_wanted packages duf && ! ensure_cmd duf; then
     local duf_ver="${UM_DUF_VERSION:-0.8.1}"
     url="https://github.com/muesli/duf/releases/download/v${duf_ver}/duf_${duf_ver}_linux_${goarch_suffix#Linux_}.tar.gz"
     install_release_bin duf "$url" "$(pinned_sha256 "$url")"

@@ -240,7 +240,7 @@ write_marker() {
     if [ -n "$UM_MODE_GIVEN" ]; then
       printf 'export UM_MODE=%q\n' "$UM_MODE_GIVEN"
     fi
-    for var in UM_SHELL UM_THEME UM_ENABLE_K8S UM_ENABLE_WSLCONFIG UM_WSL_NETWORKING UM_NONINTERACTIVE UM_COMPONENTS UM_SKIP; do
+    for var in UM_SHELL UM_THEME UM_ENABLE_K8S UM_ENABLE_WSLCONFIG UM_WSL_NETWORKING UM_NONINTERACTIVE UM_COMPONENTS UM_SKIP UM_SKIP_PACKAGES; do
       if [ -n "${!var:-}" ]; then
         printf 'export %s=%q\n' "$var" "${!var}"
       fi

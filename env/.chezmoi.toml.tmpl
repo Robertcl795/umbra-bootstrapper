@@ -19,7 +19,7 @@
        `chezmoi apply` later sees the same selection and re-runs nothing. */ -}}
 {{- $fromBootstrap := eq (env "UM_CHEZMOI_INIT") "1" -}}
 {{- $sel := dict -}}
-{{- range $key, $var := dict "components" "UM_COMPONENTS" "skip" "UM_SKIP" "k8s" "UM_ENABLE_K8S" "wslconfig" "UM_ENABLE_WSLCONFIG" "networking" "UM_WSL_NETWORKING" "is_wsl" "UM_IS_WSL" "noninteractive" "UM_NONINTERACTIVE" -}}
+{{- range $key, $var := dict "components" "UM_COMPONENTS" "skip" "UM_SKIP" "skip_packages" "UM_SKIP_PACKAGES" "k8s" "UM_ENABLE_K8S" "wslconfig" "UM_ENABLE_WSLCONFIG" "networking" "UM_WSL_NETWORKING" "is_wsl" "UM_IS_WSL" "noninteractive" "UM_NONINTERACTIVE" -}}
 {{-   if $fromBootstrap }}{{ $_ := set $sel $key (env $var) }}{{ else }}{{ $_ := set $sel $key (get $ $key | default "") }}{{ end -}}
 {{- end -}}
 sourceDir = {{ .chezmoi.workingTree | quote }}

@@ -5,6 +5,7 @@
 # phase: {{ include "wsl/install/packages/ubuntu.sh" | sha256sum }} packages/ubuntu.sh
 # phase: {{ include "wsl/install/packages/arch.sh" | sha256sum }} packages/arch.sh
 # phase: {{ include "wsl/install/packages/omarchy.sh" | sha256sum }} packages/omarchy.sh
+# phase: {{ include "wsl/install/packages.tsv" | sha256sum }} packages.tsv
 # shellcheck disable=SC1091
 source "$UM_ENV_DIR/install/detect_os.sh"
 detect_os
@@ -15,5 +16,5 @@ case "$UM_OS" in
   arch) bash "$UM_ENV_DIR/install/packages/arch.sh" --run ;;
   omarchy) bash "$UM_ENV_DIR/install/packages/omarchy.sh" --run ;;
 esac
-phase_gate packages "base packages are missing; see the package manager output above" have_cmds git curl rg fzf zsh
+phase_gate packages "base packages are missing; see the package manager output above" have_cmds git curl zsh
 {{- end }}

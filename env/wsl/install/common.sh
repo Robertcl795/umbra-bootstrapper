@@ -245,6 +245,33 @@ have_cmds() {
   done
 }
 
+# The package list (install/packages.tsv): one row per package a component installs, for the OSes
+# in its os column. UM_SKIP_PACKAGES (--skip-packages) leaves out rows with skip=yes; the others
+# are what the component needs and always stay.
+UM_SKIP_PACKAGES="${UM_SKIP_PACKAGES:-}"
+
+# pkg_rows <component> [source...]: "name<TAB>pkg<TAB>cmd" of the wanted rows for UM_OS, in file
+# order; pkg is the package manager's name. With sources, only rows with one of them.
+pkg_rows() {
+  local comp="$1"
+  shift
+  awk -F'\t' -v os="${UM_OS:-}" -v comp="$comp" -v srcs=" $* " -v skip=",$UM_SKIP_PACKAGES," '
+    /^#/ || $1 == "name" || $2 != comp { next }
+    srcs != "  " && index(srcs, " " $4 " ") == 0 { next }
+    $7 == "yes" && index(skip, "," $1 ",") > 0 { next }
+    { ok = 0
+      if ($3 == "all") ok = 1
+      else if (substr($3, 1, 1) == "!") ok = (substr($3, 2) != os)
+      else { n = split($3, l, ","); for (i = 1; i <= n; i++) if (l[i] == os) ok = 1 } }
+    ok { print $1 "\t" ($5 == "-" ? $1 : $5) "\t" $6 }' "$UM_ENV_DIR/install/packages.tsv"
+}
+
+# pkg_list <component> <source...>: the package manager names of those rows, one per line.
+pkg_list() { pkg_rows "$@" | cut -f2; }
+
+# pkg_wanted <component> <name>: the row is on this OS and not skipped.
+pkg_wanted() { pkg_rows "$1" | cut -f1 | grep -qx -- "$2"; }
+
 run() {
   if [ "$UM_VERBOSE" = "1" ]; then
     log_step "$*"
@@ -364,7 +391,7 @@ select_theme() {
   esac
 }
 
-export UM_ENV_DIR UM_NONINTERACTIVE UM_VERBOSE UM_SHELL UM_THEME UM_ENABLE_K8S UM_MODE UM_COMPONENTS UM_SKIP
+export UM_ENV_DIR UM_NONINTERACTIVE UM_VERBOSE UM_SHELL UM_THEME UM_ENABLE_K8S UM_MODE UM_COMPONENTS UM_SKIP UM_SKIP_PACKAGES
 
 UM_AI_REPO_HTTPS="${UM_AI_REPO_HTTPS:-https://github.com/Robertcl795/umbra-ai.git}"
 UM_AI_REPO_SSH="${UM_AI_REPO_SSH:-git@github.com:Robertcl795/umbra-ai.git}"

@@ -44,6 +44,7 @@ while [ $# -gt 0 ]; do
       shift 2 ;;
     --components) export UM_COMPONENTS="$2"; shift 2 ;;
     --skip) export UM_SKIP="$2"; shift 2 ;;
+    --skip-packages) export UM_SKIP_PACKAGES="$2"; shift 2 ;;
     --user) export UM_USERNAME="$2"; shift 2 ;;
     --shell) export UM_SHELL="$2"; shift 2 ;;
     --theme) export UM_THEME="$2"; shift 2 ;;

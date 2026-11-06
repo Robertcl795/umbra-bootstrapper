@@ -14,9 +14,10 @@ source "$SCRIPT_DIR/../common.sh"
 install_packages_omarchy() {
   log_step "Phase 1: Extra tools (Omarchy, pacman -S --needed only)"
 
-  if ! run_priv pacman -S --noconfirm --needed \
-    git curl zsh ripgrep fd bat eza fzf zoxide starship \
-    tldr glow duf lnav just zellij; then
+  # The rows of install/packages.tsv for omarchy.
+  local -a pkgs
+  mapfile -t pkgs < <(pkg_list packages pm)
+  if ! run_priv pacman -S --noconfirm --needed "${pkgs[@]}"; then
     die "pacman could not install the extra tools. Update Omarchy from its menu (Update > Omarchy), then run Umbra again."
   fi
 

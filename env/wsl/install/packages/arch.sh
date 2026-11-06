@@ -19,11 +19,10 @@ install_packages_arch() {
 
   run_priv pacman -Sy --noconfirm
 
-  run_priv pacman -S --noconfirm --needed \
-    base-devel git curl wget unzip ca-certificates \
-    ripgrep fd bat eza fzf zoxide neovim starship \
-    tldr zsh \
-    lazygit glow duf lazydocker yazi lnav just zellij fastfetch
+  # The rows of install/packages.tsv for arch.
+  local -a pkgs
+  mapfile -t pkgs < <(pkg_list packages pm)
+  run_priv pacman -S --noconfirm --needed "${pkgs[@]}"
 
   # ADR 0004: fish only when it is the chosen shell.
   if [ "${UM_SHELL:-zsh}" = "fish" ]; then
@@ -55,7 +54,7 @@ ensure_yay() {
 
 # sshs is not in the official repos: try AUR, then cargo, then release binary.
 install_sshs_arch() {
-  if ensure_cmd sshs; then
+  if ! pkg_wanted packages sshs || ensure_cmd sshs; then
     return 0
   fi
   if ensure_yay && yay -S --noconfirm --needed sshs; then

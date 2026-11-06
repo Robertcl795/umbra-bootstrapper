@@ -42,9 +42,11 @@ install_k8s_tools() {
     return 0
   fi
   log_step "Phase 6: Dev environment (k8s)"
-  install_kubectl
-  install_helm
-  install_k3d
+  # The k8s rows of install/packages.tsv; --skip-packages leaves one out.
+  local t
+  for t in kubectl helm k3d; do
+    if pkg_wanted k8s "$t"; then "install_$t"; else log_info "$t: skipped (--skip-packages)."; fi
+  done
 }
 
 if [ "${1:-}" = "--run" ]; then

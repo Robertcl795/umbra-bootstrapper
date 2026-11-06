@@ -98,13 +98,16 @@ install_uv() {
 
 install_lang_toolchains() {
   log_step "Phase 8: Language toolchains (rustup / fnm+pnpm / uv)"
-  install_rustup
-  if install_fnm; then
-    install_pnpm
-  else
-    log_warn "Skipping pnpm (Node.js setup did not complete)."
+  # The lang rows of install/packages.tsv; --skip-packages leaves one out (pnpm needs fnm).
+  if pkg_wanted lang rustup; then install_rustup; fi
+  if pkg_wanted lang fnm; then
+    if install_fnm; then
+      if pkg_wanted lang pnpm; then install_pnpm; fi
+    else
+      log_warn "Skipping pnpm (Node.js setup did not complete)."
+    fi
   fi
-  install_uv
+  if pkg_wanted lang uv; then install_uv; fi
 }
 
 if [ "${1:-}" = "--run" ]; then
