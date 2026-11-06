@@ -107,7 +107,7 @@ fragment_write() {
   tmp="$(mktemp "$dir/.umbra.XXXXXX")"
   if WSL_DISTRO_NAME="${WSL_DISTRO_NAME:-}" "$bin" --wt-fragment "${UM_THEME:-umbra}" --wt-font "$font" >"$tmp"; then
     mv "$tmp" "$dir/umbra.json"
-    log_info "Windows Terminal: profile \"Umbra · ${WSL_DISTRO_NAME:-}\" with the ${UM_THEME:-umbra} scheme (open it from the tab menu)."
+    log_info "Windows Terminal: profile \"Umbra · ${WSL_DISTRO_NAME:-}\" with the ${UM_THEME:-umbra} scheme. Restart Windows Terminal (a running one loads it on its next settings reload), then open it from the tab menu. Your profiles.defaults, if set, outranks its scheme and font."
   else
     rm -f "$tmp"
     log_warn "umbra-setup could not print the Windows Terminal fragment."
