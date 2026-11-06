@@ -15,8 +15,8 @@ Each component is a phase. chezmoi runs them as scripts from [`env/.chezmoiscrip
 
 | Phase | What it installs | Test |
 |---|---|---|
-| `packages` | `git curl wget unzip ripgrep fd bat eza fzf zoxide neovim starship tldr zsh lazygit glow duf lazydocker yazi sshs lnav just zellij fastfetch`; fish only when chosen | `01_packages.sh` |
-| `shell` | zsh as login shell, with zsh-vi-mode, zsh-autosuggestions, fast-syntax-highlighting and zsh-history-substring-search pre-cloned to `~/.local/share/zsh/plugins` (`UM_SHELL=fish`: fish, fisher, fzf.fish) | `03_shell.sh` |
+| `packages` | every row of [`install/packages.tsv`](../../env/wsl/install/packages.tsv) for your OS (umbra-setup lists them with a description; `--skip-packages a,b` leaves out the optional ones); fish only when chosen | `01_packages.sh` |
+| `shell` | zsh with zsh-vi-mode, zsh-autosuggestions, fast-syntax-highlighting and zsh-history-substring-search pre-cloned to `~/.local/share/zsh/plugins` (`UM_SHELL=fish`: also fish, fisher, fzf.fish). umbra-setup asks on Make default before it changes the login shell; `bootstrap.sh --yes` alone sets zsh | `03_shell.sh` |
 | `prompt` | [Starship](https://starship.rs); `~/.config/starship.toml` in the chosen variant | `04_prompt.sh` |
 | `nvim` | Neovim with lazy.nvim and the Umbra colorscheme | `05_nvim.sh` |
 | `k8s` | `kubectl`, `helm`, `k3d` (`UM_ENABLE_K8S=0` skips it) | `06_dev.sh` |
@@ -26,6 +26,7 @@ Each component is a phase. chezmoi runs them as scripts from [`env/.chezmoiscrip
 | `wsl` | WSL tuning; see [wsl.md](wsl.md) | `08_wsl.sh` |
 | `terminal` (WSL) | Windows Terminal: a fragment with the Umbra schemes and an "Umbra · <distro>" profile of its own, plus JetBrainsMono Nerd Font for your Windows user (no admin; your own profiles stay as they are). `bash $UM_ENV_DIR/install/terminal.sh --remove` takes both out | `13_terminal.sh` |
 | `pwsh` (WSL, opt-in) | Starship in PowerShell (winget), a starship.toml of Umbra's own and one marked block in each `$PROFILE`. The execution policy is never changed: under `Restricted`, Windows PowerShell does not load the profile, and Umbra names the command for you to run. `terminal.sh --pwsh-remove` takes the block out | `14_pwsh.sh` |
+| `pwsh7` (WSL, opt-in) | PowerShell 7 for your Windows user: the latest stable `Microsoft.PowerShell` from winget (an older 7 is upgraded; ADR 0044). Make default can then set it as Windows Terminal's default profile, after you confirm (a backup of settings.json first) | `15_pwsh7.sh` |
 | `ai-standard` | the Umbra AI-Standard through `um ai setup`, when Umbra AI is installed (work: only the allowed agents, no MCP server; personal: also the local context DB) | `09_ai.sh` |
 | `fastfetch` | the greeting on each new interactive shell | `12_fastfetch.sh` |
 | `desktop` (opt-in, native only) | Ghostty and JetBrainsMono Nerd Font | container scenario `desktop` |
@@ -44,6 +45,7 @@ Everything is interactive on a terminal. Every prompt has an environment variabl
 | `UM_SHELL` | `zsh`, `fish` | `zsh` |
 | `UM_MODE` (`--profile`) | `personal`, `work`; work skips the personal-only parts | `personal` |
 | `UM_COMPONENTS` (`--components`), `UM_SKIP` (`--skip`) | comma-separated phase names | all phases |
+| `UM_SKIP_PACKAGES` (`--skip-packages`) | comma-separated names from `packages.tsv` with `skip=yes` | none |
 | `UM_ENABLE_K8S` | `0`, `1` | asked on a terminal; otherwise `1` |
 | `UM_NONINTERACTIVE` (`--yes`) | `1` accepts every default | unset |
 | `UM_NO_FASTFETCH` | `1` disables the greeting | unset |
