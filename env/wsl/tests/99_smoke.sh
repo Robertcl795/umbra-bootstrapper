@@ -32,6 +32,8 @@ check 05_nvim.sh nvim
 check 06_dev.sh k8s
 check 07_devstack.sh lang ai-cli
 check 08_wsl.sh wsl
+check 13_terminal.sh terminal
+check 14_pwsh.sh pwsh
 # Without umbra-ai (no access, ADR 0018) there is no AI-Standard to check.
 if find_ai_standard >/dev/null 2>&1; then
   check 09_ai.sh ai-standard

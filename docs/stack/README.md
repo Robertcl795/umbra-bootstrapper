@@ -24,6 +24,8 @@ Each component is a phase. chezmoi runs them as scripts from [`env/.chezmoiscrip
 | `lang` | rustup, fnm (Node LTS), uv, pnpm | `07_devstack.sh` |
 | `ai-cli` | Claude Code, opencode (personal only), `gh` with the Copilot extension once `gh auth login` is done | `09_ai.sh` |
 | `wsl` | WSL tuning; see [wsl.md](wsl.md) | `08_wsl.sh` |
+| `terminal` (WSL) | Windows Terminal: a fragment with the Umbra schemes and an "Umbra · <distro>" profile of its own, plus JetBrainsMono Nerd Font for your Windows user (no admin; your own profiles stay as they are). `bash $UM_ENV_DIR/install/terminal.sh --remove` takes both out | `13_terminal.sh` |
+| `pwsh` (WSL, opt-in) | Starship in PowerShell (winget), a starship.toml of Umbra's own and one marked block in each `$PROFILE`. The execution policy is never changed: under `Restricted`, Windows PowerShell does not load the profile, and Umbra names the command for you to run. `terminal.sh --pwsh-remove` takes the block out | `14_pwsh.sh` |
 | `ai-standard` | the Umbra AI-Standard through `um ai setup`, when Umbra AI is installed (work: only the allowed agents, no MCP server; personal: also the local context DB) | `09_ai.sh` |
 | `fastfetch` | the greeting on each new interactive shell | `12_fastfetch.sh` |
 | `desktop` (opt-in, native only) | Ghostty and JetBrainsMono Nerd Font | container scenario `desktop` |

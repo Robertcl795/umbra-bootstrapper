@@ -364,7 +364,7 @@ func visibleWidth(s string) int {
 
 func TestTitleNamesTheScreenAndState(t *testing.T) {
 	m := started(t, fixtureEnv("umbra", theme.None, "en"), 80, 24)
-	want := []string{"Umbra setup · scan ready", "Umbra setup · profile", "Umbra setup · components 10/10", "Umbra setup · theme umbra", "Umbra setup · review install"}
+	want := []string{"Umbra setup · scan ready", "Umbra setup · profile", "Umbra setup · components 11/12", "Umbra setup · theme umbra", "Umbra setup · review install"}
 	for _, w := range want {
 		if got := m.View().WindowTitle; got != w {
 			t.Errorf("title %q, want %q", got, w)

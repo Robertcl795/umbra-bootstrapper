@@ -7,14 +7,14 @@
  [90m│[m [37mprofile    [mpersonal                                                        [90m│[m 
  [90m│[m [37mtheme      [mumbra                                                           [90m│[m 
  [90m│[m [37minstall    [mpackages · shell · prompt · nvim · k8s · zellij · lang          [90m│[m 
- [90m│[m [37m           [mfastfetch · wsl · umbra-ai                                      [90m│[m 
- [90m│[m [37mskip       [m[37mnothing[m                                                         [90m│[m 
+ [90m│[m [37m           [mfastfetch · wsl · terminal · umbra-ai                           [90m│[m 
+ [90m│[m [37mskip       [mpwsh                                                            [90m│[m 
  [90m│[m [37msudo       [masks once for your password                                     [90m│[m 
  [90m│[m [37mre-run     [m[37msafe: a second run changes nothing[m                              [90m│[m 
  [90m│[m                                                                            [90m│[m 
  [90m│[m [37mNext time: [m[36minstall.sh --yes --profile personal --components packages,[m      [90m│[m 
- [90m│[m            [36mshell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,ai-cli,[m         [90m│[m 
- [90m│[m            [36mai-standard,um,vault,ollama --theme umbra --enable-k8s[m          [90m│[m 
+ [90m│[m            [36mshell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,[m       [90m│[m 
+ [90m│[m            [36mai-cli,ai-standard,um,vault,ollama --theme umbra --enable-k8s[m   [90m│[m 
  [90m│[m                                                                            [90m│[m 
  [90m│[m [1;34m› [m[1;7m[ Install ][m   [ Dry run ]   [ Back ]                                     [90m│[m 
  [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 

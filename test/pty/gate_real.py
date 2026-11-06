@@ -50,8 +50,8 @@ def titled(raw, name):
 
 
 # n clears; the cursor stays on packages: packages, shell, prompt.
-PICK = [(T + "components 9/9", "n"), (T + "components 0/9", SPACE), (T + "components 1/9", DOWN + SPACE),
-        (T + "components 2/9", DOWN + SPACE), (T + "components 3/9", ENTER), (T + "theme umbra", ENTER)]
+PICK = [(T + "components 10/11", "n"), (T + "components 0/11", SPACE), (T + "components 1/11", DOWN + SPACE),
+        (T + "components 2/11", DOWN + SPACE), (T + "components 3/11", ENTER), (T + "theme umbra", ENTER)]
 
 
 def user_runs(argv, env, password):
@@ -67,10 +67,10 @@ def user_runs(argv, env, password):
 def rerun(argv, env, password):
     # The stored selection (3 of 9) opens the components screen. sudo keeps its timestamp per
     # terminal, and this is a new one, so it asks again.
-    steps = [(T + "scan ready", ENTER), (T + "profile", ENTER), (T + "components 3/9", ENTER),
+    steps = [(T + "scan ready", ENTER), (T + "profile", ENTER), (T + "components 3/11", ENTER),
              (T + "theme umbra", ENTER), (T + "review install", ENTER), ("assword", password + "\r"), (T + "done", ENTER)]
     code, text, raw = driver.run(argv, steps, env, timeout=1800, settle=0.4)
-    check("re-run: opens with the stored selection (components 3/9)", titled(raw, "components 3/9"), text[-3000:])
+    check("re-run: opens with the stored selection (components 3/11)", titled(raw, "components 3/11"), text[-3000:])
     check("re-run: passes again, exit 0", code == 0 and titled(raw, "done"), text[-4000:])
 
 

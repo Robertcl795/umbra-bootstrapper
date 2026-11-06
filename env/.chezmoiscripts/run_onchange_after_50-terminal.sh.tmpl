@@ -1,0 +1,9 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/terminal.sh" | sha256sum }} terminal.sh
+# theme: {{ .theme }} (the fragment's scheme follows it, so a switch re-runs this)
+export UM_THEME={{ .theme | quote }}
+component_enabled terminal || phase_skip
+bash "$UM_ENV_DIR/install/terminal.sh" --run
+{{- end }}

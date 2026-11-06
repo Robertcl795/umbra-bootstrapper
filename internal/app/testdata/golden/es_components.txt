@@ -12,12 +12,12 @@
  ┃   [■] Toolchains de lenguajes        ┃ │ prueba     01_packages.sh         │ 
  ┃   [■] fastfetch                      ┃ │ work       igual que personal     │ 
  ┃   [■] Ajustes de WSL                 ┃ │                                   │ 
- ┃   [■] Umbra AI: um · vault · estánd… ┃ │ agregar    --components packages  │ 
- ┃                                      ┃ │ omitir     --skip packages        │ 
- ┃ 10 de 10 seleccionados               ┃ │                                   │ 
+ ┃   [■] Windows Terminal: tema Umbra   ┃ │ agregar    --components packages  │ 
+ ┃   [ ] Prompt de PowerShell: Starship ┃ │ omitir     --skip packages        │ 
+ ┃   [■] Umbra AI: um · vault · estánd… ┃ │                                   │ 
+ ┃                                      ┃ │                                   │ 
+ ┃ 11 de 12 seleccionados               ┃ │                                   │ 
  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 
-                                                                                
-                                                                                
                                                                                 
                                                                                 
                                                                                 

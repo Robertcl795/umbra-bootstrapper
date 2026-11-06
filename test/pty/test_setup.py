@@ -62,7 +62,7 @@ def env(**extra):
 
 
 def walk_to_review():
-    return [("enter continue", ENTER), ("Which profile", ENTER), ("of 10 selected", ENTER),
+    return [("enter continue", ENTER), ("Which profile", ENTER), ("of 12 selected", ENTER),
             ("Pick a variant", ENTER), ("[ Install ]", "")]
 
 
@@ -71,14 +71,14 @@ def f1_defaults_dry_run():
     code, text, raw = driver.run([BIN], steps, env(), timeout=30)
     line = text.split("--- screen ---")[0]
     check("F1 defaults, Dry run: install.sh --dry-run prints the plan (contract C5)",
-          code == 0 and "platform=wsl-arch profile=personal components=packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,ai-cli,ai-standard,um,vault,ollama" in line, text)
+          code == 0 and "platform=wsl-arch profile=personal components=packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,ai-cli,ai-standard,um,vault,ollama" in line, text)
     check("F1 truecolor paints the variant background (OSC 11)", b"\x1b]11;" in raw)
     check("F1 the background is reset on exit (OSC 111)", b"\x1b]111" in raw)
 
 
 def f2_work_untick_void():
     steps = [("enter continue", ENTER), ("Which profile", DOWN), ("Check your company", ENTER),
-             ("of 10 selected", SPACE), ("9 of 10 selected", ENTER),
+             ("of 12 selected", SPACE), ("10 of 12 selected", ENTER),
              ("Pick a variant", RIGHT), ("UM_THEME=void", ENTER), ("[ Install ]", RIGHT), ("› [ Dry run ]", ENTER)]
     code, text, _ = driver.run([BIN], steps, env(), timeout=30)
     check("F2 work, packages unticked, void: install.sh --dry-run agrees", code == 0 and "profile=work components=shell,prompt" in text, text)
@@ -124,8 +124,8 @@ def run_env(tmp, **extra):
 
 def to_install():
     # shell and prompt only: n (none), down, space (shell), down, space (prompt)
-    return [("enter continue", ENTER), ("Which profile", ENTER), ("of 10 selected", "n"), ("0 of 10 selected", DOWN + SPACE),
-            ("1 of 10 selected", DOWN + SPACE), ("2 of 10 selected", ENTER), ("Pick a variant", ENTER), ("[ Install ]", ENTER)]
+    return [("enter continue", ENTER), ("Which profile", ENTER), ("of 12 selected", "n"), ("0 of 12 selected", DOWN + SPACE),
+            ("1 of 12 selected", DOWN + SPACE), ("2 of 12 selected", ENTER), ("Pick a variant", ENTER), ("[ Install ]", ENTER)]
 
 
 def g1_run_with_sudo_and_doctor():
@@ -177,10 +177,10 @@ def g4_rerun_shows_installed():
     os.makedirs(os.path.join(tmp, "config", "chezmoi"))
     with open(os.path.join(tmp, "config", "chezmoi", "chezmoi.toml"), "w") as f:
         f.write('sourceDir = "/x"\n\n[data]\n    profile = "work"\n    theme = "void"\n    components = "shell,prompt"\n')
-    steps = [("enter continue", ENTER), ("Which profile", ENTER), ("of 10 selected", "q")]
+    steps = [("enter continue", ENTER), ("Which profile", ENTER), ("of 12 selected", "q")]
     code, text, _ = driver.run([BIN], steps, run_env(tmp, UM_THEME=None), timeout=20)
     check("G4 a re-run opens with the stored selection, marked installed",
-          code == 130 and "● work" in text and "2 of 10 selected" in text and "installed" in text, text[-2500:])
+          code == 130 and "● work" in text and "2 of 12 selected" in text and "installed" in text, text[-2500:])
     shutil.rmtree(tmp, ignore_errors=True)
 
 
@@ -278,8 +278,8 @@ def h4_rerun_finds_the_checkout():
 
 def h5_titles_drive_the_flow():
     t = "title:Umbra setup · "
-    steps = [(t + "scan ready", ENTER), (t + "profile", ENTER), (t + "components 10/10", "n"), (t + "components 0/10", SPACE),
-             (t + "components 1/10", ENTER), (t + "theme umbra", RIGHT), (t + "theme void", ENTER),
+    steps = [(t + "scan ready", ENTER), (t + "profile", ENTER), (t + "components 11/12", "n"), (t + "components 0/12", SPACE),
+             (t + "components 1/12", ENTER), (t + "theme umbra", RIGHT), (t + "theme void", ENTER),
              (t + "review install", RIGHT), (t + "review dry", ENTER)]
     code, text, _ = driver.run([BIN], steps, env(), timeout=30)
     check("H5 the window title names each screen and its state; a flow driven only by titles reaches Dry run",

@@ -24,6 +24,7 @@ import (
 	"github.com/Robertcl795/umbra-bootstrapper/internal/i18n"
 	"github.com/Robertcl795/umbra-bootstrapper/internal/screens"
 	"github.com/Robertcl795/umbra-bootstrapper/internal/sys"
+	"github.com/Robertcl795/umbra-bootstrapper/internal/theme"
 )
 
 // version is set at release time (-ldflags "-X main.version=…").
@@ -35,9 +36,21 @@ func run() int {
 	envFlag := flag.String("env-dir", "", "the bootstrapper's env/wsl directory")
 	showVersion := flag.Bool("version", false, "print the version and exit")
 	resume := flag.Bool("resume", false, "run stage 2 with the staged selection (umbra bootstrap resume)")
+	wtVariant := flag.String("wt-fragment", "", "print the Windows Terminal fragment for this variant and WSL_DISTRO_NAME, and exit")
+	wtFont := flag.String("wt-font", theme.NerdFont, "the font face of the fragment's profile")
 	flag.Parse()
 	if *showVersion {
 		fmt.Println("umbra-setup " + version + " (Umbra bootstrapper)")
+		return 0
+	}
+	if *wtVariant != "" {
+		// terminal.sh writes it under %LOCALAPPDATA% (ADR 0043); this only prints it.
+		b, err := theme.Fragment(os.Getenv("WSL_DISTRO_NAME"), *wtVariant, *wtFont)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "umbra-setup:", err)
+			return 1
+		}
+		os.Stdout.Write(b)
 		return 0
 	}
 	tr := i18n.New(i18n.Resolve(os.Getenv))

@@ -8,17 +8,19 @@ zellij|Zellij|zellij
 lang|Language toolchains|lang
 fastfetch|fastfetch|fastfetch
 wsl|WSL tuning|wsl
+terminal|Windows Terminal: Umbra theme|terminal
+pwsh|PowerShell prompt: Starship|pwsh
 umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
 ## wsl-ubuntu defaults access=0
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal
 ## wsl-ubuntu defaults access=0 desktop-session
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal
 ## wsl-ubuntu defaults access=1
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,umbra-ai
 ## wsl-ubuntu defaults access=1 desktop-session
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
-## wsl-ubuntu items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,ai-cli,ai-standard,um,vault,ollama
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,umbra-ai
+## wsl-ubuntu items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,pwsh,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,pwsh,ai-cli,ai-standard,um,vault,ollama
 ## wsl-ubuntu items_to_components packages
 packages
 ## wsl-ubuntu items_to_components umbra-ai,shell,packages
@@ -39,17 +41,19 @@ zellij|Zellij|zellij
 lang|Language toolchains|lang
 fastfetch|fastfetch|fastfetch
 wsl|WSL tuning|wsl
+terminal|Windows Terminal: Umbra theme|terminal
+pwsh|PowerShell prompt: Starship|pwsh
 umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
 ## wsl-arch defaults access=0
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal
 ## wsl-arch defaults access=0 desktop-session
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal
 ## wsl-arch defaults access=1
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,umbra-ai
 ## wsl-arch defaults access=1 desktop-session
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
-## wsl-arch items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,umbra-ai
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,ai-cli,ai-standard,um,vault,ollama
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,umbra-ai
+## wsl-arch items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,pwsh,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,pwsh,ai-cli,ai-standard,um,vault,ollama
 ## wsl-arch items_to_components packages
 packages
 ## wsl-arch items_to_components umbra-ai,shell,packages

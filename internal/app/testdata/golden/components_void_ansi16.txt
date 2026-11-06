@@ -12,12 +12,12 @@
  [1;34m┃[m   [■] Language toolchains            [1;34m┃[m [90m│[m [37mcheck      [m01_packages.sh         [90m│[m 
  [1;34m┃[m   [■] fastfetch                      [1;34m┃[m [90m│[m [37mwork       [msame as personal       [90m│[m 
  [1;34m┃[m   [■] WSL tuning                     [1;34m┃[m [90m│[m                                   [90m│[m 
- [1;34m┃[m   [■] Umbra AI: um · vault · AI sta… [1;34m┃[m [90m│[m [37madd        [m[34m--components packages[m  [90m│[m 
- [1;34m┃[m                                      [1;34m┃[m [90m│[m [37mskip       [m[34m--skip packages[m        [90m│[m 
- [1;34m┃[m [37m10 of 10 selected[m                    [1;34m┃[m [90m│[m                                   [90m│[m 
+ [1;34m┃[m   [■] Windows Terminal: Umbra theme  [1;34m┃[m [90m│[m [37madd        [m[34m--components packages[m  [90m│[m 
+ [1;34m┃[m   [37m[ ] PowerShell prompt: Starship[m    [1;34m┃[m [90m│[m [37mskip       [m[34m--skip packages[m        [90m│[m 
+ [1;34m┃[m   [■] Umbra AI: um · vault · AI sta… [1;34m┃[m [90m│[m                                   [90m│[m 
+ [1;34m┃[m                                      [1;34m┃[m [90m│[m                                   [90m│[m 
+ [1;34m┃[m [37m11 of 12 selected[m                    [1;34m┃[m [90m│[m                                   [90m│[m 
  [1;34m┗[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m┛[m [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 
-                                                                                
-                                                                                
                                                                                 
                                                                                 
                                                                                 
