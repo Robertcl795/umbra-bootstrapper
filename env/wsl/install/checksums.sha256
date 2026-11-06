@@ -3,7 +3,7 @@
 # missing here or whose download does not match. Hashes recorded 2026-10-28; chezmoi's match its
 # release checksums file. The nerd font and Ollama added 2026-10-29 (platform Stage 3) from their
 # GitHub asset digests. umbra-setup from its cosign-verified checksums.txt (ADR 0038): 0.3.0 on
-# 2026-11-05 (gum removed the same day), replaced by 0.3.1 on 2026-11-05.
+# 2026-11-05 (gum removed the same day), replaced by 0.3.1 on 2026-11-05, by 0.3.2 the same day.
 18d051581bfa1a9a9004657d9e67f259f63d7021dd549e9e7c7afd556dd27a87  https://github.com/charmbracelet/glow/releases/download/v2.1.0/glow_2.1.0_Linux_arm64.tar.gz
 8f4e9a1c7ed8f8a0f44128d27faae90ab484be7ff109251422c3ba7f9d764a56  https://github.com/charmbracelet/glow/releases/download/v2.1.0/glow_2.1.0_Linux_x86_64.tar.gz
 fff4a127e4d76242e3bdac2a12430fc252fd6086d3eb30aee0382c3b0fece478  https://github.com/fastfetch-cli/fastfetch/releases/download/2.70.0/fastfetch-linux-aarch64.tar.gz
@@ -25,5 +25,5 @@ a74819082655863371e6560d0d4bec969841002ccd4f6072c650b3b5fff8c260  https://github
 04d5e8f903693f9dd13e16f867e994834e681eb3c72c0d337a770dcda09010cf  https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.tar.xz
 c9490e0f520be21271d969e6703f012268b1d39f8b70dd58854e5bfef7a75bb6  https://github.com/ollama/ollama/releases/download/v0.40.13/ollama-linux-amd64.tar.zst
 913d9a28da6da86d551ce4ca531457767bb14d511cbc1d5ca93e9b3b8b9a8666  https://github.com/ollama/ollama/releases/download/v0.40.13/ollama-linux-arm64.tar.zst
-be46b5bff390cff5262e461f51c7dda50063cd3bc3f55318521a6fe8dc369ae3  https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v0.3.1/umbra-setup_0.3.1_linux_amd64.tar.gz
-2040ce610f304f90775f6a28494909caf62fe86d30ddfe35c453ff9830b9853c  https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v0.3.1/umbra-setup_0.3.1_linux_arm64.tar.gz
+23f77fa473a17fcd3b21efdc7e163d781b0acff35c678a792c8a222a75affb6a  https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v0.3.2/umbra-setup_0.3.2_linux_amd64.tar.gz
+fa406980e2d920f199c3a92d2abf61cab6d3dc0e36a62f0a0625160247a29770  https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v0.3.2/umbra-setup_0.3.2_linux_arm64.tar.gz
