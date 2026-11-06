@@ -23,9 +23,10 @@ export UM_WIN_PROFILES="$t/docs/WindowsPowerShell/Microsoft.PowerShell_profile.p
 $t/docs/PowerShell/Microsoft.PowerShell_profile.ps1"
 export UM_SETUP_BIN="$t/bin/umbra-setup" UM_THEME=void WSL_DISTRO_NAME=archlinux UM_ENV_DIR="$ENV_DIR"
 log="$t/calls"
-for c in reg.exe winget.exe; do
-  printf '#!/usr/bin/env bash\necho "%s $*" >>%q\n' "$c" "$log" >"$t/bin/$c"
-done
+printf '#!/usr/bin/env bash\necho "reg.exe $*" >>%q\n' "$log" >"$t/bin/reg.exe"
+# winget show answers with UM_FAKE_LATEST (the latest stable winget knows); upgrade fails with
+# UM_FAKE_UPGRADE_RC (winget 1.29 here: "No installed package found" for a listed PowerShell).
+printf '#!/usr/bin/env bash\necho "winget.exe $*" >>%q\ncase "$1" in\n  show) [ -n "${UM_FAKE_LATEST:-}" ] && printf "Found PowerShell [Microsoft.PowerShell]\\nVersion: %%s\\n" "$UM_FAKE_LATEST" ;;\n  upgrade) exit "${UM_FAKE_UPGRADE_RC:-0}" ;;\nesac\nexit 0\n' "$log" >"$t/bin/winget.exe"
 printf '#!/usr/bin/env bash\necho "powershell.exe $*" >>%q\necho "${UM_FAKE_POLICY:-RemoteSigned}"\n' "$log" >"$t/bin/powershell.exe"
 printf '#!/usr/bin/env bash\necho "umbra-setup $*" >>%q\nprintf "{\\"profiles\\": [{\\"colorScheme\\": \\"Umbra Void\\", \\"font\\": {\\"face\\": \\"%%s\\"}}], \\"schemes\\": [{\\"name\\": \\"Umbra Void\\"}]}\\n" "$4"\n' "$log" >"$t/bin/umbra-setup"
 chmod +x "$t/bin"/*
@@ -154,8 +155,16 @@ expect "no pwsh.exe: winget installs Microsoft.PowerShell, exact id, source wing
   'grep -qx "winget.exe install --id Microsoft.PowerShell --exact --source winget --accept-package-agreements --accept-source-agreements --silent" "$log"'
 : >"$log"
 UM_WIN_PWSH="$fakepwsh" pwsh7_install >/dev/null 2>&1
-expect "pwsh 7 found: winget upgrades it to the latest stable instead" \
+expect "pwsh 7 found, latest unknown: winget upgrades it instead" \
   'grep -qx "winget.exe upgrade --id Microsoft.PowerShell --exact --source winget --accept-package-agreements --accept-source-agreements --silent" "$log" && ! grep -q "winget.exe install" "$log"'
+: >"$log"
+out="$(UM_WIN_PWSH="$fakepwsh" UM_FAKE_PWSH_V=7.6.9 UM_FAKE_LATEST=7.6.9.0 pwsh7_install 2>&1)"
+expect "pwsh 7.6.9 and winget's latest 7.6.9.0: no upgrade, and it says so" \
+  '! grep -q "winget.exe upgrade" "$log" && grep -q "7.6.9 is the latest stable" <<<"$out"'
+: >"$log"
+out="$(UM_WIN_PWSH="$fakepwsh" UM_FAKE_PWSH_V=7.4.6 UM_FAKE_LATEST=7.6.9.0 UM_FAKE_UPGRADE_RC=1 pwsh7_install 2>&1)"
+expect "an older 7 that winget cannot upgrade: a warning with the command, not a silent pass" \
+  'grep -q "winget.exe upgrade" "$log" && grep -q "PowerShell 7.4.6 is installed; the latest stable is 7.6.9" <<<"$out" && grep -q "winget install --id Microsoft.PowerShell --source winget" <<<"$out"'
 : >"$log"
 UM_WIN_PWSH="$fakepwsh" UM_FAKE_PWSH_V=6.2.7 pwsh7_install >/dev/null 2>&1
 expect "an older pwsh (6.x): winget installs 7" 'grep -q "winget.exe install --id Microsoft.PowerShell" "$log"'

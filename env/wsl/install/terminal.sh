@@ -287,6 +287,15 @@ pwsh_version() {
   win_run "$1" -NoProfile -Command '$PSVersionTable.PSVersion.ToString()' </dev/null 2>/dev/null | tr -d '\r' || true
 }
 
+# pwsh_latest: the latest stable version winget knows (7.6.9.0), or nothing.
+pwsh_latest() {
+  win_run winget.exe show --id Microsoft.PowerShell --exact --source winget --accept-source-agreements </dev/null 2>/dev/null |
+    tr -d '\r' | sed -n 's/^Version:[[:space:]]*//p' | head -n 1 || true
+}
+
+# ver3 <version>: its first three parts (7.6.9.0 and 7.6.9 compare equal).
+ver3() { cut -d. -f1-3 <<<"$1"; }
+
 # pwsh7_install: PowerShell 7 for this Windows user, from winget. ADR 0006 has one exception for it:
 # the latest stable Microsoft.PowerShell, which winget verifies (its manifest hash), not a pin.
 # A pwsh 7 already there is upgraded; "no newer version" is not an error.
@@ -296,9 +305,17 @@ pwsh7_install() {
   p="$(pwsh_exe)"
   if [ -n "$p" ]; then v="$(pwsh_version "$p")"; fi
   if [ "${v%%.*}" -ge 7 ] 2>/dev/null; then
-    log_info "PowerShell $v found; asking winget for the latest stable."
+    local latest
+    latest="$(pwsh_latest)"
+    if [ -n "$latest" ] && [ "$(ver3 "$v")" = "$(ver3 "$latest")" ]; then
+      log_info "PowerShell $v is the latest stable; nothing to upgrade."
+      return 0
+    fi
+    log_info "PowerShell $v found${latest:+; the latest stable is $(ver3 "$latest")}; asking winget to upgrade it."
     if ! win_run winget.exe upgrade "${args[@]}" </dev/null; then
-      log_info "winget did not upgrade PowerShell (it is the latest stable, or winget could not reach its source)."
+      # winget 1.29 lists an installed PowerShell but may not match it for upgrade (2026-11-06).
+      log_warn "PowerShell $v is installed; the latest stable is ${latest:+$(ver3 "$latest")}${latest:-unknown}, and winget did not upgrade it."
+      log_warn "To upgrade it yourself, in PowerShell: winget install --id Microsoft.PowerShell --source winget"
     fi
     return 0
   fi
