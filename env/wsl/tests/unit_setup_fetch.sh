@@ -54,8 +54,8 @@ fetch() {
 
 echo "# pinning"
 out="$(env -i PATH="$TOOLS" HOME="$t/home" bash -c 'source "'"$ENV_DIR"'/install/common.sh"; source "'"$ENV_DIR"'/install/selector.sh"; echo "$UM_SETUP_VERSION"')"
-expect "the default pin is 0.3.2" '[ "$out" = 0.3.2 ]'
-expect "both 0.3.2 archives have a sha256 line" '(for a in amd64 arm64; do grep -Eq "^[0-9a-f]{64}  https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v0.3.2/umbra-setup_0.3.2_linux_$a.tar.gz\$" "$ENV_DIR/install/checksums.sha256" || exit 1; done)'
+expect "the default pin is 0.4.0" '[ "$out" = 0.4.0 ]'
+expect "both 0.4.0 archives have a sha256 line" '(for a in amd64 arm64; do grep -Eq "^[0-9a-f]{64}  https://github.com/Robertcl795/umbra-bootstrapper/releases/download/v0.4.0/umbra-setup_0.4.0_linux_$a.tar.gz\$" "$ENV_DIR/install/checksums.sha256" || exit 1; done)'
 out="$(fetch UM_SETUP_VERSION=)"
 expect "no pinned version: not available (1), said once" '[[ $out == *"no pinned release"* && $out == *rc=1* && $out != *gum* ]]'
 out="$(fetch UM_SETUP_VERSION=1.0.0)"

@@ -5,7 +5,7 @@
 # umbra-setup (ADR 0038): the release install.sh fetches, pinned with its sha256 lines in
 # checksums.sha256. A bump changes both (docs/setup-tui/release.md). An empty UM_SETUP_VERSION
 # means no pin, for tests.
-UM_SETUP_VERSION="${UM_SETUP_VERSION-0.3.2}"
+UM_SETUP_VERSION="${UM_SETUP_VERSION-0.4.0}"
 UM_SETUP_REPO_URL="https://github.com/Robertcl795/umbra-bootstrapper"
 # shellcheck disable=SC2034  # used by install.sh, which sources this file
 UM_AI_PRIVATE_MSG="Umbra AI is private: log in with \`gh auth login\` or add an SSH key with access, then run the command again."
