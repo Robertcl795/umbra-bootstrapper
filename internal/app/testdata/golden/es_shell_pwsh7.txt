@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ ESCANEO  ■ PERFIL  ■ COMPONENTES  ◆ SHELL  ◇ TEMA  ◇ REVISAR  ◇ EJECUTAR  ◇ L…
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┏━ SHELL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┌─ DETALLE ─────────────────────────┐ 
+ ┃   (●) Zsh                            ┃ │ PWSH7                             │ 
+ ┃   ( ) Fish                           ┃ │ El PowerShell 7 estable más       │ 
+ ┃   ( ) Sin configuración de shell     ┃ │ reciente para tu usuario de       │ 
+ ┃                                      ┃ │ Windows, desde winget; un 7       │ 
+ ┃   WINDOWS                            ┃ │ anterior se actualiza.            │ 
+ ┃ › [ ] Actualizar a PowerShell 7      ┃ │                                   │ 
+ ┃                                      ┃ │ · PowerShell: PowerShell 7, el e… │ 
+ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ mover  ·  space elegir  ·  enter siguiente  ·  esc volver                    

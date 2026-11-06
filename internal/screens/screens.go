@@ -55,6 +55,7 @@ type Selection struct {
 	Variant string
 
 	SkipPkgs map[string]bool // packages left out in the editor (only rows with skip=yes count)
+	Shell    string          // the shell picked on the Shell screen (zsh, fish)
 }
 
 // Plan returns the plan.Selection for the current picks, in menu order.
@@ -71,7 +72,13 @@ func (d Data) Plan() plan.Selection {
 			}
 		}
 	}
-	return plan.Selection{Profile: d.Sel.Profile, Items: ids, Variant: d.Sel.Variant, SkipPackages: skip}
+	shell := ""
+	for _, it := range d.On(ScreenShell) {
+		if d.Sel.Chosen[it.ID] {
+			shell = d.Sel.Shell
+		}
+	}
+	return plan.Selection{Profile: d.Sel.Profile, Items: ids, Variant: d.Sel.Variant, SkipPackages: skip, Shell: shell}
 }
 
 // Args are the install.sh arguments for the current picks, plus Extra.
@@ -236,11 +243,12 @@ func ProfileKey(key string, cursor int) (int, Action) {
 // ComponentsView is the list (focused) and the detail of the item under the cursor.
 func ComponentsView(c ui.Ctx, d Data, cursor int) []string {
 	bw := bodyW(c)
+	items := d.On(ScreenComponents)
 	lw := bw/2 + 1
 	rw := bw - lw - 1
 	var left []string
 	n := 0
-	for i, it := range d.Items {
+	for i, it := range items {
 		box := "[ ] "
 		role := "fgMuted"
 		if d.Sel.Chosen[it.ID] {
@@ -262,10 +270,10 @@ func ComponentsView(c ui.Ctx, d Data, cursor int) []string {
 		label += tag
 		left = append(left, ui.Row(c, i == cursor, styled, box+label, lw-4))
 	}
-	left = append(left, "", c.Th.R("fgMuted", c.T("comp.count", "n", itoa(n), "total", itoa(len(d.Items)))))
+	left = append(left, "", c.Th.R("fgMuted", c.T("comp.count", "n", itoa(n), "total", itoa(len(items)))))
 	var right []string
-	if cursor < len(d.Items) {
-		it := d.Items[cursor]
+	if cursor < len(items) {
+		it := items[cursor]
 		dash := func(s string) string {
 			if s == "" {
 				return "—"
@@ -315,28 +323,28 @@ func ComponentsKey(key string, cursor int, d Data) (int, map[string]bool, Action
 	for k, v := range d.Sel.Chosen {
 		chosen[k] = v
 	}
-	n := len(d.Items)
+	items := d.On(ScreenComponents)
+	n := len(items)
 	switch key {
 	case "up", "k":
 		return (cursor + n - 1) % max(n, 1), chosen, None
 	case "down", "j":
 		return (cursor + 1) % max(n, 1), chosen, None
 	case "space":
-		if cursor < n && !d.Installed[d.Items[cursor].ID] {
-			id := d.Items[cursor].ID
+		if cursor < n && !d.Installed[items[cursor].ID] {
+			id := items[cursor].ID
 			chosen[id] = !chosen[id]
 		}
 	case "a":
-		for _, it := range d.Items {
+		for _, it := range items {
 			chosen[it.ID] = true
 		}
-	case "n":
-		chosen = map[string]bool{}
-		for id := range d.Installed {
-			chosen[id] = true
+	case "n": // this screen's items only; installed ones stay
+		for _, it := range items {
+			chosen[it.ID] = d.Installed[it.ID]
 		}
 	case "e":
-		if cursor < n && d.Editable(d.Items[cursor].ID) {
+		if cursor < n && d.Editable(items[cursor].ID) {
 			return cursor, chosen, Edit
 		}
 	case "enter":
@@ -574,7 +582,7 @@ func Defaults(d Data) Selection {
 	for _, id := range d.Cat.Defaults(d.Env.Platform, d.Env.Desktop, access) {
 		chosen[id] = true
 	}
-	return Selection{Profile: "personal", Chosen: chosen, Variant: d.Env.Theme.Name}
+	return Selection{Profile: "personal", Chosen: chosen, Variant: d.Env.Theme.Name, Shell: DefaultShell}
 }
 
 // Offered keeps the items the user may see: Umbra AI needs access (as selector_defaults in selector.sh).

@@ -200,7 +200,8 @@ profiles() {
     return 0
   fi
   local ps p
-  for ps in powershell.exe pwsh.exe; do
+  for ps in powershell.exe "$(pwsh_exe)"; do
+    [ -n "$ps" ] || continue
     command -v "$ps" >/dev/null 2>&1 || continue
     # shellcheck disable=SC2016 # $PROFILE is PowerShell's, not bash's
     p="$(win_run "$ps" -NoProfile -Command '$PROFILE.CurrentUserCurrentHost' </dev/null 2>/dev/null | tr -d '\r' || true)"
@@ -256,6 +257,53 @@ pwsh_install() {
   esac
 }
 
+# pwsh_exe: the pwsh.exe to run, or nothing. PowerShell 7 installed by --pwsh7 in this run is not on
+# this shell's PATH yet (WSL copies the Windows PATH at start), so its folder under Program Files
+# is tried too. UM_WIN_PWSH (tests): that path, or "none".
+pwsh_exe() {
+  if [ -n "${UM_WIN_PWSH:-}" ]; then
+    if [ "$UM_WIN_PWSH" != none ]; then echo "$UM_WIN_PWSH"; fi
+    return 0
+  fi
+  if command -v pwsh.exe >/dev/null 2>&1; then
+    command -v pwsh.exe
+    return 0
+  fi
+  local pf
+  pf="$(win_run cmd.exe /c 'echo %ProgramFiles%' 2>/dev/null | tr -d '\r' || true)"
+  [ -n "$pf" ] || return 0
+  pf="$(wslpath -u "$pf" 2>/dev/null || true)"
+  if [ -x "$pf/PowerShell/7/pwsh.exe" ]; then echo "$pf/PowerShell/7/pwsh.exe"; fi
+}
+
+# pwsh_version <pwsh.exe>: its version (7.4.6), or nothing.
+pwsh_version() {
+  # shellcheck disable=SC2016 # $PSVersionTable is PowerShell's
+  win_run "$1" -NoProfile -Command '$PSVersionTable.PSVersion.ToString()' </dev/null 2>/dev/null | tr -d '\r' || true
+}
+
+# pwsh7_install: PowerShell 7 for this Windows user, from winget. ADR 0006 has one exception for it:
+# the latest stable Microsoft.PowerShell, which winget verifies (its manifest hash), not a pin.
+# A pwsh 7 already there is upgraded; "no newer version" is not an error.
+pwsh7_install() {
+  log_step "PowerShell 7"
+  local p v="" args=(--id Microsoft.PowerShell --exact --source winget --accept-package-agreements --accept-source-agreements --silent)
+  p="$(pwsh_exe)"
+  if [ -n "$p" ]; then v="$(pwsh_version "$p")"; fi
+  if [ "${v%%.*}" -ge 7 ] 2>/dev/null; then
+    log_info "PowerShell $v found; asking winget for the latest stable."
+    if ! win_run winget.exe upgrade "${args[@]}" </dev/null; then
+      log_info "winget did not upgrade PowerShell (it is the latest stable, or winget could not reach its source)."
+    fi
+    return 0
+  fi
+  if ! win_run winget.exe install "${args[@]}" </dev/null; then
+    log_error "winget could not install PowerShell 7. In PowerShell, run: winget install --id Microsoft.PowerShell --source winget"
+    return 1
+  fi
+  log_info "PowerShell 7 installed: $(pwsh_version "$(pwsh_exe)")"
+}
+
 pwsh_remove() {
   localappdata || { log_warn "The Windows side is not reachable; nothing removed."; return 0; }
   local p tmp
@@ -276,4 +324,5 @@ case "${1:-}" in
   --remove) terminal_remove ;;
   --pwsh) pwsh_install ;;
   --pwsh-remove) pwsh_remove ;;
+  --pwsh7) pwsh7_install ;;
 esac

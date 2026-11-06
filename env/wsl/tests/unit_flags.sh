@@ -21,6 +21,7 @@ check "--components limits to the list" 'enabled "link,prompt" "" prompt && ! en
 check "--skip removes a phase" '! enabled "" "k8s,lang" lang && enabled "" "k8s,lang" nvim'
 check "names match whole words only" '! enabled "ai-standard" "" ai && enabled "" "ai" ai-cli'
 check "--skip wins over --components" '! enabled "link" "link" link'
+check "pwsh7 (Windows software) runs only when named" '! enabled "" "" pwsh7 && enabled "shell,pwsh7" "" pwsh7'
 
 echo "# profile"
 check "--profile rejects other values (exit 2)" '[ "$(bash "$ENV_DIR/bootstrap.sh" --profile other >/dev/null 2>&1; echo $?)" = 2 ]'

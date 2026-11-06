@@ -1,5 +1,5 @@
 [35m◢◤ [m[1mUMBRA[m[35m//[mSETUP                         [37mwsl-arch · personal · umbra · 0.0.0-test[m
-[37m■ SCAN[m  [37m■ PROFILE[m  [37m■ COMPONENTS[m  [37m■ THEME[m  [1m◆ REVIEW[m  [37m◇ RUN[m  [37m◇ DONE[m               
+[37m■ SCAN[m  [37m■ PROFILE[m  [37m■ COMPONENTS[m  [37m■ SHELL[m  [37m■ THEME[m  [1m◆ REVIEW[m  [37m◇ RUN[m  [37m◇ DONE[m      
 [90m────────────────────────────────────────────────────────────────────────────────[m
                                                                                 
  [90m┌[m[90m─[m[37m PLAN [m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┐[m 
@@ -8,17 +8,17 @@
  [90m│[m [37mtheme      [mumbra                                                           [90m│[m 
  [90m│[m [37minstall    [mpackages · shell · prompt · nvim · k8s · zellij · lang          [90m│[m 
  [90m│[m [37m           [mfastfetch · wsl · terminal · umbra-ai                           [90m│[m 
- [90m│[m [37mskip       [mpwsh                                                            [90m│[m 
+ [90m│[m [37mskip       [mpwsh7 · pwsh                                                    [90m│[m 
  [90m│[m [37msudo       [masks once for your password                                     [90m│[m 
  [90m│[m [37mre-run     [m[37msafe: a second run changes nothing[m                              [90m│[m 
  [90m│[m                                                                            [90m│[m 
  [90m│[m [37mNext time: [m[36minstall.sh --yes --profile personal --components packages,[m      [90m│[m 
  [90m│[m            [36mshell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,[m       [90m│[m 
- [90m│[m            [36mai-cli,ai-standard,um,vault,ollama --theme umbra --enable-k8s[m   [90m│[m 
+ [90m│[m            [36mai-cli,ai-standard,um,vault,ollama --shell zsh --theme umbra[m    [90m│[m 
+ [90m│[m            [36m--enable-k8s[m                                                    [90m│[m 
  [90m│[m                                                                            [90m│[m 
  [90m│[m [1;34m› [m[1;7m[ Install ][m   [ Dry run ]   [ Back ]                                     [90m│[m 
  [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 
-                                                                                
                                                                                 
                                                                                 
 [1m←→[m [37mmove[m[90m  ·  [m[1menter[m [37mconfirm[m[90m  ·  [m[1mesc[m [37mback[m[90m  ·  [m[1mq[m [37mquit[m                               

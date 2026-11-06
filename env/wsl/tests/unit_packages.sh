@@ -59,8 +59,8 @@ run_install() {
 batch() { local l; l="$(grep -m1 "^priv $1 " "$log")"; tr ' ' '\n' <<<"${l#"priv $1 "}" | sort; }
 
 echo "# the table"
-expect "every row has 9 fields and both descriptions" \
-  '! awk -F"\t" '"'"'!/^#/ && (NF != 9 || $8 == "" || $9 == "") { bad = 1 } END { exit !bad }'"'"' "$TSV"'
+expect "every row has 10 fields and both descriptions" \
+  '! awk -F"\t" '"'"'!/^#/ && (NF != 10 || $9 == "" || $10 == "") { bad = 1 } END { exit !bad }'"'"' "$TSV"'
 expect "every component exists in components.tsv" \
   'comm -23 <(awk -F"\t" '"'"'!/^#/ && $1 != "name" { print $2 }'"'"' "$TSV" | sort -u) <(awk -F"\t" '"'"'!/^#/ && $1 != "id" { print $1 }'"'"' "$ENV_DIR/install/components.tsv" | sort -u) | grep -q . && exit 1 || exit 0'
 

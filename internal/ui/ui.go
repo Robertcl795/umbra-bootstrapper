@@ -14,7 +14,7 @@ import (
 )
 
 // Steps are the step-row ids, in order (i18n keys "step.<id>").
-var Steps = []string{"scan", "profile", "components", "theme", "review", "run", "done"}
+var Steps = []string{"scan", "profile", "components", "shell", "theme", "review", "run", "done"}
 
 // Ctx is what drawing needs.
 type Ctx struct {

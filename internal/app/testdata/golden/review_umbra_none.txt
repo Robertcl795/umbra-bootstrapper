@@ -1,5 +1,5 @@
 ◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
-■ SCAN  ■ PROFILE  ■ COMPONENTS  ■ THEME  ◆ REVIEW  ◇ RUN  ◇ DONE               
+■ SCAN  ■ PROFILE  ■ COMPONENTS  ■ SHELL  ■ THEME  ◆ REVIEW  ◇ RUN  ◇ DONE      
 ────────────────────────────────────────────────────────────────────────────────
                                                                                 
  ┌─ PLAN ─────────────────────────────────────────────────────────────────────┐ 
@@ -8,17 +8,17 @@
  │ theme      umbra                                                           │ 
  │ install    packages · shell · prompt · nvim · k8s · zellij · lang          │ 
  │            fastfetch · wsl · terminal · umbra-ai                           │ 
- │ skip       pwsh                                                            │ 
+ │ skip       pwsh7 · pwsh                                                    │ 
  │ sudo       asks once for your password                                     │ 
  │ re-run     safe: a second run changes nothing                              │ 
  │                                                                            │ 
  │ Next time: install.sh --yes --profile personal --components packages,      │ 
  │            shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,       │ 
- │            ai-cli,ai-standard,um,vault,ollama --theme umbra --enable-k8s   │ 
+ │            ai-cli,ai-standard,um,vault,ollama --shell zsh --theme umbra    │ 
+ │            --enable-k8s                                                    │ 
  │                                                                            │ 
  │ › [ Install ]   [ Dry run ]   [ Back ]                                     │ 
  └────────────────────────────────────────────────────────────────────────────┘ 
-                                                                                
                                                                                 
                                                                                 
 ←→ move  ·  enter confirm  ·  esc back  ·  q quit                               

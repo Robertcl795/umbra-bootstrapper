@@ -1,0 +1,9 @@
+{{- if hasPrefix "wsl-" .os -}}
+#!/usr/bin/env bash
+{{ template "um-env.sh" . }}
+# phase: {{ include "wsl/install/terminal.sh" | sha256sum }} terminal.sh
+# Before 50-terminal and 51-pwsh: the PowerShell prompt block then finds pwsh 7's $PROFILE too.
+component_enabled pwsh7 || phase_skip
+bash "$UM_ENV_DIR/install/terminal.sh" --pwsh7
+phase_gate pwsh7 "PowerShell 7 is missing; run tests/15_pwsh7.sh" bash "$UM_ENV_DIR/tests/15_pwsh7.sh"
+{{- end }}

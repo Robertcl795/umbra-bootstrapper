@@ -1,6 +1,6 @@
 ## wsl-ubuntu items
 packages|Packages and base tools|packages
-shell|Shell: zsh (fish theme-only)|shell
+shell|Shell: zsh or fish|shell
 prompt|Prompt: Starship|prompt
 nvim|Neovim|nvim
 k8s|Kubernetes tools|k8s
@@ -8,6 +8,7 @@ zellij|Zellij|zellij
 lang|Language toolchains|lang
 fastfetch|fastfetch|fastfetch
 wsl|WSL tuning|wsl
+pwsh7|PowerShell 7 (Windows)|pwsh7
 terminal|Windows Terminal: Umbra theme|terminal
 pwsh|PowerShell prompt: Starship|pwsh
 umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
@@ -19,8 +20,8 @@ packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal
 packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,umbra-ai
 ## wsl-ubuntu defaults access=1 desktop-session
 packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,umbra-ai
-## wsl-ubuntu items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,pwsh,umbra-ai
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,pwsh,ai-cli,ai-standard,um,vault,ollama
+## wsl-ubuntu items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,pwsh7,terminal,pwsh,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,pwsh7,terminal,pwsh,ai-cli,ai-standard,um,vault,ollama
 ## wsl-ubuntu items_to_components packages
 packages
 ## wsl-ubuntu items_to_components umbra-ai,shell,packages
@@ -33,7 +34,7 @@ nvim,k8s,wsl
 shell
 ## wsl-arch items
 packages|Packages and base tools|packages
-shell|Shell: zsh (fish theme-only)|shell
+shell|Shell: zsh or fish|shell
 prompt|Prompt: Starship|prompt
 nvim|Neovim|nvim
 k8s|Kubernetes tools|k8s
@@ -41,6 +42,7 @@ zellij|Zellij|zellij
 lang|Language toolchains|lang
 fastfetch|fastfetch|fastfetch
 wsl|WSL tuning|wsl
+pwsh7|PowerShell 7 (Windows)|pwsh7
 terminal|Windows Terminal: Umbra theme|terminal
 pwsh|PowerShell prompt: Starship|pwsh
 umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
@@ -52,8 +54,8 @@ packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal
 packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,umbra-ai
 ## wsl-arch defaults access=1 desktop-session
 packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,umbra-ai
-## wsl-arch items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,pwsh,umbra-ai
-packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,terminal,pwsh,ai-cli,ai-standard,um,vault,ollama
+## wsl-arch items_to_components packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,pwsh7,terminal,pwsh,umbra-ai
+packages,shell,prompt,nvim,k8s,zellij,lang,fastfetch,wsl,pwsh7,terminal,pwsh,ai-cli,ai-standard,um,vault,ollama
 ## wsl-arch items_to_components packages
 packages
 ## wsl-arch items_to_components umbra-ai,shell,packages
@@ -66,7 +68,7 @@ nvim,k8s,wsl
 shell
 ## ubuntu items
 packages|Packages and base tools|packages
-shell|Shell: zsh (fish theme-only)|shell
+shell|Shell: zsh or fish|shell
 prompt|Prompt: Starship|prompt
 nvim|Neovim|nvim
 k8s|Kubernetes tools|k8s
@@ -97,7 +99,7 @@ nvim,k8s,desktop
 shell
 ## arch items
 packages|Packages and base tools|packages
-shell|Shell: zsh (fish theme-only)|shell
+shell|Shell: zsh or fish|shell
 prompt|Prompt: Starship|prompt
 nvim|Neovim|nvim
 k8s|Kubernetes tools|k8s
@@ -128,7 +130,7 @@ nvim,k8s,desktop
 shell
 ## omarchy items
 packages|Extra tools (pacman -S --needed; Omarchy keeps its own)|packages
-shell|Shell: zsh (fish theme-only)|shell
+shell|Shell: zsh or fish|shell
 prompt|Prompt: Starship|prompt
 umbra-ai|Umbra AI: um · vault · AI standard · AI CLIs · Ollama|ai-cli,ai-standard,um,vault,ollama
 ## omarchy defaults access=0

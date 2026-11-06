@@ -116,19 +116,20 @@ func TestFlowToInstallGivesPlanArgs(t *testing.T) {
 	cmds := Cmds{Start: func(args []string, _ string) tea.Cmd { got = args; return nil }}
 	env := fixtureEnv("umbra", theme.TrueColor, "en")
 	m := started(t, env, 80, 24, cmds)
-	m, _ = press(m, "enter")                                                   // boot → profile
-	m, _ = press(m, "down", "enter")                                           // work → components
-	m, _ = press(m, "space", "down", "down", "down", "down", "space", "enter") // untick packages and k8s
-	m, _ = press(m, "right", "enter")                                          // void → review
-	m.d.Passwordless = true                                                    // no sudo prompt in this test
-	m, _ = press(m, "enter")                                                   // Install
+	m, _ = press(m, "enter")                                           // boot → profile
+	m, _ = press(m, "down", "enter")                                   // work → components
+	m, _ = press(m, "space", "down", "down", "down", "space", "enter") // untick packages and k8s
+	m, _ = press(m, "enter")                                           // shell: zsh
+	m, _ = press(m, "right", "enter")                                  // void → review
+	m.d.Passwordless = true                                            // no sudo prompt in this test
+	m, _ = press(m, "enter")                                           // Install
 	if m.screen != Run {
 		t.Fatalf("screen %d, want Run", m.screen)
 	}
 	cat := loadCat(t)
 	defaults := cat.Defaults("wsl-arch", false, true)
 	want := slices.DeleteFunc(slices.Clone(defaults), func(id string) bool { return id == "packages" || id == "k8s" })
-	args := plan.Args(cat, "wsl-arch", plan.Selection{Profile: "work", Items: want, Variant: "void"})
+	args := plan.Args(cat, "wsl-arch", plan.Selection{Profile: "work", Items: want, Variant: "void", Shell: "zsh"})
 	if !slices.Equal(got, args) {
 		t.Errorf("install.sh args\n %v\nwant\n %v", got, args)
 	}
@@ -159,7 +160,7 @@ func TestBackAndCancel(t *testing.T) {
 
 func TestEmptySelectionCannotInstall(t *testing.T) {
 	m := started(t, fixtureEnv("umbra", theme.TrueColor, "en"), 80, 24)
-	m, _ = press(m, "enter", "enter", "n", "enter", "enter")
+	m, _ = press(m, "enter", "enter", "n", "enter", "down", "down", "space", "enter", "enter") // no shell setup either
 	if m.screen != Review || m.bcur != 2 {
 		t.Fatalf("screen %d button %d", m.screen, m.bcur)
 	}
@@ -174,7 +175,7 @@ func TestEmptySelectionCannotInstall(t *testing.T) {
 
 func TestThemeCursorRethemesTheScreen(t *testing.T) {
 	m := started(t, fixtureEnv("umbra", theme.TrueColor, "en"), 80, 24)
-	m, _ = press(m, "enter", "enter", "enter", "right", "right") // theme, cursor on lux
+	m, _ = press(m, "enter", "enter", "enter", "enter", "right", "right") // theme, cursor on lux
 	if m.d.Sel.Variant != "lux" {
 		t.Fatalf("variant %s", m.d.Sel.Variant)
 	}
@@ -234,7 +235,7 @@ var profiles = map[string]theme.Profile{"true": theme.TrueColor, "ansi16": theme
 func screensOf(t *testing.T, env sys.Env, w, h int) map[string]string {
 	m := started(t, env, w, h)
 	out := map[string]string{}
-	names := []string{"boot", "profile", "components", "theme", "review"}
+	names := []string{"boot", "profile", "components", "shell", "theme", "review"}
 	for _, n := range names {
 		out[n] = m.Content()
 		m, _ = press(m, "enter")
@@ -367,7 +368,7 @@ func visibleWidth(s string) int {
 
 func TestTitleNamesTheScreenAndState(t *testing.T) {
 	m := started(t, fixtureEnv("umbra", theme.None, "en"), 80, 24)
-	want := []string{"Umbra setup · scan ready", "Umbra setup · profile", "Umbra setup · components 11/12", "Umbra setup · theme umbra", "Umbra setup · review install"}
+	want := []string{"Umbra setup · scan ready", "Umbra setup · profile", "Umbra setup · components 10/11", "Umbra setup · shell zsh", "Umbra setup · theme umbra", "Umbra setup · review install"}
 	for _, w := range want {
 		if got := m.View().WindowTitle; got != w {
 			t.Errorf("title %q, want %q", got, w)

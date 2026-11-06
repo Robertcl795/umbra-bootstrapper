@@ -1,22 +1,22 @@
 [35m◢◤ [m[1mUMBRA[m[35m//[mSETUP                           [37mwsl-arch · personal · lux · 0.0.0-test[m
-[37m■ SCAN[m  [37m■ PROFILE[m  [1m◆ COMPONENTS[m  [37m◇ THEME[m  [37m◇ REVIEW[m  [37m◇ RUN[m  [37m◇ DONE[m               
+[37m■ SCAN[m  [37m■ PROFILE[m  [1m◆ COMPONENTS[m  [37m◇ SHELL[m  [37m◇ THEME[m  [37m◇ REVIEW[m  [37m◇ RUN[m  [37m◇ DONE[m      
 [90m────────────────────────────────────────────────────────────────────────────────[m
                                                                                 
  [1;34m┏[m[1;34m━[m[1m COMPONENTS [m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m┓[m [90m┌[m[90m─[m[37m DETAIL [m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┐[m 
  [1;34m┃[m [1;34m› [m[7m[■] Packages and base tools       [m [1;34m┃[m [90m│[m [1mPACKAGES[m                          [90m│[m 
- [1;34m┃[m   [■] Shell: zsh (fish theme-only)[37m[m   [1;34m┃[m [90m│[m Base packages from the distro's … [90m│[m 
- [1;34m┃[m   [■] Prompt: Starship[37m[m               [1;34m┃[m [90m│[m                                   [90m│[m 
- [1;34m┃[m   [■] Neovim[37m[m                         [1;34m┃[m [90m│[m · base-devel[37m: Compilers and make…[m [90m│[m 
- [1;34m┃[m   [■] Kubernetes tools[37m[m               [1;34m┃[m [90m│[m · git[37m: Version control; the inst…[m [90m│[m 
- [1;34m┃[m   [■] Zellij[37m[m                         [1;34m┃[m [90m│[m · curl[37m: Downloads over HTTP; the…[m [90m│[m 
- [1;34m┃[m   [■] Language toolchains[37m[m            [1;34m┃[m [90m│[m · wget[37m: Downloads files from the…[m [90m│[m 
- [1;34m┃[m   [■] fastfetch[37m[m                      [1;34m┃[m [90m│[m · unzip[37m: Extracts .zip archives[m   [90m│[m 
- [1;34m┃[m   [■] WSL tuning[37m[m                     [1;34m┃[m [90m│[m · ca-certificates[37m: Root certific…[m [90m│[m 
- [1;34m┃[m   [■] Windows Terminal: Umbra theme[37m[m  [1;34m┃[m [90m│[m · ripgrep[37m: Fast recursive search…[m [90m│[m 
- [1;34m┃[m   [37m[ ] PowerShell prompt: Starship[m[37m[m    [1;34m┃[m [90m│[m · fd[37m: Fast, simple alternative t…[m [90m│[m 
- [1;34m┃[m   [■] Umbra AI: um · vault · AI sta…[37m[m [1;34m┃[m [90m│[m · bat[37m: cat with syntax highlight…[m [90m│[m 
- [1;34m┃[m                                      [1;34m┃[m [90m│[m [34m+17 more · e to see all and edit[m  [90m│[m 
- [1;34m┃[m [37m11 of 12 selected[m                    [1;34m┃[m [90m│[m                                   [90m│[m 
+ [1;34m┃[m   [■] Prompt: Starship[37m[m               [1;34m┃[m [90m│[m Base packages from the distro's … [90m│[m 
+ [1;34m┃[m   [■] Neovim[37m[m                         [1;34m┃[m [90m│[m                                   [90m│[m 
+ [1;34m┃[m   [■] Kubernetes tools[37m[m               [1;34m┃[m [90m│[m · base-devel[37m: Compilers and make…[m [90m│[m 
+ [1;34m┃[m   [■] Zellij[37m[m                         [1;34m┃[m [90m│[m · git[37m: Version control; the inst…[m [90m│[m 
+ [1;34m┃[m   [■] Language toolchains[37m[m            [1;34m┃[m [90m│[m · curl[37m: Downloads over HTTP; the…[m [90m│[m 
+ [1;34m┃[m   [■] fastfetch[37m[m                      [1;34m┃[m [90m│[m · wget[37m: Downloads files from the…[m [90m│[m 
+ [1;34m┃[m   [■] WSL tuning[37m[m                     [1;34m┃[m [90m│[m · unzip[37m: Extracts .zip archives[m   [90m│[m 
+ [1;34m┃[m   [■] Windows Terminal: Umbra theme[37m[m  [1;34m┃[m [90m│[m · ca-certificates[37m: Root certific…[m [90m│[m 
+ [1;34m┃[m   [37m[ ] PowerShell prompt: Starship[m[37m[m    [1;34m┃[m [90m│[m · ripgrep[37m: Fast recursive search…[m [90m│[m 
+ [1;34m┃[m   [■] Umbra AI: um · vault · AI sta…[37m[m [1;34m┃[m [90m│[m · fd[37m: Fast, simple alternative t…[m [90m│[m 
+ [1;34m┃[m                                      [1;34m┃[m [90m│[m · bat[37m: cat with syntax highlight…[m [90m│[m 
+ [1;34m┃[m [37m10 of 11 selected[m                    [1;34m┃[m [90m│[m [34m+17 more · e to see all and edit[m  [90m│[m 
+ [1;34m┃[m                                      [1;34m┃[m [90m│[m                                   [90m│[m 
  [1;34m┃[m                                      [1;34m┃[m [90m│[m [37mdeploys    [m[36m—[m                      [90m│[m 
  [1;34m┃[m                                      [1;34m┃[m [90m│[m [37mwork       [msame as personal       [90m│[m 
  [1;34m┗[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m━[m[1;34m┛[m [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 

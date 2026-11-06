@@ -21,6 +21,7 @@ type Selection struct {
 	Variant string   // umbra, void or lux
 
 	SkipPackages []string // packages.tsv rows left out (--skip-packages), table order
+	Shell        string   // the chosen shell (--shell), or "" when no shell item is installed
 }
 
 // Components expands item ids into the --components list, in menu order, like
@@ -53,6 +54,9 @@ func Args(c catalog.Catalog, platform string, s Selection) []string {
 	args := []string{"--yes", "--profile", s.Profile, "--components", strings.Join(comps, ",")}
 	if len(s.Skip) > 0 {
 		args = append(args, "--skip", strings.Join(s.Skip, ","))
+	}
+	if s.Shell != "" {
+		args = append(args, "--shell", s.Shell)
 	}
 	if len(s.SkipPackages) > 0 {
 		args = append(args, "--skip-packages", strings.Join(s.SkipPackages, ","))

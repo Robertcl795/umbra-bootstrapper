@@ -140,6 +140,7 @@
  "step.run": "EJECUTAR",
  "step.scan": "ESCANEO",
  "step.theme": "TEMA",
+ "step.shell": "SHELL",
  "theme.ask": "Elige una variante. Toda la pantalla se redibuja con la que está bajo el cursor.",
  "theme.follows": "La siguen: prompt, zsh/fish, fzf, bat, zellij, Ghostty, Neovim.",
  "theme.lux": "claro",
@@ -152,5 +153,12 @@
  "pkg.more.edit": "+{n} más · e para ver todo y editar",
  "pkg.needed": "necesario",
  "pkg.title": "PAQUETES · {item}",
- "pkg.window": "filas {a}–{b}"
+ "pkg.window": "filas {a}–{b}",
+ "shell.title": "SHELL",
+ "shell.windows": "WINDOWS",
+ "shell.pwsh7": "Actualizar a PowerShell 7",
+ "shell.zsh": "El shell principal de Umbra: su configuración, plugins, el CLI um y los completados.",
+ "shell.fish": "fish con el tema de Umbra, Starship y fzf.fish. zsh sigue instalado: um y sus completados son de zsh (ADR 0004).",
+ "shell.none": "Sin configuración de shell",
+ "shell.none.detail": "Umbra deja tu shell como está: sin configuración de zsh o fish, sin plugins."
 }

@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                             arch · personal · umbra · 0.0.0-test
+■ SCAN  ■ PROFILE  ■ COMPONENTS  ◆ SHELL  ◇ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE      
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┏━ SHELL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┌─ DETAIL ──────────────────────────┐ 
+ ┃ › (●) Zsh                            ┃ │ ZSH                               │ 
+ ┃   ( ) Fish                           ┃ │ Umbra's main shell: its config,   │ 
+ ┃   ( ) No shell setup                 ┃ │ plugins, the um CLI and           │ 
+ ┃                                      ┃ │ completions.                      │ 
+ ┃                                      ┃ │                                   │ 
+ ┃                                      ┃ │ · zsh: Z shell, Umbra's main she… │ 
+ ┃                                      ┃ │ · zsh-autosuggestions: Suggests … │ 
+ ┃                                      ┃ │ · zsh-history-substring-search: … │ 
+ ┃                                      ┃ │ · zsh-vi-mode: Vi keys on the co… │ 
+ ┃                                      ┃ │ · fast-syntax-highlighting: Colo… │ 
+ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ move  ·  space choose  ·  enter next  ·  esc back                            

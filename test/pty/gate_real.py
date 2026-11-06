@@ -49,28 +49,34 @@ def titled(raw, name):
     return ("\x1b]2;Umbra setup · " + name).encode() in raw or ("\x1b]0;Umbra setup · " + name).encode() in raw
 
 
-# n clears; the cursor stays on packages: packages, shell, prompt.
-PICK = [(T + "components 10/11", "n"), (T + "components 0/11", SPACE), (T + "components 1/11", DOWN + SPACE),
-        (T + "components 2/11", DOWN + SPACE), (T + "components 3/11", ENTER), (T + "theme umbra", ENTER)]
+# n clears Components; the cursor stays on packages: packages, prompt; then the Shell screen keeps
+# zsh (shell): packages, shell, prompt.
+PICK = [(T + "components 9/10", "n"), (T + "components 0/10", SPACE), (T + "components 1/10", DOWN + SPACE),
+        (T + "components 2/10", ENTER), (T + "shell zsh", ENTER), (T + "theme umbra", ENTER)]
+# UM_GATE_SHELL=fish: the Shell screen's second row (G-C3 of plan installer-packages-shell).
+if os.environ.get("UM_GATE_SHELL") == "fish":
+    PICK[4] = (T + "shell zsh", DOWN + SPACE + ENTER)
 
 
 def user_runs(argv, env, password):
     steps = [(T + "scan ready", ENTER), (T + "profile", ENTER)] + PICK + [
         (T + "review install", ENTER), ("assword", password + "\r"), (T + "done", ENTER)]
     code, text, raw = driver.run(argv, steps, env, timeout=2400, settle=0.4)
-    check("run 1: real install of packages, shell, prompt through umbra-setup; doctor passes; exit 0",
+    check("run 1: real install of packages, shell (" + (os.environ.get("UM_GATE_SHELL") or "zsh") + "), prompt through umbra-setup; doctor passes; exit 0",
           code == 0 and titled(raw, "done"), text[-4000:])
     check("run 1: the run screen was shown", titled(raw, "run"), text[-3000:])
     rerun(argv, env, password)
 
 
 def rerun(argv, env, password):
-    # The stored selection (3 of 9) opens the components screen. sudo keeps its timestamp per
-    # terminal, and this is a new one, so it asks again.
-    steps = [(T + "scan ready", ENTER), (T + "profile", ENTER), (T + "components 3/11", ENTER),
-             (T + "theme umbra", ENTER), (T + "review install", ENTER), ("assword", password + "\r"), (T + "done", ENTER)]
+    # The stored selection (packages and prompt here, shell on the Shell screen) opens the
+    # components screen. sudo keeps its timestamp per terminal, and this is a new one, so it asks again.
+    shell = os.environ.get("UM_GATE_SHELL") or "zsh"
+    steps = [(T + "scan ready", ENTER), (T + "profile", ENTER), (T + "components 2/10", ENTER),
+             (T + "shell " + shell, ENTER), (T + "theme umbra", ENTER), (T + "review install", ENTER), ("assword", password + "\r"), (T + "done", ENTER)]
     code, text, raw = driver.run(argv, steps, env, timeout=1800, settle=0.4)
-    check("re-run: opens with the stored selection (components 3/11)", titled(raw, "components 3/11"), text[-3000:])
+    check("re-run: opens with the stored selection (components 2/10, shell " + shell + ")",
+          titled(raw, "components 2/10") and titled(raw, "shell " + shell), text[-3000:])
     check("re-run: passes again, exit 0", code == 0 and titled(raw, "done"), text[-4000:])
 
 

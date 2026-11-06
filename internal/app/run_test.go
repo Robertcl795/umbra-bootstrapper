@@ -54,7 +54,7 @@ func send(m Model, ms ...tea.Msg) Model {
 func toRun(t *testing.T, c *calls, passwordless bool) Model {
 	t.Helper()
 	m := started(t, fixtureEnv("umbra", theme.TrueColor, "en"), 80, 24, fakeCmds(c))
-	m, _ = press(m, "enter", "enter", "n", "down", "space", "down", "space", "enter", "enter")
+	m, _ = press(m, "enter", "enter", "n", "down", "space", "enter", "enter", "enter") // shell (Shell screen, zsh) and prompt
 	m.d.Passwordless = passwordless
 	m, _ = press(m, "enter")
 	return m
@@ -87,7 +87,7 @@ func TestRunSucceedsThroughTheDoctor(t *testing.T) {
 	if c.doctor != 1 || m.r.Current != plan.Doctor {
 		t.Fatalf("doctor not started: %d %q", c.doctor, m.r.Current)
 	}
-	if want := []string{"UM_COMPONENTS=shell,prompt", "UM_SKIP=", "UM_SKIP_PACKAGES=", "UM_MODE=personal"}; !slices.Equal(c.doctorEnv, want) {
+	if want := []string{"UM_COMPONENTS=shell,prompt", "UM_SKIP=", "UM_SKIP_PACKAGES=", "UM_MODE=personal", "UM_SHELL=zsh"}; !slices.Equal(c.doctorEnv, want) {
 		t.Errorf("doctor env %v, want %v (only what was selected)", c.doctorEnv, want)
 	}
 	m = send(m, msgs.DoctorDone{OK: true, Tail: []string{"all good"}})
@@ -225,7 +225,7 @@ func TestRootAsksForTheAccountAndEndsAtTheRestartPoint(t *testing.T) {
 	if m.screen != Components {
 		t.Fatalf("screen %d, want Components", m.screen)
 	}
-	m, _ = press(m, "enter", "enter")
+	m, _ = press(m, "enter", "enter", "enter")
 	if args := strings.Join(m.d.Args(), " "); !strings.HasSuffix(args, "--user umbra") {
 		t.Errorf("install.sh args lack --user: %s", args)
 	}
@@ -273,15 +273,14 @@ func TestRerunStartsFromTheStoredSelection(t *testing.T) {
 	if m.d.Sel.Profile != "work" || m.d.Sel.Variant != "lux" || !m.d.Installed["shell"] || len(m.d.Sel.Chosen) != 2 {
 		t.Fatalf("stored not applied: %+v installed %v", m.d.Sel, m.d.Installed)
 	}
-	m, _ = press(m, "enter", "enter", "down", "space")
-	if !m.d.Sel.Chosen["shell"] {
+	m, _ = press(m, "enter", "enter", "down", "space") // prompt (shell is on the Shell screen)
+	if !m.d.Sel.Chosen["prompt"] || !m.d.Sel.Chosen["shell"] {
 		t.Error("an installed item was unticked")
 	}
 	if !strings.Contains(m.Content(), "installed") {
 		t.Error("installed tag missing")
 	}
-	m, _ = press(m, "down", "space") // prompt is installed too; nvim is next
-	m, _ = press(m, "down", "space")
+	m, _ = press(m, "down", "space") // nvim is next
 	if !m.d.Sel.Chosen["nvim"] {
 		t.Error("a new item cannot be added on a re-run")
 	}
@@ -345,7 +344,7 @@ func runScreens(t *testing.T) map[string]string {
 	r, _ = press(r, "tab")
 	r = typeText(r, "pw")
 	out["account"] = r.Content()
-	r, _ = press(r, "enter", "enter", "enter", "enter")
+	r, _ = press(r, "enter", "enter", "enter", "enter", "enter")
 	r = send(r, msgs.RunStarted{PID: 1, Log: "/root/.local/state/um/setup-x.log", Events: "/tmp/e"}, msgs.RunExited{Code: 0}, msgs.EventsRead{})
 	out["restart"] = r.Content()
 	return out

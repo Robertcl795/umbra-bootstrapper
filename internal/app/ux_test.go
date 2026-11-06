@@ -87,7 +87,7 @@ func TestStage1ListsItsPhasesInOrder(t *testing.T) {
 	m = typeText(m, "pw")
 	m, _ = press(m, "tab")
 	m = typeText(m, "pw")
-	m, _ = press(m, "enter", "enter", "enter", "enter")
+	m, _ = press(m, "enter", "enter", "enter", "enter", "enter")
 	if m.screen != Run {
 		t.Fatalf("screen %d, want Run", m.screen)
 	}

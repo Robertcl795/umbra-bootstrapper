@@ -68,7 +68,7 @@ func TestShineStopsOffTheLogoAndRestartsOnRun(t *testing.T) {
 	if len(frames) != 0 || m.shine != 0 || m.shining {
 		t.Fatalf("off the logo: shine %d, scheduled %v", m.shine, frames)
 	}
-	m, _ = press(m, "enter", "n", "down", "space", "enter", "enter")
+	m, _ = press(m, "enter", "n", "down", "space", "enter", "enter", "enter")
 	m.d.Passwordless = true
 	m, _ = press(m, "enter")
 	if m.screen != Run || len(frames) != 1 || frames[0] != 1 {

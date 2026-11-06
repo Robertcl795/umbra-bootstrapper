@@ -37,10 +37,10 @@ while IFS= read -r line || [ -n "$line" ]; do
   case "$line" in '' | '#'*) continue ;; esac
   IFS=$'\t' read -r -a f <<<"$line"
   if [ "${f[0]}" = id ]; then
-    [ "${#f[@]}" -eq 13 ] || problems+=("line $n: header has ${#f[@]} columns, want 13")
+    [ "${#f[@]}" -eq 14 ] || problems+=("line $n: header has ${#f[@]} columns, want 14")
     continue
   fi
-  [ "${#f[@]}" -eq 13 ] || { problems+=("line $n: ${#f[@]} columns, want 13"); continue; }
+  [ "${#f[@]}" -eq 14 ] || { problems+=("line $n: ${#f[@]} columns, want 14"); continue; }
   id="${f[0]}" plats="${f[1]}" def="${f[3]}" work="${f[12]}"
   [[ $id =~ ^[a-z][a-z0-9-]*$ ]] || problems+=("line $n: bad id '$id'")
   [[ $seen == *",$id/$plats,"* ]] && problems+=("line $n: duplicate $id for $plats")
@@ -48,6 +48,7 @@ while IFS= read -r line || [ -n "$line" ]; do
   [[ $plats =~ ^(all|!?[a-z-]+(,[a-z-]+)*)$ ]] || problems+=("line $n: bad platforms '$plats'")
   case "$def" in yes | no | desktop-session | ai-access) ;; *) problems+=("line $n: bad default '$def'") ;; esac
   case "$work" in same | limited | off) ;; *) problems+=("line $n: bad work '$work'") ;; esac
+  case "${f[13]}" in components | shell-choice | shell-extra) ;; *) problems+=("line $n: bad screen '${f[13]}'") ;; esac
   for i in 4 5 6 7; do
     [ -n "${f[$i]}" ] && [ "${f[$i]}" != - ] || problems+=("line $n: column $((i + 1)) is empty")
   done
@@ -60,9 +61,9 @@ while IFS= read -r line || [ -n "$line" ]; do
   done
   [ "${f[11]}" = - ] || [ -f "$TESTS/${f[11]}" ] || problems+=("line $n: no check ${f[11]}")
 done <"$CATALOG"
-head -n 1 "$CATALOG" | grep -q '^# schema 1 ' || problems+=("line 1: no '# schema 1' comment")
+head -n 1 "$CATALOG" | grep -q '^# schema 2 ' || problems+=("line 1: no '# schema 2' comment")
 if [ "${#problems[@]}" -eq 0 ]; then
-  ok "every row is valid (schema 1)"
+  ok "every row is valid (schema 2)"
 else
   bad "invalid rows: ${problems[*]}"
 fi

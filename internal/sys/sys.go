@@ -127,6 +127,8 @@ func ParseStored(text string) msgs.Stored {
 			st.Profile, st.Found = v, true
 		case "theme":
 			st.Theme = v
+		case "shell":
+			st.Shell = v
 		case "components":
 			if v != "" {
 				st.Components = strings.Split(v, ",")

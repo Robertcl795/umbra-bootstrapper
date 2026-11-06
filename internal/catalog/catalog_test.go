@@ -97,19 +97,20 @@ func TestEveryItemHasBothLanguagesAndPhases(t *testing.T) {
 
 func TestParseRejectsBadInput(t *testing.T) {
 	header := strings.Join(Columns, "\t")
-	row := "x\tall\tx\tyes\tX\tX\tx\tx\t-\t-\ts.sh\t-\tsame"
+	row := "x\tall\tx\tyes\tX\tX\tx\tx\t-\t-\ts.sh\t-\tsame\tcomponents"
 	cases := map[string]string{
 		"no schema line":   header + "\n" + row + "\n",
-		"later schema":     "# schema 2 ·\n" + header + "\n" + row + "\n",
-		"wrong header":     "# schema 1 ·\n" + strings.Replace(header, "label_es", "label_fr", 1) + "\n" + row + "\n",
-		"missing a column": "# schema 1 ·\n" + header + "\n" + strings.TrimSuffix(row, "\tsame") + "\n",
+		"later schema":     "# schema 3 ·\n" + header + "\n" + row + "\n",
+		"older schema":     "# schema 1 ·\n" + header + "\n" + row + "\n",
+		"wrong header":     "# schema 2 ·\n" + strings.Replace(header, "label_es", "label_fr", 1) + "\n" + row + "\n",
+		"missing a column": "# schema 2 ·\n" + header + "\n" + strings.TrimSuffix(row, "\tcomponents") + "\n",
 	}
 	for name, in := range cases {
 		if _, err := Parse(strings.NewReader(in)); err == nil {
 			t.Errorf("%s: want an error", name)
 		}
 	}
-	c, err := Parse(strings.NewReader("# schema 1 ·\n" + header + "\n" + row + "\n"))
+	c, err := Parse(strings.NewReader("# schema 2 ·\n" + header + "\n" + row + "\n"))
 	if err != nil || len(c.Items) != 1 || c.Items[0].Installs != "" || c.Items[0].Scripts[0] != "s.sh" {
 		t.Errorf("valid input: %+v, %v", c, err)
 	}

@@ -11,11 +11,11 @@ import (
 )
 
 // Schema is the catalog schema this package reads (the "# schema N" comment on line 1).
-const Schema = 1
+const Schema = 2
 
-// Columns are the schema 1 columns, in file order.
+// Columns are the schema 2 columns, in file order. Schema 2 added screen.
 var Columns = []string{"id", "platforms", "components", "default", "label_en", "label_es",
-	"summary_en", "summary_es", "installs", "deploys", "scripts", "check", "work"}
+	"summary_en", "summary_es", "installs", "deploys", "scripts", "check", "work", "screen"}
 
 // Item is one catalog row: a component as offered on a set of platforms.
 type Item struct {
@@ -30,12 +30,13 @@ type Item struct {
 	Scripts    []string // chezmoi scripts without .tmpl: the phases of this item
 	Check      string   // test under env/wsl/tests/, or ""
 	Work       string   // same, limited, off
+	Screen     string   // components; shell-choice (the Shell screen's choice of shell); shell-extra (a box there)
 }
 
 // Catalog is every row, in file (menu) order.
 type Catalog struct{ Items []Item }
 
-// Parse reads a schema 1 catalog. Comments start with '#', '-' is an empty field.
+// Parse reads a schema 2 catalog. Comments start with '#', '-' is an empty field.
 func Parse(r io.Reader) (Catalog, error) {
 	raw, err := io.ReadAll(r)
 	if err != nil {
@@ -56,7 +57,7 @@ func Parse(r io.Reader) (Catalog, error) {
 		return Catalog{}, fmt.Errorf("catalog: %w", err)
 	}
 	if len(recs) == 0 || strings.Join(recs[0], "\t") != strings.Join(Columns, "\t") {
-		return Catalog{}, errors.New("catalog: header row does not match schema 1")
+		return Catalog{}, errors.New("catalog: header row does not match schema 2")
 	}
 	var c Catalog
 	for _, f := range recs[1:] {
@@ -70,7 +71,7 @@ func Parse(r io.Reader) (Catalog, error) {
 			ID: f[0], Platforms: f[1], Components: split(v(2)), Default: f[3],
 			Label:    map[string]string{"en": f[4], "es": f[5]},
 			Summary:  map[string]string{"en": f[6], "es": f[7]},
-			Installs: v(8), Deploys: v(9), Scripts: split(v(10)), Check: v(11), Work: f[12],
+			Installs: v(8), Deploys: v(9), Scripts: split(v(10)), Check: v(11), Work: f[12], Screen: f[13],
 		})
 	}
 	return c, nil

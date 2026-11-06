@@ -56,8 +56,9 @@ func TestKeysUsedAndKnown(t *testing.T) {
 		}
 		return nil
 	})
-	// Built at run time: "step."+id, "theme."+variant, "comp.work."+work, "profile."+p(+".more").
-	for _, prefix := range []string{"step.", "theme.umbra", "theme.void", "theme.lux", "comp.work.", "profile.personal", "profile.work"} {
+	// Built at run time: "step."+id, "theme."+variant, "comp.work."+work, "profile."+p(+".more"),
+	// "shell."+shell.
+	for _, prefix := range []string{"step.", "theme.umbra", "theme.void", "theme.lux", "comp.work.", "profile.personal", "profile.work", "shell.zsh", "shell.fish"} {
 		for k := range cat {
 			if strings.HasPrefix(k, prefix) {
 				used[k] = true

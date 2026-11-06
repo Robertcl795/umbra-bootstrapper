@@ -5,11 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 )
 
 // PackageColumns are the columns of env/wsl/install/packages.tsv (schema 1), in file order.
-var PackageColumns = []string{"name", "component", "os", "source", "pkg", "cmd", "skip", "desc_en", "desc_es"}
+var PackageColumns = []string{"name", "component", "os", "source", "pkg", "cmd", "skip", "when", "desc_en", "desc_es"}
+
+// PackageSchema is the packages.tsv schema this package reads.
+const PackageSchema = 1
 
 // Package is one row of packages.tsv: a package a component installs on a set of OSes.
 type Package struct {
@@ -20,6 +24,7 @@ type Package struct {
 	Pkg       string            // the package manager's name ("" = Name)
 	Cmd       string            // the doctor's command, a|b = either ("" = none)
 	Skip      bool              // the user may leave it out (--skip-packages)
+	When      string            // "" always; "shell=fish": only with that shell
 	Desc      map[string]string // en, es
 }
 
@@ -34,8 +39,8 @@ func ParsePackages(r io.Reader) (Packages, error) {
 	}
 	text := string(raw)
 	first, _, _ := strings.Cut(text, "\n")
-	if !strings.HasPrefix(first, fmt.Sprintf("# schema %d ", Schema)) {
-		return Packages{}, fmt.Errorf("packages: line 1 must start with '# schema %d '", Schema)
+	if !strings.HasPrefix(first, fmt.Sprintf("# schema %d ", PackageSchema)) {
+		return Packages{}, fmt.Errorf("packages: line 1 must start with '# schema %d '", PackageSchema)
 	}
 	cr := csv.NewReader(strings.NewReader(text))
 	cr.Comma = '\t'
@@ -61,7 +66,7 @@ func ParsePackages(r io.Reader) (Packages, error) {
 			return f[i]
 		}
 		p.Rows = append(p.Rows, Package{Name: f[0], Component: f[1], OS: f[2], Source: f[3], Pkg: v(4), Cmd: v(5),
-			Skip: f[6] == "yes", Desc: map[string]string{"en": f[7], "es": f[8]}})
+			Skip: f[6] == "yes", When: v(7), Desc: map[string]string{"en": f[8], "es": f[9]}})
 	}
 	return p, nil
 }
@@ -93,6 +98,30 @@ func (p Packages) For(component, platform string) []Package {
 	for _, r := range p.Rows {
 		if r.Component == component && r.On(platform) {
 			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// ForShell returns the rows of a component on platform for the chosen shell: rows with a
+// "shell=<name>" condition only for that shell.
+func (p Packages) ForShell(component, platform, shell string) []Package {
+	var out []Package
+	for _, r := range p.For(component, platform) {
+		if r.When == "" || r.When == "shell="+shell {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// Shells lists the shells a component offers on platform beyond the default: the names in its
+// rows' "shell=<name>" conditions, in table order.
+func (p Packages) Shells(component, platform string) []string {
+	var out []string
+	for _, r := range p.For(component, platform) {
+		if name, ok := strings.CutPrefix(r.When, "shell="); ok && !slices.Contains(out, name) {
+			out = append(out, name)
 		}
 	}
 	return out

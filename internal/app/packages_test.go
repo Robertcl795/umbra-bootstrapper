@@ -128,7 +128,7 @@ func TestReviewListsThePackagesLeftOut(t *testing.T) {
 	m := atComponents(t)
 	m, _ = press(m, "e")
 	m, _ = press(m, down(rowOf(t, m, "yazi"))...)
-	m, _ = press(m, "space", "esc", "enter", "enter")
+	m, _ = press(m, "space", "esc", "enter", "enter", "enter")
 	if m.screen != Review {
 		t.Fatalf("screen %d, want Review", m.screen)
 	}

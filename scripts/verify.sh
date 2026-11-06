@@ -53,7 +53,7 @@ check_new_code() {
     env/wsl/tests/unit_wsl_detect.sh env/wsl/tests/unit_catalog.sh env/wsl/tests/unit_events.sh \
     env/wsl/tests/selector_dump.sh env/wsl/tests/unit_setup_fetch.sh env/wsl/tests/unit_resume.sh \
     env/wsl/install/terminal.sh env/wsl/tests/unit_terminal.sh env/wsl/tests/13_terminal.sh env/wsl/tests/14_pwsh.sh \
-    env/wsl/tests/unit_packages.sh env/wsl/tests/01_packages.sh \
+    env/wsl/tests/unit_packages.sh env/wsl/tests/01_packages.sh env/wsl/tests/15_pwsh7.sh \
     test/pty/fakes/install.sh test/pty/fakes/doctor.sh test/pty/fakes/bin/sudo test/ps1/run.sh; do
     bash -n "$f" || { echo "bash -n $f"; return 1; }
     sc="$(shellcheck -f gcc "$f" 2>&1)" || { echo "$sc" >&2; echo "shellcheck: $(head -n 1 <<<"$sc")"; return 1; }

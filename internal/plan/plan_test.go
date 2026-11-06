@@ -137,4 +137,9 @@ func TestDoctorEnv(t *testing.T) {
 	if !slices.Contains(got, "UM_SKIP_PACKAGES=fzf") {
 		t.Errorf("%v has no UM_SKIP_PACKAGES=fzf", got)
 	}
+	// With fish, the doctor checks fish and not a zsh login shell (tests/03_shell.sh).
+	got = DoctorEnv(c, "wsl-ubuntu", Selection{Profile: "personal", Items: []string{"shell"}, Shell: "fish"})
+	if !slices.Contains(got, "UM_SHELL=fish") {
+		t.Errorf("%v has no UM_SHELL=fish", got)
+	}
 }

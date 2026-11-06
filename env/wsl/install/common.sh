@@ -77,8 +77,8 @@ phase_skip() {
 die() { log_error "$*"; exit 1; }
 
 # Opt-in components (install.sh, ADR 0017, 0018) run only when UM_COMPONENTS names them,
-# so a plain `bootstrap.sh --yes` installs what it always did.
-UM_OPTIN_COMPONENTS="desktop um vault ollama"
+# so a plain `bootstrap.sh --yes` installs what it always did. pwsh7 installs Windows software.
+UM_OPTIN_COMPONENTS="desktop um vault ollama pwsh7"
 
 # component_enabled <name>: true unless excluded by UM_COMPONENTS (allow-list) or UM_SKIP.
 component_enabled() {

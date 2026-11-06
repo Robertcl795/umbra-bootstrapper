@@ -28,6 +28,7 @@ const (
 	Profile
 	Account // only as root on WSL: the user stage 1 creates
 	Components
+	Shell // the shell choice and its extras (plan installer-packages-shell, R4)
 	Theme
 	Review
 	Run
@@ -37,7 +38,7 @@ const (
 )
 
 // step is the step-row position of each screen.
-var step = map[Screen]int{Boot: 0, Profile: 1, Account: 1, Components: 2, Theme: 3, Review: 4, Run: 5, Done: 6, Restart: 6, Failed: 5}
+var step = map[Screen]int{Boot: 0, Profile: 1, Account: 1, Components: 2, Shell: 3, Theme: 4, Review: 5, Run: 6, Done: 7, Restart: 7, Failed: 6}
 
 // MinW and MinH are the smallest terminal the screens are drawn for.
 const (
@@ -80,6 +81,7 @@ type Model struct {
 	ccur    int
 	editing bool // the package editor of the item under ccur is open (on Components)
 	ecur    int
+	scur    int
 	tcur    int
 	bcur    int
 	glitch  int
@@ -332,6 +334,9 @@ func (m *Model) defaults() {
 				sel.SkipPkgs[name] = true
 			}
 		}
+		if m.stored.Shell != "" {
+			sel.Shell = m.stored.Shell
+		}
 		if m.stored.Theme != "" && !m.d.Env.ThemeSet && slices.Contains(theme.Variants, m.stored.Theme) {
 			sel.Variant = m.stored.Theme
 		}
@@ -375,7 +380,7 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 		}
 	case Components:
 		if m.editing {
-			id := m.d.Items[m.ccur].ID
+			id := m.d.On(screens.ScreenComponents)[m.ccur].ID
 			m.ecur, m.d.Sel.SkipPkgs, a = screens.PackagesKey(k, m.ecur, m.d, id)
 			if k == "space" || k == "a" || k == "n" {
 				m.touched = true
@@ -397,6 +402,11 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 		m.acct, a = screens.AccountKey(k, m.acct)
 		if a == screens.Next {
 			m.d.Extra = []string{"--user", m.acct.User}
+		}
+	case Shell:
+		m.scur, m.d.Sel.Chosen, m.d.Sel.Shell, a = screens.ShellKey(k, m.scur, m.d)
+		if k == "space" {
+			m.touched = true
 		}
 	case Theme:
 		m.tcur, a = screens.ThemeKey(k, m.tcur)
@@ -703,10 +713,12 @@ func (m Model) Content() string {
 		body, keys = screens.AccountView(c, m.acct, m.users), screens.AccountKeys(c)
 	case Components:
 		if m.editing {
-			body, keys = screens.PackagesView(c, m.d, m.d.Items[m.ccur].ID, m.ecur), screens.PackagesKeys(c)
+			body, keys = screens.PackagesView(c, m.d, m.d.On(screens.ScreenComponents)[m.ccur].ID, m.ecur), screens.PackagesKeys(c)
 			break
 		}
 		body, keys = screens.ComponentsView(c, m.d, m.ccur), screens.ComponentsKeys(c)
+	case Shell:
+		body, keys = screens.ShellView(c, m.d, m.scur), screens.ShellKeys(c)
 	case Theme:
 		body, keys = screens.ThemeView(c, m.tcur), screens.ThemeKeys(c)
 	case Review:
@@ -771,7 +783,7 @@ func (m Model) cursor(content string) *tea.Cursor {
 
 // Title is "Umbra setup · <screen>[ <state>]".
 func (m Model) Title() string {
-	name := map[Screen]string{Boot: "scan", Profile: "profile", Account: "account", Components: "components",
+	name := map[Screen]string{Boot: "scan", Profile: "profile", Account: "account", Components: "components", Shell: "shell",
 		Theme: "theme", Review: "review", Run: "run", Done: "done", Restart: "restart", Failed: "failed"}[m.screen]
 	state := ""
 	switch m.screen {
@@ -783,16 +795,18 @@ func (m Model) Title() string {
 		state = []string{"user", "password", "again"}[m.acct.Field]
 	case Components:
 		if m.editing {
-			name, state = "editor", m.d.Items[m.ccur].ID
+			name, state = "editor", m.d.On(screens.ScreenComponents)[m.ccur].ID
 			break
 		}
-		n := 0
-		for _, it := range m.d.Items {
+		n, items := 0, m.d.On(screens.ScreenComponents)
+		for _, it := range items {
 			if m.d.Sel.Chosen[it.ID] {
 				n++
 			}
 		}
-		state = strconv.Itoa(n) + "/" + strconv.Itoa(len(m.d.Items))
+		state = strconv.Itoa(n) + "/" + strconv.Itoa(len(items))
+	case Shell:
+		state = m.d.Plan().Shell
 	case Theme:
 		state = m.d.Sel.Variant
 	case Review:

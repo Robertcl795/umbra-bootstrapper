@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ ESCANEO  ■ PERFIL  ■ COMPONENTES  ◆ SHELL  ◇ TEMA  ◇ REVISAR  ◇ EJECUTAR  ◇ L…
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┏━ SHELL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┌─ DETALLE ─────────────────────────┐ 
+ ┃ › (●) Zsh                            ┃ │ ZSH                               │ 
+ ┃   ( ) Fish                           ┃ │ El shell principal de Umbra: su   │ 
+ ┃   ( ) Sin configuración de shell     ┃ │ configuración, plugins, el CLI um │ 
+ ┃                                      ┃ │ y los completados.                │ 
+ ┃   WINDOWS                            ┃ │                                   │ 
+ ┃   [ ] Actualizar a PowerShell 7      ┃ │ · zsh: Z shell, el shell princip… │ 
+ ┃                                      ┃ │ · zsh-autosuggestions: Sugiere c… │ 
+ ┃                                      ┃ │ · zsh-history-substring-search: … │ 
+ ┃                                      ┃ │ · zsh-vi-mode: Teclas de vi en l… │ 
+ ┃                                      ┃ │ · fast-syntax-highlighting: Colo… │ 
+ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ mover  ·  space elegir  ·  enter siguiente  ·  esc volver                    

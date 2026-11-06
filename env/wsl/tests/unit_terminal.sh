@@ -143,6 +143,27 @@ expect "the block is gone, the user's lines stay byte for byte" '[ "$(cat "$p51"
 expect "Umbra's starship.toml is gone" '[ ! -e "$t/la/umbra/starship.toml" ]'
 expect "doctor 14_pwsh.sh then fails" '! bash "$TESTS/14_pwsh.sh" 2>/dev/null'
 
+echo "# pwsh7: PowerShell 7 from winget (ADR 0006 exception: the latest stable, verified by winget)"
+# UM_WIN_PWSH is the pwsh.exe the script finds; the fake answers \$PSVersionTable with UM_FAKE_PWSH_V.
+fakepwsh="$t/bin/pwsh-fake.exe"
+printf '#!/usr/bin/env bash\necho "pwsh.exe $*" >>%q\necho "${UM_FAKE_PWSH_V:-7.4.6}"\n' "$log" >"$fakepwsh"
+chmod +x "$fakepwsh"
+: >"$log"
+out="$(UM_WIN_PWSH=none pwsh7_install 2>&1)"
+expect "no pwsh.exe: winget installs Microsoft.PowerShell, exact id, source winget, silent" \
+  'grep -qx "winget.exe install --id Microsoft.PowerShell --exact --source winget --accept-package-agreements --accept-source-agreements --silent" "$log"'
+: >"$log"
+UM_WIN_PWSH="$fakepwsh" pwsh7_install >/dev/null 2>&1
+expect "pwsh 7 found: winget upgrades it to the latest stable instead" \
+  'grep -qx "winget.exe upgrade --id Microsoft.PowerShell --exact --source winget --accept-package-agreements --accept-source-agreements --silent" "$log" && ! grep -q "winget.exe install" "$log"'
+: >"$log"
+UM_WIN_PWSH="$fakepwsh" UM_FAKE_PWSH_V=6.2.7 pwsh7_install >/dev/null 2>&1
+expect "an older pwsh (6.x): winget installs 7" 'grep -q "winget.exe install --id Microsoft.PowerShell" "$log"'
+expect "doctor 15_pwsh7.sh passes with pwsh 7.x" 'UM_WIN_PWSH="$fakepwsh" bash "$TESTS/15_pwsh7.sh" 2>/dev/null'
+expect "doctor 15_pwsh7.sh fails with 6.x or none" \
+  '! UM_WIN_PWSH="$fakepwsh" UM_FAKE_PWSH_V=6.2.7 bash "$TESTS/15_pwsh7.sh" 2>/dev/null && ! UM_WIN_PWSH=none bash "$TESTS/15_pwsh7.sh" 2>/dev/null'
+expect "pwsh_exe: a pwsh 7 installed in this run is found off PATH (UM_WIN_PWSH)" '[ "$(UM_WIN_PWSH="$fakepwsh" pwsh_exe)" = "$fakepwsh" ]'
+
 # PowerShell parses the block (only where the real powershell.exe is reachable).
 if [ -n "$real_ps" ]; then
   pwsh_block >"$t/block.ps1"

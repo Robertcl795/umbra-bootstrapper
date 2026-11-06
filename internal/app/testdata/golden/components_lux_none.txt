@@ -1,22 +1,22 @@
 ◢◤ UMBRA//SETUP                           wsl-arch · personal · lux · 0.0.0-test
-■ SCAN  ■ PROFILE  ◆ COMPONENTS  ◇ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE               
+■ SCAN  ■ PROFILE  ◆ COMPONENTS  ◇ SHELL  ◇ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE      
 ────────────────────────────────────────────────────────────────────────────────
                                                                                 
  ┏━ COMPONENTS ━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┌─ DETAIL ──────────────────────────┐ 
  ┃ › [■] Packages and base tools        ┃ │ PACKAGES                          │ 
- ┃   [■] Shell: zsh (fish theme-only)   ┃ │ Base packages from the distro's … │ 
- ┃   [■] Prompt: Starship               ┃ │                                   │ 
- ┃   [■] Neovim                         ┃ │ · base-devel: Compilers and make… │ 
- ┃   [■] Kubernetes tools               ┃ │ · git: Version control; the inst… │ 
- ┃   [■] Zellij                         ┃ │ · curl: Downloads over HTTP; the… │ 
- ┃   [■] Language toolchains            ┃ │ · wget: Downloads files from the… │ 
- ┃   [■] fastfetch                      ┃ │ · unzip: Extracts .zip archives   │ 
- ┃   [■] WSL tuning                     ┃ │ · ca-certificates: Root certific… │ 
- ┃   [■] Windows Terminal: Umbra theme  ┃ │ · ripgrep: Fast recursive search… │ 
- ┃   [ ] PowerShell prompt: Starship    ┃ │ · fd: Fast, simple alternative t… │ 
- ┃   [■] Umbra AI: um · vault · AI sta… ┃ │ · bat: cat with syntax highlight… │ 
- ┃                                      ┃ │ +17 more · e to see all and edit  │ 
- ┃ 11 of 12 selected                    ┃ │                                   │ 
+ ┃   [■] Prompt: Starship               ┃ │ Base packages from the distro's … │ 
+ ┃   [■] Neovim                         ┃ │                                   │ 
+ ┃   [■] Kubernetes tools               ┃ │ · base-devel: Compilers and make… │ 
+ ┃   [■] Zellij                         ┃ │ · git: Version control; the inst… │ 
+ ┃   [■] Language toolchains            ┃ │ · curl: Downloads over HTTP; the… │ 
+ ┃   [■] fastfetch                      ┃ │ · wget: Downloads files from the… │ 
+ ┃   [■] WSL tuning                     ┃ │ · unzip: Extracts .zip archives   │ 
+ ┃   [■] Windows Terminal: Umbra theme  ┃ │ · ca-certificates: Root certific… │ 
+ ┃   [ ] PowerShell prompt: Starship    ┃ │ · ripgrep: Fast recursive search… │ 
+ ┃   [■] Umbra AI: um · vault · AI sta… ┃ │ · fd: Fast, simple alternative t… │ 
+ ┃                                      ┃ │ · bat: cat with syntax highlight… │ 
+ ┃ 10 of 11 selected                    ┃ │ +17 more · e to see all and edit  │ 
+ ┃                                      ┃ │                                   │ 
  ┃                                      ┃ │ deploys    —                      │ 
  ┃                                      ┃ │ work       same as personal       │ 
  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ └───────────────────────────────────┘ 

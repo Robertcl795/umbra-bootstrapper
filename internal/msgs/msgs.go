@@ -57,6 +57,7 @@ type Stored struct {
 	Components []string
 
 	SkipPackages []string // packages.tsv rows left out (skip_packages)
+	Shell        string   // zsh, fish
 }
 
 // Tick drives spinners and elapsed times while something runs (no tick at rest).

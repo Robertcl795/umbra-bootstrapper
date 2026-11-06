@@ -1,5 +1,5 @@
 [38;2;255;79;174m◢◤ [m[1;38;2;232;228;247mUMBRA[m[38;2;255;79;174m//[m[38;2;232;228;247mSETUP[m                         [38;2;138;132;168mwsl-arch · personal · umbra · 0.0.0-test[m
-[38;2;138;132;168m■ SCAN[m  [38;2;138;132;168m■ PROFILE[m  [38;2;138;132;168m■ COMPONENTS[m  [38;2;138;132;168m■ THEME[m  [38;2;138;132;168m■ REVIEW[m  [1;38;2;232;228;247m◆ RUN[m  [38;2;138;132;168m◇ DONE[m               
+[38;2;138;132;168m■ SCAN[m  [38;2;138;132;168m■ PROFILE[m  [38;2;138;132;168m■ COMPONENTS[m  [38;2;138;132;168m■ SHELL[m  [38;2;138;132;168m■ THEME[m  [38;2;138;132;168m■ REVIEW[m  [1;38;2;232;228;247m◆ RUN[m  [38;2;138;132;168m◇ DONE[m      
 [38;2;36;30;61m────────────────────────────────────────────────────────────────────────────────[m
                                                                                 
  [38;2;255;92;122m✕ [m[1;38;2;232;228;247mbefore_20-shell failed.[m                                                      
@@ -13,7 +13,7 @@
  [38;2;232;228;247mFix the cause above, then run the same again. A second run only repeats what[m   
  [38;2;232;228;247mis missing.[m                                                                    
  [38;2;138;132;168mNext time: [m[38;2;43;228;255minstall.sh --yes --profile personal --components shell,prompt[m       
-            [38;2;43;228;255m--theme umbra --disable-k8s[m                                         
+            [38;2;43;228;255m--shell zsh --theme umbra --disable-k8s[m                             
  [38;2;138;132;168mlog: ~/.local/state/um/setup-x.log[m                                             
                                                                                 
                                                                                 

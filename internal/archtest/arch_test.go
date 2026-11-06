@@ -111,8 +111,11 @@ func TestNoComponentIDsInGo(t *testing.T) {
 		ast.Inspect(file, func(n ast.Node) bool {
 			if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == token.STRING {
 				s, err := strconv.Unquote(lit.Value)
-				// Allowed: plan.k8sComponent, named by bootstrap.sh's own --enable-k8s flag.
-				allowed := s == "k8s" && strings.HasSuffix(p, filepath.Join("plan", "plan.go"))
+				// Allowed: plan.k8sComponent, named by bootstrap.sh's own --enable-k8s flag; "shell" as
+				// the Shell screen's step id and window title, and as chezmoi's data key (sys.go).
+				allowed := s == "k8s" && strings.HasSuffix(p, filepath.Join("plan", "plan.go")) ||
+					s == "shell" && (strings.HasSuffix(p, filepath.Join("ui", "ui.go")) || strings.HasSuffix(p, filepath.Join("app", "app.go")) ||
+						strings.HasSuffix(p, filepath.Join("sys", "sys.go")))
 				if err == nil && ids[s] && !allowed {
 					t.Errorf("%s: component id %q is hard-coded (read it from the catalog)", p, s)
 				}
