@@ -46,7 +46,7 @@ check_layout() {
 # new-code: scripts added by the bootstrap fix pass shellcheck; migrated ones stay out of it
 # (ADR 0023, 0009). guards: the rules of ADR 0021 and 0022 hold in the code.
 check_new_code() {
-  local f
+  local f sc
   for f in env/wsl/install/stage1.sh env/wsl/install/stage1_pacman.sh env/wsl/install/stage1_apt.sh \
     env/wsl/install/finish.sh env/wsl/install/wsl_detect.sh \
     env/wsl/bin/umbra env/wsl/tests/unit_guards.sh env/wsl/tests/unit_phase.sh \
@@ -55,7 +55,7 @@ check_new_code() {
     env/wsl/install/terminal.sh env/wsl/tests/unit_terminal.sh env/wsl/tests/13_terminal.sh env/wsl/tests/14_pwsh.sh \
     test/pty/fakes/install.sh test/pty/fakes/doctor.sh test/pty/fakes/bin/sudo test/ps1/run.sh; do
     bash -n "$f" || { echo "bash -n $f"; return 1; }
-    shellcheck -f gcc "$f" >&2 || { echo "shellcheck $f"; return 1; }
+    sc="$(shellcheck -f gcc "$f" 2>&1)" || { echo "$sc" >&2; echo "shellcheck: $(head -n 1 <<<"$sc")"; return 1; }
   done
 }
 

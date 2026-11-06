@@ -11,9 +11,9 @@
 # Tests set UM_WIN_LOCALAPPDATA_U/_W (Linux and Windows paths) and UM_WIN_PROFILES (one per line).
 set -euo pipefail
 
-TERMINAL_SH="${BASH_SOURCE[0]:-${0:-}}"
-# shellcheck disable=SC1091
-source "$(cd -- "$(dirname "$TERMINAL_SH")" && pwd)/common.sh"
+TERMINAL_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]:-${0:-}}")" && pwd)"
+# shellcheck disable=SC1090,SC1091
+source "$TERMINAL_DIR/common.sh"
 
 UM_NERD_FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.tar.xz"
 UM_NERD_FONT="JetBrainsMono Nerd Font"
