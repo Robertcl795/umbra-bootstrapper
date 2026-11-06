@@ -80,8 +80,8 @@ func TestRunSucceedsThroughTheDoctor(t *testing.T) {
 	if !strings.Contains(m.Content(), "installing zsh") && m.r.Current != "P9-extra" {
 		t.Error("log of the current phase")
 	}
-	if ids := phaseIDs(m); ids[len(ids)-2] != "P9-extra" || ids[len(ids)-1] != plan.Doctor {
-		t.Errorf("an unknown phase goes before the doctor: %v", ids)
+	if ids := phaseIDs(m); ids[2] != "P9-extra" || ids[len(ids)-1] != plan.Doctor {
+		t.Errorf("an unknown phase goes where it ran (after prompt), the doctor last: %v", ids)
 	}
 	m = send(m, msgs.RunExited{Code: 0}, msgs.EventsRead{Offset: 100})
 	if c.doctor != 1 || m.r.Current != plan.Doctor {

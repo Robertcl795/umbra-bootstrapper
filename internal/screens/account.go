@@ -33,9 +33,9 @@ func AccountView(c ui.Ctx, a Account, existing []string) []string {
 	}
 	field := func(i int, label, value string) string {
 		box := c.Th.R("fgMuted", ui.Fit(label, 18))
-		v := value + strings.Repeat(" ", max(0, 24-ui.Width(value)))
-		if i == a.Field {
-			return c.Th.B("accent", "› ") + box + c.Th.Selected().Render(v+"▏")
+		v := value + strings.Repeat(" ", max(0, 25-ui.Width(value)))
+		if i == a.Field { // the terminal's cursor sits after the text (AccountCursor)
+			return c.Th.B("accent", "› ") + box + c.Th.Selected().Render(v)
 		}
 		return "  " + box + c.Th.R("fg", v)
 	}
@@ -55,6 +55,14 @@ func AccountView(c ui.Ctx, a Account, existing []string) []string {
 		}
 	}
 	return append([]string{""}, ui.Panel(c, c.T("account.title"), lines, bodyW(c), 0, false)...)
+}
+
+// AccountCursor is where the terminal's cursor goes on the focused field's row: the field's
+// label as the row shows it (the row is found by it) and the cells from the marker to the cursor.
+func AccountCursor(c ui.Ctx, a Account) (label string, x int) {
+	values := []string{a.User, strings.Repeat("•", len([]rune(a.Pass))), strings.Repeat("•", len([]rune(a.Again)))}
+	label = ui.Fit(c.T([]string{"account.user", "account.pass", "account.again"}[a.Field]), 18)
+	return "› " + label, 2 + 18 + ui.Width(values[a.Field])
 }
 
 // AccountKeys lists the footer keys of account.

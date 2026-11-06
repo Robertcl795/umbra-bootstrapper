@@ -11,6 +11,9 @@ import (
 // Doctor is the id of the last phase, run by umbra-setup itself after install.sh (ux-spec §3).
 const Doctor = "doctor"
 
+// Stage1 lists the phases stage1.sh runs as root on WSL, in its order (run_stage1).
+var Stage1 = []string{"P0", "P1", "P2", "P3", "P3r"}
+
 // Summary is the chezmoi script every WSL run ends with.
 const Summary = "run_onchange_after_99-summary.sh"
 

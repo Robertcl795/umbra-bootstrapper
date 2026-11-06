@@ -289,3 +289,11 @@ func FailedView(c ui.Ctx, r Run, command string) []string {
 
 // EndKeys are the keys of done, restart and failed.
 func EndKeys(c ui.Ctx) []ui.Key { return []ui.Key{{Key: "enter", Desc: c.T("key.exit")}} }
+
+// RestartKeys: on WSL, enter leaves the distro (umbra-setup terminates it) and q only closes.
+func RestartKeys(c ui.Ctx, wsl bool) []ui.Key {
+	if !wsl {
+		return EndKeys(c)
+	}
+	return []ui.Key{{Key: "enter", Desc: c.T("key.leavewsl")}, {Key: "q", Desc: c.T("key.stay")}}
+}

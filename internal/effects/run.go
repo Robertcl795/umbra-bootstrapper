@@ -350,3 +350,22 @@ func tail(s string, n int) []string {
 func Tick() tea.Cmd {
 	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg { return msgs.Tick{Now: t} })
 }
+
+// LeaveWSL runs after umbra-setup closed, on the stage-1 restart screen's enter: it prints lines,
+// then terminates the distro through WSL interop (`wsl.exe --terminate <distro>`), which ends this
+// process too and leaves the user's terminal in PowerShell. A terminate is needed, not an exit:
+// with systemd the distro keeps running after the shell ends, and wsl.conf's default user only
+// applies on the next start. It returns false, having run nothing, when there is no distro name
+// or no wsl.exe (interop off); the caller then shows the commands to run by hand.
+func LeaveWSL(distro string, out io.Writer, lines ...string) bool {
+	bin, err := exec.LookPath("wsl.exe")
+	if distro == "" || err != nil {
+		return false
+	}
+	for _, l := range lines {
+		_, _ = io.WriteString(out, l+"\n")
+	}
+	cmd := exec.Command(bin, "--terminate", distro)
+	cmd.Stdout, cmd.Stderr = out, out
+	return cmd.Run() == nil
+}

@@ -25,6 +25,7 @@ const (
 	Quit
 	Install
 	DryRun
+	Leave // leave WSL: umbra-setup terminates the distro after it closed
 )
 
 // Data is what the screens read. The app owns it.

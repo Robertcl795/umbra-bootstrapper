@@ -92,6 +92,16 @@ func run() int {
 		return 0
 	case screens.Quit:
 		fmt.Println(tr("cancelled"))
+	case screens.Leave:
+		// Stage 1 is done: terminate the distro so PowerShell is back and the next start is the
+		// new user. Without interop, the restart screen's commands, printed.
+		distro := env.Distro
+		next := tr("leave.next", "cmd", "wsl.exe -d "+distro)
+		if !effects.LeaveWSL(distro, os.Stdout, tr("leave.closing", "distro", distro), next) {
+			fmt.Println(tr("leave.manual"))
+			fmt.Println("  wsl.exe --terminate " + distro)
+			fmt.Println("  " + next)
+		}
 	}
 	return res.Code
 }

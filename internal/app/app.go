@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/Robertcl795/umbra-bootstrapper/internal/events"
 	"github.com/Robertcl795/umbra-bootstrapper/internal/i18n"
@@ -381,7 +382,15 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 		m.touched = true
 	case Review:
 		m.bcur, a = screens.ReviewKey(k, m.bcur, m.d)
-	case Done, Restart, Failed:
+	case Restart:
+		if k == "enter" && m.wsl() {
+			m.result = Result{Action: screens.Leave, Args: m.args}
+			return m, tea.Quit
+		}
+		if k == "enter" || k == "q" || k == "esc" {
+			return m.quit(screens.Next, m.endCode())
+		}
+	case Done, Failed:
 		if k == "enter" || k == "q" || k == "esc" {
 			return m.quit(screens.Next, m.endCode())
 		}
@@ -413,6 +422,8 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m Model) wsl() bool { return strings.HasPrefix(m.d.Env.Platform, "wsl-") }
+
 // needAccount: root on WSL runs stage 1, which must be told the user (stage1.sh p2_pre).
 func (m Model) needAccount() bool {
 	return m.d.Env.Root && strings.HasPrefix(m.d.Env.Platform, "wsl-")
@@ -438,7 +449,11 @@ func (m Model) endCode() int {
 func (m *Model) start() tea.Cmd {
 	m.screen = Run
 	m.r.Phases = nil
-	for _, id := range plan.Phases(m.d.Cat, m.d.Env.Platform, m.d.Plan().Items) {
+	ids := plan.Phases(m.d.Cat, m.d.Env.Platform, m.d.Plan().Items)
+	if m.needAccount() { // stage 1: no chezmoi script runs before the restart
+		ids = plan.Stage1
+	}
+	for _, id := range ids {
 		m.r.Phases = append(m.r.Phases, screens.Phase{ID: id})
 	}
 	m.r.Started = m.r.Now // the last tick; the first event corrects it when earlier
@@ -513,16 +528,17 @@ func (m *Model) apply(ev events.Event) tea.Cmd {
 	return nil
 }
 
-// phase returns the row of id, adding it before the doctor when the catalog did not list it.
+// phase returns the row of id. One the list did not have goes after the last phase that started
+// (it runs now), so rows stay in the order they ran; the doctor stays last.
 func (m *Model) phase(id string) int {
+	at := 0
 	for i, p := range m.r.Phases {
 		if p.ID == id {
 			return i
 		}
-	}
-	at := len(m.r.Phases)
-	if at > 0 && m.r.Phases[at-1].ID == plan.Doctor {
-		at--
+		if p.State != screens.Waiting && p.ID != plan.Doctor {
+			at = i + 1
+		}
 	}
 	m.r.Phases = slices.Insert(m.r.Phases, at, screens.Phase{ID: id})
 	return at
@@ -664,7 +680,7 @@ func (m Model) Content() string {
 	case Done:
 		body, keys = screens.DoneView(c, m.r, m.d.Sel.Chosen[umbraAI(m.d)]), screens.EndKeys(c)
 	case Restart:
-		body, keys = screens.RestartView(c, m.r), screens.EndKeys(c)
+		body, keys = screens.RestartView(c, m.r), screens.RestartKeys(c, m.wsl())
 	case Failed:
 		command := plan.Command(m.args)
 		if m.resume != nil {
@@ -689,11 +705,32 @@ func umbraAI(d screens.Data) string {
 // window title names the screen and its state; the terminal tab shows the step, and tests can
 // wait on it (an OSC title is written whole, unlike cells the renderer only changes).
 func (m Model) View() tea.View {
-	v := tea.NewView(m.Content())
+	th := m.d.Env.Theme.With(m.d.Sel.Variant)
+	content := m.Content()
+	v := tea.NewView(ui.PaintBackground(content, th))
 	v.AltScreen = true
-	v.BackgroundColor = m.d.Env.Theme.With(m.d.Sel.Variant).Background()
+	v.BackgroundColor = th.Background()
+	v.Cursor = m.cursor(content)
 	v.WindowTitle = m.Title()
 	return v
+}
+
+// cursor is the terminal's own cursor in the account screen's focused field: a bar right after
+// the text, blinking unless NO_MOTION (terminals keep it steady while keys arrive).
+func (m Model) cursor(content string) *tea.Cursor {
+	if m.screen != Account || m.small() {
+		return nil
+	}
+	c := ui.Ctx{Th: m.d.Env.Theme.With(m.d.Sel.Variant), T: m.tr, W: m.w, H: m.h}
+	label, dx := screens.AccountCursor(c, m.acct)
+	for y, row := range strings.Split(ansi.Strip(content), "\n") {
+		if i := strings.Index(row, label); i >= 0 {
+			cur := tea.NewCursor(ansi.StringWidth(row[:i])+dx, y)
+			cur.Shape, cur.Blink = tea.CursorBar, !m.d.Env.NoMotion
+			return cur
+		}
+	}
+	return nil
 }
 
 // Title is "Umbra setup · <screen>[ <state>]".

@@ -279,3 +279,20 @@ func Words(text string, w int) []string {
 	}
 	return append(out, line)
 }
+
+// PaintBackground puts the variant's background (truecolor) on every cell of a frame: at the
+// start of each row and after each reset, so no cell falls back to the terminal's own background
+// (a light Windows Terminal scheme showed through void, 2026-11-05). Other profiles: unchanged.
+func PaintBackground(frame string, th theme.T) string {
+	bg := th.Background()
+	if bg == nil {
+		return frame
+	}
+	on := ansi.Style{}.BackgroundColor(bg).String()
+	rows := strings.Split(frame, "\n")
+	for i, r := range rows {
+		r = strings.ReplaceAll(strings.ReplaceAll(r, "\x1b[0m", "\x1b[m"), "\x1b[m", "\x1b[m"+on)
+		rows[i] = on + r + "\x1b[m"
+	}
+	return strings.Join(rows, "\n")
+}

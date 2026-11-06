@@ -43,3 +43,33 @@ echo "file=$f"; echo "perm=$(stat -c %a "$f") dirperm=$(stat -c %a "$d")"; echo 
 		t.Errorf("no password: no file expected, got:\n%s", log2)
 	}
 }
+
+// Leaving WSL after stage 1 terminates the distro through wsl.exe (interop), so the user's
+// terminal is back in PowerShell and the next start logs in as the new user.
+func TestLeaveWSLTerminatesTheDistro(t *testing.T) {
+	tmp := t.TempDir()
+	rec := filepath.Join(tmp, "args")
+	fake := "#!/bin/sh\necho \"$@\" >" + rec + "\n"
+	if err := os.WriteFile(filepath.Join(tmp, "wsl.exe"), []byte(fake), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", tmp+":/usr/bin:/bin")
+	var out strings.Builder
+	if !LeaveWSL("Arch", &out, "closing Arch", "then: wsl.exe -d Arch") {
+		t.Fatalf("wsl.exe was there; output %q", out.String())
+	}
+	if b, _ := os.ReadFile(rec); strings.TrimSpace(string(b)) != "--terminate Arch" {
+		t.Fatalf("wsl.exe got %q", b)
+	}
+	if !strings.Contains(out.String(), "closing Arch") || !strings.Contains(out.String(), "wsl.exe -d Arch") {
+		t.Fatalf("output %q", out.String())
+	}
+	t.Setenv("PATH", "/usr/bin:/bin")
+	out.Reset()
+	if LeaveWSL("Arch", &out, "closing Arch", "then: wsl.exe -d Arch") {
+		t.Fatal("without interop there is nothing to run")
+	}
+	if LeaveWSL("", &out, "x") {
+		t.Fatal("without a distro name there is nothing to terminate")
+	}
+}
