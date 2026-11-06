@@ -383,6 +383,9 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 	case Review:
 		m.bcur, a = screens.ReviewKey(k, m.bcur, m.d)
 	case Restart:
+		if k == "enter" && m.driven() {
+			return m.quit(screens.Next, RestartCode) // the driver terminates and runs stage 2
+		}
 		if k == "enter" && m.wsl() {
 			m.result = Result{Action: screens.Leave, Args: m.args}
 			return m, tea.Quit
@@ -421,6 +424,13 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 	}
 	return m, nil
 }
+
+// RestartCode is the exit code that tells install.ps1 "stage 1 done, restart the distro"
+// (ADR 0042).
+const RestartCode = 10
+
+// driven: install.ps1 runs this stage and does the restart itself (UM_DRIVER=ps1).
+func (m Model) driven() bool { return m.d.Env.Driver == "ps1" }
 
 func (m Model) wsl() bool { return strings.HasPrefix(m.d.Env.Platform, "wsl-") }
 
@@ -680,7 +690,7 @@ func (m Model) Content() string {
 	case Done:
 		body, keys = screens.DoneView(c, m.r, m.d.Sel.Chosen[umbraAI(m.d)]), screens.EndKeys(c)
 	case Restart:
-		body, keys = screens.RestartView(c, m.r), screens.RestartKeys(c, m.wsl())
+		body, keys = screens.RestartView(c, m.r), screens.RestartKeys(c, m.wsl(), m.driven())
 	case Failed:
 		command := plan.Command(m.args)
 		if m.resume != nil {

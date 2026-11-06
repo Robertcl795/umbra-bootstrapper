@@ -26,6 +26,7 @@ type Env struct {
 	Version  string
 	Distro   string // WSL_DISTRO_NAME, for the restart commands
 	ThemeSet bool   // UM_THEME was given: it wins over the stored theme of a re-run
+	Driver   string // UM_DRIVER: "ps1" when install.ps1 drives both stages (ADR 0042)
 }
 
 // Platform mirrors um_platform in selector.sh: UM_OS and UM_IS_WSL override the detection.

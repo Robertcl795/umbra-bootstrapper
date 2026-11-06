@@ -6,7 +6,8 @@
 // staged selection from the environment and follows it the same way.
 //
 // Exit codes: 0 done (or the WSL restart point), 1 a phase or the doctor failed, 2 needs a
-// terminal, 130 cancelled or stopped (ux-spec §3.1).
+// terminal, 10 stage 1 done under install.ps1 (the driver restarts the distro, ADR 0042),
+// 130 cancelled or stopped (ux-spec §3.1).
 package main
 
 import (

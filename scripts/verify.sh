@@ -52,7 +52,7 @@ check_new_code() {
     env/wsl/bin/umbra env/wsl/tests/unit_guards.sh env/wsl/tests/unit_phase.sh \
     env/wsl/tests/unit_wsl_detect.sh env/wsl/tests/unit_catalog.sh env/wsl/tests/unit_events.sh \
     env/wsl/tests/selector_dump.sh env/wsl/tests/unit_setup_fetch.sh env/wsl/tests/unit_resume.sh \
-    test/pty/fakes/install.sh test/pty/fakes/doctor.sh test/pty/fakes/bin/sudo; do
+    test/pty/fakes/install.sh test/pty/fakes/doctor.sh test/pty/fakes/bin/sudo test/ps1/run.sh; do
     bash -n "$f" || { echo "bash -n $f"; return 1; }
     shellcheck -f gcc "$f" >&2 || { echo "shellcheck $f"; return 1; }
   done
@@ -88,11 +88,19 @@ check_go() {
   [[ $last == *", 0 failed" ]] || { echo "pty ended with: $last"; return 1; }
 }
 
+# ps1: install.ps1 (ADR 0042) is ASCII (5.1 reads a BOM-less file as ANSI) and passes its Pester
+# tests where powershell.exe is reachable (WSL); elsewhere the test runner prints skip.
+check_ps1() {
+  ! LC_ALL=C grep -nP '[^\x00-\x7F]' install.ps1 || { echo "install.ps1 is not ASCII"; return 1; }
+  test/ps1/run.sh >&2 || { echo "Pester failed (test/ps1/run.sh)"; return 1; }
+}
+
 rc=0; out=$(check_env_syntax 2>&1) || rc=$?; report env-syntax "$rc" "$out"
 rc=0; out=$(check_layout 2>&1) || rc=$?; report layout "$rc" "$out"
 rc=0; out=$(check_new_code 2>&1) || rc=$?; report new-code "$rc" "$out"
 rc=0; out=$(check_guards 2>&1) || rc=$?; report guards "$rc" "$out"
 rc=0; out=$(check_setup_fetch 2>&1) || rc=$?; report setup-fetch "$rc" "$out"
 rc=0; out=$(check_go 2>&1) || rc=$?; report go "$rc" "$out"
+rc=0; out=$(check_ps1 2>&1) || rc=$?; report ps1 "$rc" "$out"
 
 exit $((failed > 0))

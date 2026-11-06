@@ -291,7 +291,11 @@ func FailedView(c ui.Ctx, r Run, command string) []string {
 func EndKeys(c ui.Ctx) []ui.Key { return []ui.Key{{Key: "enter", Desc: c.T("key.exit")}} }
 
 // RestartKeys: on WSL, enter leaves the distro (umbra-setup terminates it) and q only closes.
-func RestartKeys(c ui.Ctx, wsl bool) []ui.Key {
+// Under install.ps1, enter hands the restart to PowerShell (ADR 0042).
+func RestartKeys(c ui.Ctx, wsl, driven bool) []ui.Key {
+	if driven {
+		return []ui.Key{{Key: "enter", Desc: c.T("key.continueps")}, {Key: "q", Desc: c.T("key.later")}}
+	}
 	if !wsl {
 		return EndKeys(c)
 	}

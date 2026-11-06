@@ -52,6 +52,7 @@ func FromOS(envDir, version string) sys.Env {
 		Version:  version,
 		Distro:   get("WSL_DISTRO_NAME"),
 		ThemeSet: get("UM_THEME") != "",
+		Driver:   get("UM_DRIVER"),
 	}
 	if !ok {
 		e.ThemeBad = get("UM_THEME")

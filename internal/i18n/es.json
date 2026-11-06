@@ -58,6 +58,8 @@
  "key.continue": "continuar",
  "key.leavewsl": "salir de WSL",
  "key.stay": "quedarse en la distro",
+ "key.continueps": "continuar en PowerShell",
+ "key.later": "terminar después",
  "leave.closing": "Cerrando {distro} para que tu usuario surta efecto…",
  "leave.next": "Después, en PowerShell: {cmd} y umbra bootstrap resume",
  "leave.manual": "La interoperabilidad de WSL está desactivada. En PowerShell:",

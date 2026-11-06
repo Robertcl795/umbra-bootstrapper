@@ -58,6 +58,8 @@
  "key.continue": "continue",
  "key.leavewsl": "leave WSL",
  "key.stay": "stay in the distro",
+ "key.continueps": "continue in PowerShell",
+ "key.later": "finish later",
  "leave.closing": "Closing {distro} so your user takes effect…",
  "leave.next": "Then, in PowerShell: {cmd} and umbra bootstrap resume",
  "leave.manual": "WSL interop is off here. In PowerShell:",

@@ -144,7 +144,12 @@ func TestRestartEnterLeavesWSL(t *testing.T) {
 
 func atRestart(t *testing.T) Model {
 	t.Helper()
-	m := atAccount(t, fixtureEnv("umbra", theme.TrueColor, "en"))
+	return atRestartIn(t, fixtureEnv("umbra", theme.TrueColor, "en"))
+}
+
+func atRestartIn(t *testing.T, e sys.Env) Model {
+	t.Helper()
+	m := atAccount(t, e)
 	m = typeText(m, "umbra")
 	m, _ = press(m, "tab")
 	m = typeText(m, "pw")
@@ -183,5 +188,24 @@ func TestTruecolorPaintsTheBackgroundInEveryCell(t *testing.T) {
 	n := started(t, fixtureEnv("void", theme.ANSI16, "en"), 80, 24)
 	if strings.Contains(n.View().Content, "\x1b[48;2;") {
 		t.Fatal("ANSI-16 keeps the terminal's background")
+	}
+}
+
+// ADR 0042: under install.ps1 (UM_DRIVER=ps1) the restart screen hands the restart to the
+// driver. Enter exits with code 10 and terminates nothing; q exits 0 (the driver stops there).
+func TestRestartUnderThePowerShellDriverExitsTen(t *testing.T) {
+	e := fixtureEnv("umbra", theme.TrueColor, "en")
+	e.Driver = "ps1"
+	m := atRestartIn(t, e)
+	if !strings.Contains(m.Content(), "continue in PowerShell") {
+		t.Fatalf("the footer does not name PowerShell:\n%s", m.Content())
+	}
+	en, _ := press(m, "enter")
+	if r := en.Result(); r.Action != screens.Next || r.Code != 10 {
+		t.Fatalf("enter: %+v, want Next with code 10 (no Leave: the driver terminates)", r)
+	}
+	q, _ := press(m, "q")
+	if r := q.Result(); r.Action != screens.Next || r.Code != 0 {
+		t.Fatalf("q: %+v, want Next with code 0", r)
 	}
 }
