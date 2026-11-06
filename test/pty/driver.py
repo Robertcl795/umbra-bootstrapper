@@ -162,10 +162,11 @@ def clean(raw: bytes) -> str:
     return ANSI.sub(b"", raw).decode(errors="replace")
 
 
-def run(argv, steps, env, timeout=10, settle=0.15, cwd=None):
+def run(argv, steps, env, timeout=10, settle=0.15, cwd=None, tee=None):
     """steps: list of (prompt_substring, keys). A prompt matches in the output since the last keys or
     on the current screen once new output has arrived. Returns (exit_code | None, text, raw_bytes);
-    text is the ANSI-stripped stream plus the final screen."""
+    text is the ANSI-stripped stream plus the final screen. tee: a path that gets every byte as it
+    arrives, for a run that may end this process (the gate's leave-WSL step)."""
     pid, fd = pty.fork()
     if pid == 0:
         rows, cols = int(env.get("LINES", "30")), int(env.get("COLUMNS", "80"))
@@ -174,6 +175,7 @@ def run(argv, steps, env, timeout=10, settle=0.15, cwd=None):
             os.chdir(cwd)
         os.execvpe(argv[0], argv, env)
     raw, mark, i, end = b"", 0, 0, time.time() + timeout
+    sink = open(tee, "wb", buffering=0) if tee else None
     screen = Screen(int(env.get("COLUMNS", "80")), int(env.get("LINES", "30")))
     seen_at = None
     status = None
@@ -194,6 +196,8 @@ def run(argv, steps, env, timeout=10, settle=0.15, cwd=None):
                 break
             raw += chunk
             screen.feed(chunk)
+            if sink:
+                sink.write(chunk)
         if i < len(steps):
             fresh = len(raw) > mark or (i > 0 and steps[i - 1][1] == "")  # after an empty step, the screen is enough
             want = steps[i][0]

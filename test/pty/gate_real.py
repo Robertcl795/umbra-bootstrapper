@@ -5,7 +5,9 @@ second run that must start from the stored selection and pass again.
 
 Usage: python3 -I gate_real.py <checkout> <password-file> [user|root|rerun]
   user   a regular user: a real install, then a re-run (Ubuntu with its user)
-  root   a fresh distro as root: the account screen, stage 1, the restart point (Arch)
+  root   a fresh distro as root: the account screen, stage 1, the restart point, where enter leaves
+         WSL: umbra-setup terminates the distro, which ends this gate too (its output is in RAW)
+  root-check  after that restart: the checks of the root run, on RAW (Arch)
   resume after the restart: `umbra bootstrap resume` in a terminal opens umbra-setup --resume and
          stage 2 runs on its run screen to done (Arch)
   rerun  after stage 2: umbra-setup opens with the stored selection and installs again
@@ -72,14 +74,26 @@ def rerun(argv, env, password):
     check("re-run: passes again, exit 0", code == 0 and titled(raw, "done"), text[-4000:])
 
 
+RAW = "/root/.gate-root.raw"  # the root run's terminal output, written as it arrives
+
+
 def root_run(argv, env, password):
-    # A fresh distro as root: the account screen, then stage 1 and the restart point.
+    # A fresh distro as root: the account screen, stage 1, the restart point; enter there leaves
+    # WSL. If this gate is still alive afterwards, the distro was not terminated.
     steps = [(T + "scan ready", ENTER), (T + "profile", ENTER),
              (T + "account user", "umbra\t" + password + "\t" + password + "\r")] + PICK + [
         (T + "review install", ENTER), (T + "restart", ENTER)]
-    code, text, raw = driver.run(argv, steps, env, timeout=2400, settle=0.4)
-    check("root: account screen, stage 1 through umbra-setup, the restart point, exit 0",
-          code == 0 and titled(raw, "account user") and titled(raw, "restart"), text[-4000:])
+    code, text, raw = driver.run(argv, steps, env, timeout=2400, settle=0.4, tee=RAW)
+    check("root: enter on the restart screen terminated the distro (this line must not print)", False,
+          f"exit {code}\n" + text[-3000:])
+
+
+def root_check(_argv, _env, password):
+    # Started again after the root run's distro was terminated: its output is in RAW.
+    raw = open(RAW, "rb").read()
+    text = driver.clean(raw)
+    check("root: account screen, stage 1 through umbra-setup, the restart point",
+          titled(raw, "account user") and titled(raw, "restart"), text[-4000:])
     check("root: the password is never drawn", password.encode() not in raw, "the password appeared in the output")
 
 
@@ -100,7 +114,7 @@ def main():
     mode = sys.argv[3] if len(sys.argv) > 3 else "user"
     password = open(pwfile).read().strip()
     argv = [os.path.join(checkout, "build", "umbra-setup"), "--env-dir", os.path.join(checkout, "env", "wsl")]
-    {"user": user_runs, "rerun": rerun, "root": root_run, "resume": resume_run}[mode](argv, env_for(checkout), password)
+    {"user": user_runs, "rerun": rerun, "root": root_run, "root-check": root_check, "resume": resume_run}[mode](argv, env_for(checkout), password)
     ok = sum(results)
     print(f"gate-real: {ok} ok, {len(results) - ok} failed", flush=True)
     sys.exit(0 if ok == len(results) else 1)
