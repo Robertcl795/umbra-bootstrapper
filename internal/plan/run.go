@@ -82,8 +82,9 @@ func Short(id string) string {
 // UM_COMPONENTS it checks every component, also the ones nobody chose.
 func DoctorEnv(c catalog.Catalog, platform string, s Selection) []string {
 	comps, _ := Components(c, platform, s.Items)
+	// UM_LOGIN_SHELL=keep: the login shell is Make default's question, not the run's (plan T4).
 	env := []string{"UM_COMPONENTS=" + strings.Join(comps, ","), "UM_SKIP=" + strings.Join(s.Skip, ","),
-		"UM_SKIP_PACKAGES=" + strings.Join(s.SkipPackages, ","), "UM_MODE=" + s.Profile}
+		"UM_SKIP_PACKAGES=" + strings.Join(s.SkipPackages, ","), "UM_MODE=" + s.Profile, "UM_LOGIN_SHELL=keep"}
 	if s.Shell != "" { // tests/03_shell.sh checks the chosen shell
 		env = append(env, "UM_SHELL="+s.Shell)
 	}

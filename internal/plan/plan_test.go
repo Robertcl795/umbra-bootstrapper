@@ -128,7 +128,7 @@ func TestShort(t *testing.T) {
 func TestDoctorEnv(t *testing.T) {
 	c, _ := load(t)
 	got := DoctorEnv(c, "wsl-ubuntu", Selection{Profile: "work", Items: []string{"prompt", "packages"}})
-	want := []string{"UM_COMPONENTS=packages,prompt", "UM_SKIP=", "UM_SKIP_PACKAGES=", "UM_MODE=work"}
+	want := []string{"UM_COMPONENTS=packages,prompt", "UM_SKIP=", "UM_SKIP_PACKAGES=", "UM_MODE=work", "UM_LOGIN_SHELL=keep"}
 	if !slices.Equal(got, want) {
 		t.Errorf("%v, want %v", got, want)
 	}

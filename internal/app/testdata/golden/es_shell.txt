@@ -1,5 +1,5 @@
 ◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
-■ ESCANEO  ■ PERFIL  ■ COMPONENTES  ◆ SHELL  ◇ TEMA  ◇ REVISAR  ◇ EJECUTAR  ◇ L…
+■ ■ PERFIL ■ COMPONENTES ◆ SHELL ◇ TEMA ◇ REVISAR ◇ EJECUTAR ◇ DEFAULT ◇ LISTO  
 ────────────────────────────────────────────────────────────────────────────────
                                                                                 
  ┏━ SHELL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┌─ DETALLE ─────────────────────────┐ 

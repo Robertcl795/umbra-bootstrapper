@@ -1,5 +1,5 @@
 ◢◤ UMBRA//SETUP                          wsl-arch · personal · void · 0.0.0-test
-◆ SCAN  ◇ PROFILE  ◇ COMPONENTS  ◇ SHELL  ◇ THEME  ◇ REVIEW  ◇ RUN  ◇ DONE      
+◆ SCAN ◇ PROFILE ◇ COMPONENTS ◇ SHELL ◇ THEME ◇ REVIEW ◇ RUN ◇ DEFAULT ◇ DONE   
 ────────────────────────────────────────────────────────────────────────────────
   █ █ █▀▄▀█ █▄▄ █▀█ ▄▀█                                                         
   █▄█ █ ▀ █ █▄█ █▀▄ █▀█                                                         

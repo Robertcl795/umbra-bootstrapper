@@ -1,0 +1,24 @@
+[35m◢◤ [m[1mUMBRA[m[35m//[mSETUP                         [37mwsl-arch · personal · umbra · 0.0.0-test[m
+[37m■ SCAN[m [37m■ PROFILE[m [37m■ COMPONENTS[m [37m■ SHELL[m [37m■ THEME[m [37m■ REVIEW[m [37m■ RUN[m [1m◆ DEFAULT[m [37m◇ DONE[m   
+[90m────────────────────────────────────────────────────────────────────────────────[m
+                                                                                
+ [90m┌[m[90m─[m[37m MAKE DEFAULT [m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┐[m 
+ [90m│[m Umbra set these up. Make them what opens by default? Nothing changes until [90m│[m 
+ [90m│[m you press enter.                                                           [90m│[m 
+ [90m│[m                                                                            [90m│[m 
+ [90m│[m [1;34m› [m[7m[■] Login shell       Fish                      now bash                [m [90m│[m 
+ [90m│[m   [■] Windows Terminal  PowerShell 7 in new tabs  [37mnow another profile[m      [90m│[m 
+ [90m└[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m─[m[90m┘[m 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+[1m↑↓[m [37mmove[m[90m  ·  [m[1mspace[m [37mtoggle[m[90m  ·  [m[1menter[m [37mmake default[m[90m  ·  [m[1mesc[m [37mkeep current[m            

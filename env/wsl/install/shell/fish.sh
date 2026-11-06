@@ -30,7 +30,8 @@ install_fish() {
 
   fish -c "fisher install PatrickF1/fzf.fish" >/dev/null 2>&1 || true
 
-  if [ "$UM_SHELL" = "fish" ] && ensure_cmd chsh; then
+  # umbra-setup asks on its Make default screen after the run (shell/default.sh).
+  if [ "$UM_SHELL" = "fish" ] && [ "${UM_LOGIN_SHELL:-}" != keep ] && ensure_cmd chsh; then
     if [ "$UM_NONINTERACTIVE" = "1" ]; then
       log_warn "Skipping default shell change in non-interactive mode."
     else

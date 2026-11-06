@@ -51,6 +51,11 @@ install_zsh() {
 
 set_default_shell_zsh() {
   local zsh_path current_shell
+  # umbra-setup asks on its Make default screen after the run (shell/default.sh).
+  if [ "${UM_LOGIN_SHELL:-}" = keep ]; then
+    log_info "The login shell is left to umbra-setup's Make default screen."
+    return 0
+  fi
   zsh_path="$(command -v zsh)"
   current_shell="$(getent passwd "$USER" | cut -d: -f7 || true)"
 

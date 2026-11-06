@@ -117,13 +117,12 @@ def f8_ansi16():
 # ── G4: the run, with a fake install.sh, doctor and sudo ──────────────────────
 def run_env(tmp, **extra):
     return env(UM_SETUP_INSTALL=os.path.join(FAKES, "install.sh"), UM_SETUP_DOCTOR=os.path.join(FAKES, "doctor.sh"),
-               FAKE_ARGS=os.path.join(tmp, "args"), FAKE_SUDO_LOG=os.path.join(tmp, "sudo.log"),
+               UM_SETUP_DEFAULT=os.path.join(FAKES, "default.sh"), FAKE_DIR=tmp, FAKE_ARGS=os.path.join(tmp, "args"), FAKE_SUDO_LOG=os.path.join(tmp, "sudo.log"),
                XDG_STATE_HOME=os.path.join(tmp, "state"), XDG_CONFIG_HOME=os.path.join(tmp, "config"),
                PATH=os.path.join(FAKES, "bin") + ":" + os.environ["PATH"], **extra)
 
 
 def to_install():
-    # shell and prompt only: n (none), down, space (shell), down, space (prompt)
     # n clears Components (shell is on the Shell screen, zsh by default): shell and prompt.
     return [("enter continue", ENTER), ("Which profile", ENTER), ("of 11 selected", "n"), ("0 of 11 selected", DOWN + SPACE),
             ("1 of 11 selected", ENTER), ("No shell setup", ENTER), ("Pick a variant", ENTER), ("[ Install ]", ENTER)]
@@ -131,11 +130,16 @@ def to_install():
 
 def g1_run_with_sudo_and_doctor():
     tmp = tempfile.mkdtemp(prefix="setup-pty-")
-    steps = to_install() + [("password for tester", "test-password\r"), ("Umbra is set up.", ENTER)]
+    steps = to_install() + [("password for tester", "test-password\r"), ("title:Umbra setup · default", ENTER),
+                            ("?password for tester", "test-password\r"), ("Umbra is set up.", ENTER)]
     code, text, _ = driver.run([BIN], steps, run_env(tmp), timeout=40)
     check("G1 Install asks sudo once on the terminal, runs, passes the doctor, exits 0", code == 0 and "Umbra is set up. " in text, text)
+    made = open(os.path.join(tmp, "default.log")).read() if os.path.exists(os.path.join(tmp, "default.log")) else ""
+    check("G1 Make default asks after the run, then sets zsh (enter) and Done says so",
+          made.strip() == "default.sh --shell zsh" and "Your login shell is now zsh" in text, made + text[-1500:])
     sudo = open(os.path.join(tmp, "sudo.log")).read() if os.path.exists(os.path.join(tmp, "sudo.log")) else ""
-    check("G1 sudo: -n true at scan, then -v once", sudo.splitlines()[:2] == ["sudo -n true", "sudo -v"] and sudo.count("sudo -v") == 1, sudo)
+    check("G1 sudo: -n true at scan, then -v once for the run and once for Make default (usermod)",
+          sudo.splitlines()[:2] == ["sudo -n true", "sudo -v"] and sudo.count("sudo -v") == 2, sudo)
     args = open(os.path.join(tmp, "args")).read().strip() if os.path.exists(os.path.join(tmp, "args")) else ""
     check("G1 install.sh got the Review command's flags (C5)",
           args == "--yes --profile personal --components shell,prompt --shell zsh --theme umbra --disable-k8s", args)
@@ -241,13 +245,16 @@ def h3_no_release_stops():
 
 def r1_resume_shows_stage_two():
     tmp = tempfile.mkdtemp(prefix="setup-pty-")
-    steps = [("Stage 2", ""), ("password for tester", "test-password\r"), ("title:Umbra setup · done", ENTER)]
-    e = run_env(tmp, UM_COMPONENTS="shell,prompt", UM_MODE="work", FAKE_FINISH="1")
+    steps = [("Stage 2", ""), ("password for tester", "test-password\r"), ("title:Umbra setup · default", "\x1b"),
+             ("title:Umbra setup · done", ENTER)]
+    e = run_env(tmp, UM_COMPONENTS="shell,prompt", UM_MODE="work", FAKE_FINISH="1", UM_SHELL="fish")
     code, text, _ = driver.run([BIN, "--resume"], steps, e, timeout=40)
     check("R1 --resume: boot says stage 2, sudo once, the run screen, then done (exit 0)",
           code == 0 and "Stage 2" in text and "PHASES" in text and "Umbra is set up." in text, text[-2500:])
     args = open(os.path.join(tmp, "args")).read() if os.path.exists(os.path.join(tmp, "args")) else "missing"
     check("R1 the staged run gets no flags: the marker's env is the selection", args.strip() == "", args)
+    check("R1 Make default asks about the staged shell (fish); esc keeps the login shell",
+          "Fish" in text and "Your defaults are as they were." in text and not os.path.exists(os.path.join(tmp, "default.log")), text[-2000:])
     state = os.path.join(tmp, "state", "um")
     log = next((open(os.path.join(state, f)).read() for f in os.listdir(state) if f.endswith(".log")), "") if os.path.isdir(state) else ""
     check("R1 the doctor is finish.sh's phase; umbra-setup does not run a second one",

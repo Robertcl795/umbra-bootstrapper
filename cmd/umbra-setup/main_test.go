@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -58,5 +59,60 @@ func TestWTFragmentFailsWithoutADistroOrWithAnUnknownVariant(t *testing.T) {
 	}
 	if _, code := setup(t, []string{"WSL_DISTRO_NAME=x"}, "--wt-fragment", "neon"); code != 1 {
 		t.Fatalf("unknown variant: exit %d, want 1", code)
+	}
+}
+
+const wtSample = `{
+    "defaultProfile": "{04d0c07a-b717-5790-a033-fbd379a82afb}", // Ubuntu
+    "profiles": { "list": [
+        { "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}", "name": "PowerShell", "source": "Windows.Terminal.PowershellCore" },
+        { "guid": "{04d0c07a-b717-5790-a033-fbd379a82afb}", "name": "Ubuntu" }
+    ] }
+}
+`
+
+// Make default (plan installer-packages-shell, T4; ADR 0043 as amended): --wt-status reads,
+// --wt-default-pwsh7 backs the file up and changes only defaultProfile.
+func TestWTDefaultPowerShell7(t *testing.T) {
+	p := t.TempDir() + "/settings.json"
+	if err := os.WriteFile(p, []byte(wtSample), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out, code := setup(t, nil, "--wt-status", p)
+	if code != 0 || out != "default={04d0c07a-b717-5790-a033-fbd379a82afb}\npwsh7={574e775e-4f2a-5b96-ac1e-a2962a402336}\n" {
+		t.Fatalf("status: exit %d %q", code, out)
+	}
+	out, code = setup(t, nil, "--wt-default-pwsh7", p)
+	if code != 0 || !strings.HasPrefix(out, "backup=") {
+		t.Fatalf("set: exit %d %q", code, out)
+	}
+	backup := strings.TrimSpace(strings.TrimPrefix(out, "backup="))
+	if b, err := os.ReadFile(backup); err != nil || string(b) != wtSample {
+		t.Errorf("backup %s: %v", backup, err)
+	}
+	b, _ := os.ReadFile(p)
+	want := strings.Replace(wtSample, "{04d0c07a-b717-5790-a033-fbd379a82afb}\", // Ubuntu", "{574e775e-4f2a-5b96-ac1e-a2962a402336}\", // Ubuntu", 1)
+	if string(b) != want {
+		t.Errorf("settings.json:\n%s", b)
+	}
+	if out, code = setup(t, nil, "--wt-status", p); !strings.HasPrefix(out, "default={574e775e") || code != 0 {
+		t.Errorf("after: %q", out)
+	}
+}
+
+// Without the PowerShell 7 profile (Windows Terminal has not started since pwsh was installed)
+// nothing is written and the exit code says so.
+func TestWTDefaultPowerShell7WithoutTheProfile(t *testing.T) {
+	p := t.TempDir() + "/settings.json"
+	text := strings.Replace(wtSample, "Windows.Terminal.PowershellCore", "x", 1)
+	_ = os.WriteFile(p, []byte(text), 0o644)
+	if _, code := setup(t, nil, "--wt-default-pwsh7", p); code != 3 {
+		t.Fatalf("exit %d, want 3", code)
+	}
+	if b, _ := os.ReadFile(p); string(b) != text {
+		t.Error("the file changed")
+	}
+	if matches, _ := filepath.Glob(p + ".umbra-*"); len(matches) != 0 {
+		t.Errorf("a backup was made: %v", matches)
 	}
 }

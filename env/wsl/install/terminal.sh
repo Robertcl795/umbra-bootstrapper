@@ -7,6 +7,7 @@
 #   --pwsh         component pwsh: starship through winget, Umbra's starship.toml, one marked block
 #                  in each PowerShell $PROFILE. The execution policy is read, never changed.
 #   --pwsh-remove  the blocks and Umbra's starship.toml (starship stays: winget uninstall Starship.Starship)
+#   --pwsh7        component pwsh7: PowerShell 7 from winget, the latest stable (ADR 0006 exception)
 # Sourced without arguments it only defines its functions (env/wsl/tests/unit_terminal.sh).
 # Tests set UM_WIN_LOCALAPPDATA_U/_W (Linux and Windows paths) and UM_WIN_PROFILES (one per line).
 set -euo pipefail
@@ -117,6 +118,10 @@ fragment_write() {
 # wt_settings: Windows Terminal's settings.json files here (stable, Preview, unpackaged).
 wt_settings() {
   local f
+  if [ -n "${UM_WIN_SETTINGS:-}" ]; then # tests
+    echo "$UM_WIN_SETTINGS"
+    return 0
+  fi
   for f in "$LA_U/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json" \
     "$LA_U/Packages/Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe/LocalState/settings.json" \
     "$LA_U/Microsoft/Windows Terminal/settings.json"; do

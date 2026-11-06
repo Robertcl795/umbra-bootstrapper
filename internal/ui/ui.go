@@ -14,7 +14,7 @@ import (
 )
 
 // Steps are the step-row ids, in order (i18n keys "step.<id>").
-var Steps = []string{"scan", "profile", "components", "shell", "theme", "review", "run", "done"}
+var Steps = []string{"scan", "profile", "components", "shell", "theme", "review", "run", "default", "done"}
 
 // Ctx is what drawing needs.
 type Ctx struct {
@@ -103,21 +103,59 @@ func Header(c Ctx, right string) string {
 	return left + strings.Repeat(" ", gap) + th.R("fgMuted", right)
 }
 
-// StepRow marks done steps ■, the current one ◆ (bold) and the next ones ◇.
+// StepRow marks done steps ■, the current one ◆ (bold) and the next ones ◇. When the names do
+// not fit in W (nine steps, or Spanish, at 80 columns), the gap shrinks to one space, then the
+// steps farthest from the current one show only their mark, done steps first.
 func StepRow(c Ctx, current int) string {
-	var parts []string
-	for i, id := range Steps {
-		name := c.T("step." + id)
-		switch {
-		case i < current:
-			parts = append(parts, c.Th.R("fgMuted", "■ "+name))
-		case i == current:
-			parts = append(parts, c.Th.B("fg", "◆ "+name))
-		default:
-			parts = append(parts, c.Th.R("fgMuted", "◇ "+name))
+	named := make([]bool, len(Steps))
+	for i := range named {
+		named[i] = true
+	}
+	draw := func(sep string) (string, int) {
+		var parts, plain []string
+		for i, id := range Steps {
+			mark := "◇"
+			switch {
+			case i < current:
+				mark = "■"
+			case i == current:
+				mark = "◆"
+			}
+			text := mark
+			if named[i] {
+				text += " " + c.T("step."+id)
+			}
+			plain = append(plain, text)
+			if i == current {
+				parts = append(parts, c.Th.B("fg", text))
+			} else {
+				parts = append(parts, c.Th.R("fgMuted", text))
+			}
+		}
+		return strings.Join(parts, sep), Width(strings.Join(plain, sep))
+	}
+	for _, sep := range []string{"  ", " "} {
+		if row, w := draw(sep); w <= c.W {
+			return Fit(row, c.W)
 		}
 	}
-	return Fit(strings.Join(parts, "  "), c.W)
+	// farthest first: done steps (from the first), then the next ones (from the last)
+	var order []int
+	for i := 0; i < current; i++ {
+		order = append(order, i)
+	}
+	for i := len(Steps) - 1; i > current; i-- {
+		order = append(order, i)
+	}
+	row, _ := draw(" ")
+	for _, i := range order {
+		named[i] = false
+		var w int
+		if row, w = draw(" "); w <= c.W {
+			break
+		}
+	}
+	return Fit(row, c.W)
 }
 
 // Rule is a full-width line in the border role.

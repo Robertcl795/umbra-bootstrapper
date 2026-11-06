@@ -47,6 +47,7 @@ type Run struct {
 	Doctor   []string
 	Tail     []string // last lines of the log (failed)
 	Distro   string   // WSL_DISTRO_NAME, for the restart commands
+	Defaults []string // what Make default changed (or kept), shown on Done
 }
 
 var spinner = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
@@ -217,7 +218,15 @@ func RunKeys(c ui.Ctx, r Run) []ui.Key {
 func DoneView(c ui.Ctx, r Run, umbraAI bool) []string {
 	bw := bodyW(c)
 	_, passed, total := r.Counts()
-	out := []string{"", c.Th.R("ok", "✓ ") + c.Th.B("fg", c.T("done.ok", "n", itoa(passed), "total", itoa(total))), ""}
+	out := []string{"", c.Th.R("ok", "✓ ") + c.Th.B("fg", c.T("done.ok", "n", itoa(passed), "total", itoa(total)))}
+	for _, l := range r.Defaults {
+		if strings.HasPrefix(l, "! ") {
+			out = append(out, c.Th.R("warn", "! ")+c.Th.R("fg", strings.TrimPrefix(l, "! ")))
+			continue
+		}
+		out = append(out, c.Th.R("ok", "✓ ")+c.Th.R("fg", l))
+	}
+	out = append(out, "")
 	doctor := r.Doctor
 	if len(doctor) == 0 {
 		doctor = []string{c.T("done.doctor.quiet")}

@@ -188,12 +188,13 @@ type Resume struct {
 	Components []string
 	Skip       []string
 	Profile    string
+	Shell      string // UM_SHELL: Make default asks about it after stage 2
 }
 
 // ResumeFrom reads it from the environment: UM_COMPONENTS, UM_SKIP and UM_MODE (personal when
 // unset, as bootstrap.sh does).
 func ResumeFrom(get func(string) string) Resume {
-	r := Resume{Components: list(get("UM_COMPONENTS")), Skip: list(get("UM_SKIP")), Profile: get("UM_MODE")}
+	r := Resume{Components: list(get("UM_COMPONENTS")), Skip: list(get("UM_SKIP")), Profile: get("UM_MODE"), Shell: get("UM_SHELL")}
 	if r.Profile == "" {
 		r.Profile = "personal"
 	}

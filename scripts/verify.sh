@@ -54,6 +54,7 @@ check_new_code() {
     env/wsl/tests/selector_dump.sh env/wsl/tests/unit_setup_fetch.sh env/wsl/tests/unit_resume.sh \
     env/wsl/install/terminal.sh env/wsl/tests/unit_terminal.sh env/wsl/tests/13_terminal.sh env/wsl/tests/14_pwsh.sh \
     env/wsl/tests/unit_packages.sh env/wsl/tests/01_packages.sh env/wsl/tests/15_pwsh7.sh \
+    env/wsl/install/shell/default.sh env/wsl/tests/unit_default_shell.sh test/pty/fakes/default.sh \
     test/pty/fakes/install.sh test/pty/fakes/doctor.sh test/pty/fakes/bin/sudo test/ps1/run.sh; do
     bash -n "$f" || { echo "bash -n $f"; return 1; }
     sc="$(shellcheck -f gcc "$f" 2>&1)" || { echo "$sc" >&2; echo "shellcheck: $(head -n 1 <<<"$sc")"; return 1; }
@@ -69,6 +70,7 @@ check_guards() {
   bash env/wsl/tests/unit_resume.sh
   bash env/wsl/tests/unit_terminal.sh
   bash env/wsl/tests/unit_packages.sh
+  bash env/wsl/tests/unit_default_shell.sh
 }
 
 # setup-fetch: install.sh's verified download of umbra-setup (ADR 0038); needs go for the fake release.

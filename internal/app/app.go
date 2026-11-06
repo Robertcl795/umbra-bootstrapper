@@ -32,13 +32,15 @@ const (
 	Theme
 	Review
 	Run
+	MakeDefault // after a passed run: the chosen shell (and PowerShell 7) as the default (plan T4)
 	Done
 	Restart
 	Failed
 )
 
 // step is the step-row position of each screen.
-var step = map[Screen]int{Boot: 0, Profile: 1, Account: 1, Components: 2, Shell: 3, Theme: 4, Review: 5, Run: 6, Done: 7, Restart: 7, Failed: 6}
+var step = map[Screen]int{Boot: 0, Profile: 1, Account: 1, Components: 2, Shell: 3, Theme: 4, Review: 5, Run: 6,
+	MakeDefault: 7, Done: 8, Restart: 8, Failed: 6}
 
 // MinW and MinH are the smallest terminal the screens are drawn for.
 const (
@@ -61,6 +63,9 @@ type Cmds struct {
 	Stop         func(stopFile string) tea.Cmd
 	Doctor       func(logPath string, env []string) tea.Cmd // env: plan.DoctorEnv
 	LogTail      func(path string) tea.Cmd
+	// Make default (shell/default.sh): the status, then the change the user confirmed.
+	DefaultStatus func() tea.Cmd
+	MakeDefault   func(shell string, wt bool) tea.Cmd
 }
 
 // Result is how the program ended.
@@ -82,6 +87,8 @@ type Model struct {
 	editing bool // the package editor of the item under ccur is open (on Components)
 	ecur    int
 	scur    int
+	def     screens.Default
+	dcur    int
 	tcur    int
 	bcur    int
 	glitch  int
@@ -134,6 +141,9 @@ func (m *Model) maybeResume() tea.Cmd {
 	}
 	m.resumed, m.touched = true, true
 	m.d.Sel.Profile = m.resume.Profile
+	if m.resume.Shell != "" {
+		m.d.Sel.Shell = m.resume.Shell
+	}
 	m.d.Sel.Chosen = map[string]bool{}
 	for _, id := range plan.ItemsFromComponents(m.d.Cat, m.d.Env.Platform, m.resume.Components) {
 		m.d.Sel.Chosen[id] = true
@@ -236,10 +246,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.d.Spin++
 		m.r.Spin++
 		m.ticking = false
+	case msgs.DefaultStatus:
+		m.def.Status, m.def.Known = msg, true
+		if len(m.def.Rows()) == 0 {
+			m.screen = Done
+		}
+	case msgs.DefaultDone:
+		m.def.Applying = false
+		m.r.Defaults = msg.Lines
+		if msg.Err != "" {
+			m.r.Defaults = append(m.r.Defaults, "! "+msg.Err)
+		}
+		m.screen = Done
 	case msgs.SudoReady:
 		m.d.Passwordless = true
+		if m.screen == MakeDefault {
+			cmd = m.cmds.MakeDefault(m.def.Apply())
+			break
+		}
 		cmd = m.start()
 	case msgs.SudoFailed:
+		if m.screen == MakeDefault {
+			m.def.Applying = false
+			m.r.Defaults = []string{"! " + m.tr("review.sudo.failed", "err", msg.Err)}
+			m.screen = Done
+			break
+		}
 		m.d.SudoErr = msg.Err
 	case msgs.RunStarted:
 		m.pid, m.evPath, m.r.LogPath, m.stopPath = msg.PID, msg.Events, msg.Log, msg.Stop
@@ -414,6 +446,28 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 		m.touched = true
 	case Review:
 		m.bcur, a = screens.ReviewKey(k, m.bcur, m.d)
+	case MakeDefault:
+		var da screens.Action
+		m.dcur, m.def.Off, da = screens.DefaultKey(k, m.dcur, m.def)
+		switch da {
+		case screens.Next:
+			shell, wt := m.def.Apply()
+			if (shell == "" && !wt) || m.cmds.MakeDefault == nil {
+				m.screen = Done
+				return m, nil
+			}
+			m.def.Applying = true
+			if shell != "" && m.cmds.SudoValidate != nil {
+				// usermod needs sudo, and its timestamp may be gone (finish.sh removed stage 2's
+				// rule): renew it on the terminal first; SudoReady then makes the change.
+				return m, m.cmds.SudoValidate()
+			}
+			return m, m.cmds.MakeDefault(shell, wt)
+		case screens.Back:
+			m.r.Defaults = []string{m.tr("default.kept")}
+			m.screen = Done
+		}
+		return m, nil
 	case Restart:
 		if k == "enter" && m.driven() {
 			return m.quit(screens.Next, RestartCode) // the driver terminates and runs stage 2
@@ -603,18 +657,35 @@ func (m *Model) finish() tea.Cmd {
 		return nil
 	case m.doctorEnded():
 		// finish.sh (stage 2) already ran the doctor as a phase: no second one.
-		m.screen = Done
-		return nil
+		return m.end()
 	case m.cmds.Doctor == nil || m.resume != nil:
 		m.dropDoctor()
-		m.screen = Done
-		return nil
+		return m.end()
 	}
 	i := m.phase(plan.Doctor)
 	m.r.Phases[i].State, m.r.Phases[i].Start = screens.Running, m.r.Now
 	m.r.Current = plan.Doctor
 	m.doctoring = true
 	return m.cmds.Doctor(m.r.LogPath, plan.DoctorEnv(m.d.Cat, m.d.Env.Platform, m.d.Plan()))
+}
+
+// end follows a passed run: Make default when there is a default to ask about, else Done.
+// Omarchy keeps its login shell (ADR 0011).
+func (m *Model) end() tea.Cmd {
+	shell := m.d.Plan().Shell
+	if m.d.Env.Platform == "omarchy" {
+		shell = ""
+	}
+	wt := false
+	for _, it := range m.d.On(screens.ScreenShellExtra) {
+		wt = wt || m.d.Sel.Chosen[it.ID]
+	}
+	if (shell == "" && !wt) || m.cmds.DefaultStatus == nil {
+		m.screen = Done
+		return nil
+	}
+	m.def, m.dcur, m.screen = screens.Default{Shell: shell, WT: wt}, 0, MakeDefault
+	return m.cmds.DefaultStatus()
 }
 
 func (m Model) doctorEnded() bool {
@@ -644,8 +715,7 @@ func (m *Model) doctorDone(msg msgs.DoctorDone) tea.Cmd {
 	m.doctoring = false
 	if msg.OK {
 		m.r.Phases[i].State = screens.Passed
-		m.screen = Done
-		return nil
+		return m.end()
 	}
 	m.r.Phases[i].State = screens.Failed
 	m.r.Phases[i].Msg = m.tr("run.doctor.failed")
@@ -725,6 +795,8 @@ func (m Model) Content() string {
 		body, keys = screens.ReviewView(c, m.d, m.bcur), screens.ReviewKeys(c)
 	case Run:
 		body, keys = screens.RunView(c, m.r), screens.RunKeys(c, m.r)
+	case MakeDefault:
+		body, keys = screens.DefaultView(c, m.def, m.dcur), screens.DefaultKeys(c)
 	case Done:
 		body, keys = screens.DoneView(c, m.r, m.d.Sel.Chosen[umbraAI(m.d)]), screens.EndKeys(c)
 	case Restart:
@@ -784,7 +856,7 @@ func (m Model) cursor(content string) *tea.Cursor {
 // Title is "Umbra setup · <screen>[ <state>]".
 func (m Model) Title() string {
 	name := map[Screen]string{Boot: "scan", Profile: "profile", Account: "account", Components: "components", Shell: "shell",
-		Theme: "theme", Review: "review", Run: "run", Done: "done", Restart: "restart", Failed: "failed"}[m.screen]
+		Theme: "theme", Review: "review", Run: "run", MakeDefault: "default", Done: "done", Restart: "restart", Failed: "failed"}[m.screen]
 	state := ""
 	switch m.screen {
 	case Boot:

@@ -15,6 +15,7 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/Robertcl795/umbra-bootstrapper/internal/events"
 	"github.com/Robertcl795/umbra-bootstrapper/internal/msgs"
@@ -194,7 +195,9 @@ func StartScript(script, envDir string, args []string, password string) tea.Cmd 
 		cmd := exec.Command("bash", append([]string{script}, args...)...)
 		// GIT_TERMINAL_PROMPT=0: git asks on /dev/tty, not stdin; a prompt would draw over the TUI.
 		// The access check already proved the credentials work without one.
-		cmd.Env = append(os.Environ(), "UM_EVENTS="+evPath, "UM_STOP="+stopPath, "UM_ENV_DIR="+envDir, "GIT_TERMINAL_PROMPT=0")
+		// UM_LOGIN_SHELL=keep: zsh.sh and fish.sh leave the login shell to Make default (plan T4).
+		cmd.Env = append(os.Environ(), "UM_EVENTS="+evPath, "UM_STOP="+stopPath, "UM_ENV_DIR="+envDir, "GIT_TERMINAL_PROMPT=0",
+			"UM_LOGIN_SHELL=keep")
 		if self, err := os.Executable(); err == nil {
 			cmd.Env = append(cmd.Env, "UM_SETUP_BIN="+self)
 		}
@@ -368,4 +371,80 @@ func LeaveWSL(distro string, out io.Writer, lines ...string) bool {
 	cmd := exec.Command(bin, "--terminate", distro)
 	cmd.Stdout, cmd.Stderr = out, out
 	return cmd.Run() == nil
+}
+
+// ── make default ─────────────────────────────────────────────────────────────
+
+// defaulter is install/shell/default.sh, or UM_SETUP_DEFAULT (tests).
+func defaulter(envDir string) string {
+	if p := os.Getenv("UM_SETUP_DEFAULT"); p != "" {
+		return p
+	}
+	return filepath.Join(envDir, filepath.FromSlash("install/shell/default.sh"))
+}
+
+func selfEnv() []string {
+	env := os.Environ()
+	if self, err := os.Executable(); err == nil {
+		env = append(env, "UM_SETUP_BIN="+self)
+	}
+	return env
+}
+
+// DefaultStatus reads what is the default now (default.sh --status: key=value lines).
+func DefaultStatus(envDir string) tea.Cmd {
+	return func() tea.Msg {
+		cmd := exec.Command("bash", defaulter(envDir), "--status")
+		cmd.Env = selfEnv()
+		out, err := cmd.Output()
+		st := msgs.DefaultStatus{}
+		if err != nil {
+			st.Err = err.Error()
+		}
+		for _, line := range strings.Split(string(out), "\n") {
+			k, v, _ := strings.Cut(line, "=")
+			switch k {
+			case "login":
+				st.Login = v
+			case "wt_settings":
+				st.WTSettings = v
+			case "wt_default":
+				st.WTDefault = v
+			case "wt_pwsh7":
+				st.WTPwsh7 = v
+			}
+		}
+		return st
+	}
+}
+
+// MakeDefault runs default.sh for what the user confirmed, after umbra-setup renewed sudo's
+// timestamp (usermod runs through sudo -n). Its messages, without color and log tags, come
+// back for Done.
+func MakeDefault(envDir, shell string, wt bool) tea.Cmd {
+	return func() tea.Msg {
+		script := `rc=0; if [ -n "$2" ]; then bash "$1" --shell "$2" || rc=$?; fi; if [ "$3" = 1 ]; then bash "$1" --wt-pwsh7 || rc=$?; fi; exit $rc`
+		w := "0"
+		if wt {
+			w = "1"
+		}
+		cmd := exec.Command("bash", "-c", script, "_", defaulter(envDir), shell, w)
+		cmd.Env = selfEnv()
+		out, err := cmd.CombinedOutput()
+		done := msgs.DefaultDone{}
+		for _, line := range strings.Split(ansi.Strip(string(out)), "\n") {
+			line = strings.TrimSpace(line)
+			switch {
+			case strings.HasPrefix(line, "[INFO] "):
+				done.Lines = append(done.Lines, strings.TrimPrefix(line, "[INFO] "))
+			case strings.HasPrefix(line, "[WARN] "), strings.HasPrefix(line, "[ERROR] "):
+				_, msg, _ := strings.Cut(line, "] ")
+				done.Lines = append(done.Lines, "! "+msg)
+			}
+		}
+		if err != nil && len(done.Lines) == 0 {
+			done.Err = err.Error()
+		}
+		return done
+	}
 }

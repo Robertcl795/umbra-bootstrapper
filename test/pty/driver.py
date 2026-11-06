@@ -202,13 +202,20 @@ def run(argv, steps, env, timeout=10, settle=0.15, cwd=None, tee=None):
             # (powershell.exe, wsl.exe started from WSL) sends one at start and waits for it.
             for _ in range(chunk.count(b"\x1b[6n")):
                 os.write(fd, b"\x1b[%d;%dR" % (screen.r + 1, screen.c + 1))
+        def matches(want):
+            if want.startswith("title:"):  # an OSC 0/2 window title, written whole on each change
+                return bool(re.search(rb"\x1b\][02];" + re.escape(want[6:].encode()) + rb"(?:\x07|\x1b\\)", raw[mark:]))
+            return want in clean(raw[mark:]) or want in screen.text()
+
+        # A step whose prompt starts with "?" is optional: when the next step's prompt shows
+        # first, it is skipped (a sudo password that may not be asked).
+        while i + 1 < len(steps) and steps[i][0].startswith("?") and seen_at is None \
+                and not matches(steps[i][0][1:]) and matches(steps[i + 1][0]):
+            i += 1
         if i < len(steps):
             fresh = len(raw) > mark or (i > 0 and steps[i - 1][1] == "")  # after an empty step, the screen is enough
-            want = steps[i][0]
-            if want.startswith("title:"):  # an OSC 0/2 window title, written whole on each change
-                hit = bool(re.search(rb"\x1b\][02];" + re.escape(want[6:].encode()) + rb"(?:\x07|\x1b\\)", raw[mark:]))
-            else:
-                hit = want in clean(raw[mark:]) or want in screen.text()
+            want = steps[i][0].removeprefix("?")
+            hit = matches(want)
             if seen_at is None and fresh and hit:
                 seen_at = time.time()
             # let the frame finish drawing before typing

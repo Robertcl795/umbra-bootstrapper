@@ -87,7 +87,7 @@ func TestRunSucceedsThroughTheDoctor(t *testing.T) {
 	if c.doctor != 1 || m.r.Current != plan.Doctor {
 		t.Fatalf("doctor not started: %d %q", c.doctor, m.r.Current)
 	}
-	if want := []string{"UM_COMPONENTS=shell,prompt", "UM_SKIP=", "UM_SKIP_PACKAGES=", "UM_MODE=personal", "UM_SHELL=zsh"}; !slices.Equal(c.doctorEnv, want) {
+	if want := []string{"UM_COMPONENTS=shell,prompt", "UM_SKIP=", "UM_SKIP_PACKAGES=", "UM_MODE=personal", "UM_LOGIN_SHELL=keep", "UM_SHELL=zsh"}; !slices.Equal(c.doctorEnv, want) {
 		t.Errorf("doctor env %v, want %v (only what was selected)", c.doctorEnv, want)
 	}
 	m = send(m, msgs.DoctorDone{OK: true, Tail: []string{"all good"}})

@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ SCAN ■ PROFILE ■ COMPONENTS ■ SHELL ■ THEME ■ REVIEW ■ RUN ◆ DEFAULT ◇ DONE   
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┌─ MAKE DEFAULT ─────────────────────────────────────────────────────────────┐ 
+ │ Umbra set these up. Make them what opens by default? Nothing changes until │ 
+ │ you press enter.                                                           │ 
+ │                                                                            │ 
+ │ › [■] Login shell       Fish                      now bash                 │ 
+ │   [■] Windows Terminal  PowerShell 7 in new tabs  now another profile      │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ move  ·  space toggle  ·  enter make default  ·  esc keep current            

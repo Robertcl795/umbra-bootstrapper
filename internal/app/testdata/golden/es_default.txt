@@ -1,0 +1,24 @@
+◢◤ UMBRA//SETUP                         wsl-arch · personal · umbra · 0.0.0-test
+■ ■ PERFIL ■ COMPONENTES ■ SHELL ■ TEMA ■ REVISAR ■ EJECUTAR ◆ DEFAULT ◇ LISTO  
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+ ┌─ PREDETERMINAR ────────────────────────────────────────────────────────────┐ 
+ │ Umbra instaló esto. ¿Hacerlo lo que se abre por defecto? Nada cambia hasta │ 
+ │ que presiones enter.                                                       │ 
+ │                                                                            │ 
+ │ › [■] Shell de inicio   Fish                             ahora bash        │ 
+ │   [ ] Windows Terminal  PowerShell 7 en pestañas nuevas  ahora otro perfil │ 
+ │       Windows Terminal todavía no lista PowerShell 7: abre Windows         │ 
+ │       Terminal una vez y vuelve a correr umbra-setup, o elígelo en         │ 
+ │       Configuración > Inicio > Perfil predeterminado.                      │ 
+ └────────────────────────────────────────────────────────────────────────────┘ 
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+↑↓ mover  ·  space marcar  ·  enter predeterminar  ·  esc dejar como está       

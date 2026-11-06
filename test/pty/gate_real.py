@@ -14,6 +14,7 @@ Usage: python3 -I gate_real.py <checkout> <password-file> [user|root|rerun]
 Prints one line per check and "gate-real: N ok, M failed"; exits 1 on any failure.
 """
 import os
+import pwd
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -58,13 +59,25 @@ if os.environ.get("UM_GATE_SHELL") == "fish":
     PICK[4] = (T + "shell zsh", DOWN + SPACE + ENTER)
 
 
+def shell():
+    return os.environ.get("UM_GATE_SHELL") or "zsh"
+
+
+def login_is(name, when, text=""):
+    """Make default (plan installer-packages-shell, T4) made name the user's login shell."""
+    login = pwd.getpwuid(os.getuid()).pw_shell
+    check(when + ": Make default set the login shell to " + name, os.path.basename(login) == name, login + "\n" + text[-3000:])
+
+
 def user_runs(argv, env, password):
     steps = [(T + "scan ready", ENTER), (T + "profile", ENTER)] + PICK + [
-        (T + "review install", ENTER), ("assword", password + "\r"), (T + "done", ENTER)]
+        (T + "review install", ENTER), ("assword", password + "\r"),
+        (T + "default", ENTER), ("?assword", password + "\r"), (T + "done", ENTER)]
     code, text, raw = driver.run(argv, steps, env, timeout=2400, settle=0.4)
     check("run 1: real install of packages, shell (" + (os.environ.get("UM_GATE_SHELL") or "zsh") + "), prompt through umbra-setup; doctor passes; exit 0",
           code == 0 and titled(raw, "done"), text[-4000:])
     check("run 1: the run screen was shown", titled(raw, "run"), text[-3000:])
+    login_is(shell(), "run 1", text)
     rerun(argv, env, password)
 
 
@@ -103,16 +116,17 @@ def root_check(_argv, _env, password):
     check("root: the password is never drawn", password.encode() not in raw, "the password appeared in the output")
 
 
-def resume_run(_argv, env, _password):
+def resume_run(_argv, env, password):
     # Stage 2 as the new user, in a terminal: the wrapper opens the copy stage 1 left in
     # ~/.local/bin; sudo is passwordless until finish.sh removes the temporary rule.
     copy = os.path.join(os.environ["HOME"], ".local", "bin", "umbra-setup")
     check("resume: stage 1 left a verified umbra-setup in ~/.local/bin", os.access(copy, os.X_OK), copy)
-    steps = [(T + "run", ""), (T + "done", ENTER)]
+    steps = [(T + "run", ""), (T + "default", ENTER), ("?assword", password + "\r"), (T + "done", ENTER)]
     code, text, raw = driver.run(["umbra", "bootstrap", "resume"], steps, env, timeout=2400, settle=0.4)
     check("resume: stage 2 on umbra-setup's run screen to done, exit 0",
           code == 0 and titled(raw, "run") and titled(raw, "done") and b"Stage 2" in raw, text[-4000:])
     check("resume: finish.sh's doctor is the doctor row", b"doctor" in raw.lower() and titled(raw, "done"), text[-2000:])
+    login_is("zsh", "resume", text)
 
 
 def main():

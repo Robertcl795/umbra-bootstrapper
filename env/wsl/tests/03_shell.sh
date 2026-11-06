@@ -53,8 +53,9 @@ for p in zsh-autosuggestions fast-syntax-highlighting zsh-history-substring-sear
   fi
 done
 
-# The default login shell should be zsh (unless fish was chosen)
-if [ "${UM_SHELL:-zsh}" = "zsh" ]; then
+# The default login shell should be zsh (unless fish was chosen, or umbra-setup leaves it to its
+# Make default screen: UM_LOGIN_SHELL=keep)
+if [ "${UM_SHELL:-zsh}" = "zsh" ] && [ "${UM_LOGIN_SHELL:-}" != keep ]; then
   login_shell="$(getent passwd "$USER" | cut -d: -f7)"
   case "$login_shell" in
     */zsh) : ;;

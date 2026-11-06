@@ -60,6 +60,20 @@ type Stored struct {
 	Shell        string   // zsh, fish
 }
 
+// DefaultStatus is what is the default now (install/shell/default.sh --status): the login
+// shell, and on WSL Windows Terminal's default profile and its PowerShell 7 profile ("" when it
+// lists none yet).
+type DefaultStatus struct {
+	Login, WTSettings, WTDefault, WTPwsh7 string
+	Err                                   string
+}
+
+// DefaultDone carries what Make default changed (default.sh's messages), or why it could not.
+type DefaultDone struct {
+	Lines []string
+	Err   string
+}
+
 // Tick drives spinners and elapsed times while something runs (no tick at rest).
 type Tick struct{ Now time.Time }
 
