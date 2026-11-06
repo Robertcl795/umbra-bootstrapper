@@ -51,7 +51,8 @@ wsl.exe -d <distro>
 ```
 
 ```sh
-umbra bootstrap resume   # stage 2; safe to run again if it fails
+umbra bootstrap resume   # stage 2 in umbra-setup's progress screen; safe to run again if it fails
+umbra bootstrap resume --plain   # the same, as plain log lines
 umbra bootstrap status   # what is pending, and whether sudo is still passwordless
 ```
 

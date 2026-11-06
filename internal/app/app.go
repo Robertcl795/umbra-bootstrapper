@@ -49,6 +49,7 @@ const (
 type Cmds struct {
 	Init         []tea.Cmd               // fast facts, slow facts, catalog, stored selection
 	Glitch       func(frame int) tea.Cmd // the next boot glitch frame
+	Shine        func(frame int) tea.Cmd // the next corona sweep frame (the rest when frame is 1)
 	Tick         func() tea.Cmd          // 100 ms, only while something is pending or running
 	SudoValidate func() tea.Cmd
 	SudoRefresh  func() tea.Cmd
@@ -69,18 +70,20 @@ type Result struct {
 
 // Model is the whole program state.
 type Model struct {
-	d      screens.Data
-	r      screens.Run
-	tr     i18n.Func
-	cmds   Cmds
-	screen Screen
-	pcur   int
-	ccur   int
-	tcur   int
-	bcur   int
-	glitch int
-	w, h   int
-	result Result
+	d       screens.Data
+	r       screens.Run
+	tr      i18n.Func
+	cmds    Cmds
+	screen  Screen
+	pcur    int
+	ccur    int
+	tcur    int
+	bcur    int
+	glitch  int
+	shine   int  // the corona sweep frame, 0 = still
+	shining bool // a ShineTick is on its way
+	w, h    int
+	result  Result
 
 	acct      screens.Account
 	users     []string
@@ -96,6 +99,10 @@ type Model struct {
 	stopReq   bool
 	doctoring bool
 	args      []string
+
+	resume    *sys.Resume // stage 2: run the staged selection without asking (--resume)
+	resumed   bool
+	sudoKnown bool
 }
 
 // New returns the first model for an environment. pending are scan lines that will arrive.
@@ -104,7 +111,56 @@ func New(env sys.Env, cmds Cmds, pending ...msgs.ScanFact) Model {
 	d.Sel = screens.Selection{Profile: "personal", Chosen: map[string]bool{}, Variant: env.Theme.Name}
 	d.Passwordless = env.Root
 	return Model{d: d, r: screens.Run{Distro: env.Distro}, tr: i18n.New(env.Lang), cmds: cmds,
-		tcur: max(0, slices.Index(theme.Variants, env.Theme.Name))}
+		tcur: max(0, slices.Index(theme.Variants, env.Theme.Name)), shining: cmds.Shine != nil && !env.NoMotion}
+}
+
+// Resuming makes the model run stage 2: boot scans, then the staged selection starts on its own
+// once the catalog and the sudo state are known; there is no Profile…Review.
+func (m Model) Resuming(r sys.Resume) Model {
+	m.resume = &r
+	m.d.Resume = true
+	return m
+}
+
+// maybeResume starts the staged run once everything it needs is in.
+func (m *Model) maybeResume() tea.Cmd {
+	if m.resume == nil || m.resumed || !m.d.Ready || !m.sudoKnown || m.screen != Boot {
+		return nil
+	}
+	m.resumed, m.touched = true, true
+	m.d.Sel.Profile = m.resume.Profile
+	m.d.Sel.Chosen = map[string]bool{}
+	for _, id := range plan.ItemsFromComponents(m.d.Cat, m.d.Env.Platform, m.resume.Components) {
+		m.d.Sel.Chosen[id] = true
+	}
+	return m.install()
+}
+
+// install validates sudo (once) and starts the run.
+func (m *Model) install() tea.Cmd {
+	m.d.SudoErr = ""
+	if m.d.Passwordless || m.cmds.SudoValidate == nil {
+		return m.start()
+	}
+	return m.cmds.SudoValidate()
+}
+
+// logoVisible: the wordmark (boot) or the header's sweep (run) is on screen.
+func (m Model) logoVisible() bool { return m.screen == Boot || m.screen == Run }
+
+// shineTick advances the sweep; off the logo, or without motion, the chain ends.
+func (m *Model) shineTick(f int) tea.Cmd {
+	if m.d.Env.NoMotion || m.cmds.Shine == nil || !m.logoVisible() {
+		m.shine, m.shining = 0, false
+		return nil
+	}
+	m.shining = true
+	if f > ui.ShineFrames {
+		m.shine = 0
+		return m.cmds.Shine(1)
+	}
+	m.shine = f
+	return m.cmds.Shine(f + 1)
 }
 
 // Result returns how the program ended.
@@ -115,6 +171,9 @@ func (m Model) Init() tea.Cmd {
 	cmds := append([]tea.Cmd(nil), m.cmds.Init...)
 	if m.cmds.Glitch != nil && !m.d.Env.NoMotion {
 		cmds = append(cmds, m.cmds.Glitch(1))
+	}
+	if m.shining {
+		cmds = append(cmds, m.cmds.Shine(1))
 	}
 	return tea.Batch(cmds...)
 }
@@ -139,6 +198,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case msgs.Catalog:
 		m.d.Cat, m.d.Ready = msg.Cat, true
 		m.defaults()
+		cmd = m.maybeResume()
 	case msgs.CatalogErr:
 		m.d.CatErr = msg.Err
 	case msgs.Access:
@@ -147,6 +207,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.defaults()
 	case msgs.Sudo:
 		m.d.Passwordless = m.d.Env.Root || msg.Passwordless
+		m.sudoKnown = true
+		cmd = m.maybeResume()
 	case msgs.Stored:
 		m.stored = msg
 		m.defaults()
@@ -162,6 +224,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.glitch = msg.Frame
 		return m, m.cmds.Glitch(msg.Frame + 1)
+	case msgs.ShineTick:
+		cmd = m.shineTick(msg.Frame)
 	case msgs.Tick:
 		m.r.Now = msg.Now
 		m.d.Spin++
@@ -274,6 +338,15 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 	if k == "ctrl+c" {
 		return m.quit(screens.Quit, 130)
 	}
+	if m.resume != nil && m.screen == Boot { // stage 2 starts on its own; enter retries a failed sudo
+		switch {
+		case k == "q":
+			return m.quit(screens.Quit, 130)
+		case k == "enter" && m.d.SudoErr != "" && m.resumed:
+			return m, m.install()
+		}
+		return m, nil
+	}
 	if m.small() {
 		if k == "q" {
 			return m.quit(screens.Quit, 130)
@@ -321,11 +394,7 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	case screens.Install:
 		m.args = m.d.Args()
-		m.d.SudoErr = ""
-		if m.d.Passwordless || m.cmds.SudoValidate == nil {
-			return m, m.start()
-		}
-		return m, m.cmds.SudoValidate()
+		return m, m.install()
 	case screens.Next:
 		m.screen++
 		if m.screen == Account && !m.needAccount() {
@@ -373,14 +442,19 @@ func (m *Model) start() tea.Cmd {
 		m.r.Phases = append(m.r.Phases, screens.Phase{ID: id})
 	}
 	m.r.Started = m.r.Now // the last tick; the first event corrects it when earlier
+	var shine tea.Cmd
+	if !m.shining && m.cmds.Shine != nil && !m.d.Env.NoMotion {
+		m.shining = true
+		shine = m.cmds.Shine(1)
+	}
 	if m.cmds.Start == nil {
-		return nil
+		return shine
 	}
 	password := ""
 	if m.needAccount() {
 		password = m.acct.Pass
 	}
-	return m.cmds.Start(m.args, password)
+	return tea.Batch(shine, m.cmds.Start(m.args, password))
 }
 
 func (m Model) refresh() tea.Cmd {
@@ -469,7 +543,11 @@ func (m *Model) finish() tea.Cmd {
 		m.dropDoctor()
 		m.screen = Restart
 		return nil
-	case m.cmds.Doctor == nil:
+	case m.doctorEnded():
+		// finish.sh (stage 2) already ran the doctor as a phase: no second one.
+		m.screen = Done
+		return nil
+	case m.cmds.Doctor == nil || m.resume != nil:
 		m.dropDoctor()
 		m.screen = Done
 		return nil
@@ -479,6 +557,15 @@ func (m *Model) finish() tea.Cmd {
 	m.r.Current = plan.Doctor
 	m.doctoring = true
 	return m.cmds.Doctor(m.r.LogPath, plan.DoctorEnv(m.d.Cat, m.d.Env.Platform, m.d.Plan()))
+}
+
+func (m Model) doctorEnded() bool {
+	for _, p := range m.r.Phases {
+		if p.ID == plan.Doctor {
+			return p.State == screens.Passed
+		}
+	}
+	return false
 }
 
 func callTail(f func(string) tea.Cmd, p string) tea.Cmd {
@@ -547,6 +634,12 @@ func (m Model) Content() string {
 		return ""
 	}
 	c := ui.Ctx{Th: m.d.Env.Theme.With(m.d.Sel.Variant), T: m.tr, W: m.w, H: m.h}
+	switch m.screen {
+	case Boot:
+		c.Shine = m.shine
+	case Run:
+		c.HeadShine = m.shine
+	}
 	if m.small() {
 		return screens.SmallView(c)
 	}
@@ -573,7 +666,11 @@ func (m Model) Content() string {
 	case Restart:
 		body, keys = screens.RestartView(c, m.r), screens.EndKeys(c)
 	case Failed:
-		body, keys = screens.FailedView(c, m.r, plan.Command(m.args)), screens.EndKeys(c)
+		command := plan.Command(m.args)
+		if m.resume != nil {
+			command = "umbra bootstrap resume"
+		}
+		body, keys = screens.FailedView(c, m.r, command), screens.EndKeys(c)
 	}
 	return ui.Frame(c, right, step[m.screen], body, keys)
 }

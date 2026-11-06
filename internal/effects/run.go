@@ -153,12 +153,28 @@ func installer(envDir string) string {
 	return filepath.Join(envDir, "..", "..", "install.sh")
 }
 
-// Start runs install.sh with args (the clock for the file names is read here, an effect). stdin is /dev/null, so nothing can wait for input behind the
+// Resumer is the command of a stage 2 run (--resume): <env>/bootstrap.sh, which reads the staged
+// selection from the environment `umbra bootstrap resume` exported; UM_SETUP_INSTALL in tests.
+func Resumer(envDir string) string {
+	if p := os.Getenv("UM_SETUP_INSTALL"); p != "" {
+		return p
+	}
+	return filepath.Join(envDir, "bootstrap.sh")
+}
+
+// Start runs install.sh with args; StartScript runs another script the same way.
+func Start(envDir string, args []string, password string) tea.Cmd {
+	return StartScript(installer(envDir), envDir, args, password)
+}
+
+// StartScript runs script with args (the clock for the file names is read here, an effect). stdin is /dev/null, so nothing can wait for input behind the
 // TUI; stdout and stderr go to the log; events go to a file next to it (ADR 0040); UM_STOP names
 // the stop file. The child gets its own process group, so a terminal ctrl+c reaches only the TUI.
 // A password (stage 1's new user, as root) goes in a 0600 file in a 0700 temp dir, named by
 // UM_USER_PASSWORD_FILE (stage1.sh set_password) and removed when the child exits.
-func Start(envDir string, args []string, password string) tea.Cmd {
+// UM_SETUP_BIN names this binary, so stage 1 can hand the verified copy to the new user
+// (stage1.sh stage_setup_bin) and `umbra bootstrap resume` opens it again.
+func StartScript(script, envDir string, args []string, password string) tea.Cmd {
 	return func() tea.Msg {
 		dir := stateDir()
 		if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -175,10 +191,13 @@ func Start(envDir string, args []string, password string) tea.Cmd {
 		if err := os.WriteFile(evPath, nil, 0o644); err != nil {
 			return msgs.RunErr{Err: err.Error()}
 		}
-		cmd := exec.Command("bash", append([]string{installer(envDir)}, args...)...)
+		cmd := exec.Command("bash", append([]string{script}, args...)...)
 		// GIT_TERMINAL_PROMPT=0: git asks on /dev/tty, not stdin; a prompt would draw over the TUI.
 		// The access check already proved the credentials work without one.
 		cmd.Env = append(os.Environ(), "UM_EVENTS="+evPath, "UM_STOP="+stopPath, "UM_ENV_DIR="+envDir, "GIT_TERMINAL_PROMPT=0")
+		if self, err := os.Executable(); err == nil {
+			cmd.Env = append(cmd.Env, "UM_SETUP_BIN="+self)
+		}
 		cmd.Stdout, cmd.Stderr = logf, logf
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 		secret := ""

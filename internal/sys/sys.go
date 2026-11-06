@@ -174,3 +174,31 @@ func ValidUsername(u string) bool {
 	}
 	return true
 }
+
+// Resume is the selection stage 1 staged for stage 2 (bootstrap.env, which `umbra bootstrap
+// resume` exports before it starts umbra-setup --resume).
+type Resume struct {
+	Components []string
+	Skip       []string
+	Profile    string
+}
+
+// ResumeFrom reads it from the environment: UM_COMPONENTS, UM_SKIP and UM_MODE (personal when
+// unset, as bootstrap.sh does).
+func ResumeFrom(get func(string) string) Resume {
+	r := Resume{Components: list(get("UM_COMPONENTS")), Skip: list(get("UM_SKIP")), Profile: get("UM_MODE")}
+	if r.Profile == "" {
+		r.Profile = "personal"
+	}
+	return r
+}
+
+func list(s string) []string {
+	var out []string
+	for _, f := range strings.Split(s, ",") {
+		if f = strings.TrimSpace(f); f != "" {
+			out = append(out, f)
+		}
+	}
+	return out
+}

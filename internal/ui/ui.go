@@ -22,6 +22,57 @@ type Ctx struct {
 	T  i18n.Func
 	W  int // terminal width
 	H  int // terminal height
+
+	Shine     int // the corona sweep frame on the boot wordmark (0 = still)
+	HeadShine int // the same on the header's UMBRA (the run screen)
+}
+
+// ShineFrames is how many frames one corona sweep takes (ux-spec §6.3).
+const ShineFrames = 20
+
+// shineHalf is the half width of the band, in cells.
+const shineHalf = 2
+
+// Sweep draws s in bold fg with a band of gradient.corona at frame (1..ShineFrames) moving left
+// to right; the band's center is the corona end of the gradient. Any other frame, and a profile
+// without color, give exactly the still text. Spaces are never colored. ANSI-16: warn at the
+// center, accent2 around it.
+func Sweep(th theme.T, s string, frame int) string {
+	if frame < 1 || frame > ShineFrames || th.Profile == theme.None {
+		return th.B("fg", s)
+	}
+	runes := []rune(s)
+	span := len(runes) + 2*shineHalf
+	pos := (frame-1)*span/(ShineFrames-1) - shineHalf
+	cols := th.Corona(shineHalf + 1) // accent … corona
+	var b, plain strings.Builder
+	flush := func() {
+		if plain.Len() > 0 {
+			b.WriteString(th.B("fg", plain.String()))
+			plain.Reset()
+		}
+	}
+	for i, r := range runes {
+		d := i - pos
+		if d < 0 {
+			d = -d
+		}
+		if d > shineHalf || r == ' ' {
+			plain.WriteRune(r)
+			continue
+		}
+		flush()
+		switch {
+		case cols != nil:
+			b.WriteString(th.Bold("fg").Foreground(cols[shineHalf-d]).Render(string(r)))
+		case d == 0:
+			b.WriteString(th.B("warn", string(r)))
+		default:
+			b.WriteString(th.B("accent2", string(r)))
+		}
+	}
+	flush()
+	return b.String()
 }
 
 // Width is the visible width of s (ANSI aware).
@@ -43,7 +94,7 @@ func Fit(s string, w int) string {
 // Header is "◢◤ UMBRA//SETUP" on the left and the facts on the right.
 func Header(c Ctx, right string) string {
 	th := c.Th
-	left := th.R("accent2", "◢◤ ") + th.B("fg", "UMBRA") + th.R("accent2", "//") + th.R("fg", "SETUP")
+	left := th.R("accent2", "◢◤ ") + Sweep(th, "UMBRA", c.HeadShine) + th.R("accent2", "//") + th.R("fg", "SETUP")
 	gap := c.W - Width(left) - Width(right)
 	if gap < 1 {
 		right = ansi.Truncate(right, max(0, c.W-Width(left)-1), "…")

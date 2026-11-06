@@ -262,6 +262,21 @@ EOF
   chmod 0644 "$UM_REMINDER"
 }
 
+# stage_setup_bin <home> <group>: the umbra-setup that runs stage 1 (UM_SETUP_BIN, set by it)
+# goes to the new user's ~/.local/bin, so `umbra bootstrap resume` opens stage 2 in it. Only our
+# binary, never over one that is not ours; without UM_SETUP_BIN (no TUI) nothing happens.
+stage_setup_bin() {
+  local home="$1" group="$2" src="${UM_SETUP_BIN:-}" dest="$1/.local/bin/umbra-setup"
+  [ -n "$src" ] && [ -x "$src" ] || return 0
+  "$src" --version 2>/dev/null | grep -q '(Umbra bootstrapper)' || return 0
+  if [ -e "$dest" ] && ! "$dest" --version 2>/dev/null | grep -q '(Umbra bootstrapper)'; then
+    log_warn "$dest exists and is not umbra-setup; not overwritten. Stage 2 will print plain logs."
+    return 0
+  fi
+  install -d -o "$UM_USER" -g "$group" "$home/.local/bin" || return 1
+  install -m 0755 -o "$UM_USER" -g "$group" "$src" "$dest"
+}
+
 p3r_apply() {
   local home group
   home="$(user_home)"
@@ -274,6 +289,7 @@ p3r_apply() {
     return 1
   fi
   install -m 0755 -o root -g root "$UM_ENV_DIR/bin/umbra" "$UM_COMMAND" || return 1
+  stage_setup_bin "$home" "$group" || return 1
   install_reminder
 }
 

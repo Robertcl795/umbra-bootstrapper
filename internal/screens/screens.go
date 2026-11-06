@@ -42,6 +42,7 @@ type Data struct {
 	SudoErr      string          // the last sudo -v failure, shown on review
 	Spin         int             // spinner frame
 	Extra        []string        // arguments the app adds (--user for stage 1)
+	Resume       bool            // stage 2: the staged selection runs without asking (--resume)
 }
 
 // Selection is what the user picked so far.
@@ -85,7 +86,7 @@ func BootView(c ui.Ctx, d Data, glitch int) []string {
 		case 2:
 			out = append(out, c.Th.R("accent2", line))
 		default:
-			out = append(out, " "+c.Th.B("fg", line))
+			out = append(out, " "+ui.Sweep(c.Th, line, c.Shine))
 		}
 	}
 	out = append(out, " "+c.Th.R("fgMuted", c.T("boot.tagline")), "")
@@ -117,6 +118,10 @@ func BootView(c ui.Ctx, d Data, glitch int) []string {
 		out = append(out, c.Th.R("error", "! "+c.T("err.catalog", "err", d.CatErr)))
 	case rootOutsideWSL(d):
 		out = append(out, c.Th.R("error", "! "+c.T("err.root")))
+	case d.Resume && d.SudoErr != "":
+		out = append(out, c.Th.R("error", "! "+c.T("boot.resume.sudo", "err", d.SudoErr)))
+	case d.Resume:
+		out = append(out, c.Th.R("info", c.T("boot.resume")))
 	default:
 		out = append(out, c.Th.R("fgMuted", c.T("boot.readonly")))
 	}
@@ -128,7 +133,10 @@ func BootView(c ui.Ctx, d Data, glitch int) []string {
 
 // BootKeys lists the footer keys of boot.
 func BootKeys(c ui.Ctx, d Data) []ui.Key {
-	if !BootCanContinue(d) {
+	if d.Resume && d.SudoErr != "" {
+		return []ui.Key{{Key: "enter", Desc: c.T("key.retry")}, {Key: "q", Desc: c.T("key.quit")}}
+	}
+	if d.Resume || !BootCanContinue(d) {
 		return []ui.Key{{Key: "q", Desc: c.T("key.quit")}}
 	}
 	return []ui.Key{{Key: "enter", Desc: c.T("key.continue")}, {Key: "q", Desc: c.T("key.quit")}}

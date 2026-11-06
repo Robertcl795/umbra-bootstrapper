@@ -17,4 +17,6 @@ run_phase() { # run_phase <id> <body>
 echo "[fake] starting"
 run_phase run_onchange_before_20-shell.sh 'log_info "installing zsh"; sleep "${FAKE_SLEEP:-0.3}"; phase_gate shell "zsh is missing" test -z "${FAKE_FAIL:-}"' || exit $?
 run_phase run_onchange_before_30-prompt.sh 'UM_SKIP=prompt; component_enabled prompt || phase_skip' || exit $?
+# FAKE_FINISH: stage 2 ends with finish.sh, whose doctor is a phase (ADR 0040).
+[ -z "${FAKE_FINISH:-}" ] || run_phase doctor 'log_info "doctor from finish.sh"' || exit $?
 echo "[fake] done"

@@ -144,6 +144,16 @@ func okIf(b bool) msgs.FactState {
 	return msgs.FactBad
 }
 
+// ShineTick schedules the next corona sweep frame: frame 1, the start of a sweep, comes after the
+// rest between sweeps (2.5 s); the others 50 ms apart (one sweep ≈ 1 s, ux-spec §6.3).
+func ShineTick(frame int) tea.Cmd {
+	d := 50 * time.Millisecond
+	if frame == 1 {
+		d = 2500 * time.Millisecond
+	}
+	return tea.Tick(d, func(time.Time) tea.Msg { return msgs.ShineTick{Frame: frame} })
+}
+
 // GlitchTick schedules the next glitch frame (≤ 600 ms in all, ux-spec §6.3).
 func GlitchTick(frame int) tea.Cmd {
 	return tea.Tick(200*time.Millisecond, func(time.Time) tea.Msg { return msgs.GlitchTick{Frame: frame} })

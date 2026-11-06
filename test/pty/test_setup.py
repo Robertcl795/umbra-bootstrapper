@@ -238,6 +238,32 @@ def h3_no_release_stops():
     shutil.rmtree(tmp, ignore_errors=True)
 
 
+def r1_resume_shows_stage_two():
+    tmp = tempfile.mkdtemp(prefix="setup-pty-")
+    steps = [("Stage 2", ""), ("password for tester", "test-password\r"), ("title:Umbra setup · done", ENTER)]
+    e = run_env(tmp, UM_COMPONENTS="shell,prompt", UM_MODE="work", FAKE_FINISH="1")
+    code, text, _ = driver.run([BIN, "--resume"], steps, e, timeout=40)
+    check("R1 --resume: boot says stage 2, sudo once, the run screen, then done (exit 0)",
+          code == 0 and "Stage 2" in text and "PHASES" in text and "Umbra is set up." in text, text[-2500:])
+    args = open(os.path.join(tmp, "args")).read() if os.path.exists(os.path.join(tmp, "args")) else "missing"
+    check("R1 the staged run gets no flags: the marker's env is the selection", args.strip() == "", args)
+    state = os.path.join(tmp, "state", "um")
+    log = next((open(os.path.join(state, f)).read() for f in os.listdir(state) if f.endswith(".log")), "") if os.path.isdir(state) else ""
+    check("R1 the doctor is finish.sh's phase; umbra-setup does not run a second one",
+          "doctor from finish.sh" in log and "ok 04_prompt" not in log, log)
+    shutil.rmtree(tmp, ignore_errors=True)
+
+
+def m1_wordmark_sweeps():
+    # Motion on: within ~4 s the corona band (#FFC857 = 255;200;87) crosses the wordmark; with
+    # UM_REDUCED_MOTION=1 it never appears on boot.
+    corona = b"38;2;255;200;87"
+    _, _, raw = driver.run([BIN], [], env(UM_REDUCED_MOTION=None), timeout=4.5)
+    check("M1 boot: the corona sweep crosses the wordmark (motion on)", corona in raw, raw[-400:])
+    _, _, raw = driver.run([BIN], [], env(), timeout=4.5)
+    check("M1 UM_REDUCED_MOTION=1: the wordmark stays still", corona not in raw, raw[-400:])
+
+
 def h4_rerun_finds_the_checkout():
     tmp = tempfile.mkdtemp(prefix="setup-pty-")
     home = os.path.join(tmp, "home")
@@ -265,7 +291,7 @@ if __name__ == "__main__":
         sys.exit(f"build the binary first: go build -o build/umbra-setup ./cmd/umbra-setup ({BIN})")
     for f in (f1_defaults_dry_run, f2_work_untick_void, f3_cancel, f4_small, f5_no_tty, f6_no_color, f7_spanish, f8_ansi16,
               g1_run_with_sudo_and_doctor, g2_failed_phase, g3_stop_after_phase, g4_rerun_shows_installed,
-              h1_install_opens_umbra_setup, h2_tampered_release_stops, h3_no_release_stops, h4_rerun_finds_the_checkout, h5_titles_drive_the_flow):
+              h1_install_opens_umbra_setup, h2_tampered_release_stops, h3_no_release_stops, h4_rerun_finds_the_checkout, h5_titles_drive_the_flow, r1_resume_shows_stage_two, m1_wordmark_sweeps):
         f()
     shutil.rmtree(ISOLATED, ignore_errors=True)
     ok = sum(results)

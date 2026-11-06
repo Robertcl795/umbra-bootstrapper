@@ -7,8 +7,14 @@ set -euo pipefail
 marker="$HOME/.local/state/um/bootstrap.env"
 
 usage() {
-  echo "usage: umbra bootstrap resume|status" >&2
+  echo "usage: umbra bootstrap resume [--plain]|status" >&2
   exit 2
+}
+
+# setup_bin: the user's umbra-setup when it is ours (stage 1 copied the verified binary there).
+setup_bin() {
+  local bin="$HOME/.local/bin/umbra-setup"
+  [ -x "$bin" ] && "$bin" --version 2>/dev/null | grep -q '(Umbra bootstrapper)' && echo "$bin"
 }
 
 case "${1:-}:${2:-}" in
@@ -24,6 +30,16 @@ case "${1:-}:${2:-}" in
     # shellcheck disable=SC1090
     source "$marker"
     shift 2
+    # In a terminal, stage 2 runs in umbra-setup's run screen (phases, log, progress); --plain,
+    # no terminal, extra flags or no umbra-setup of ours: bootstrap.sh's own log, as before.
+    plain=0
+    if [ "${1:-}" = --plain ]; then
+      plain=1
+      shift
+    fi
+    if [ "$plain" = 0 ] && [ $# -eq 0 ] && [ -t 0 ] && [ -t 1 ] && bin="$(setup_bin)"; then
+      exec "$bin" --resume --env-dir "$UM_ENV_DIR"
+    fi
     exec bash "$UM_ENV_DIR/bootstrap.sh" "$@"
     ;;
   bootstrap:status)

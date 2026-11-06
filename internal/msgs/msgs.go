@@ -36,6 +36,10 @@ type CatalogErr struct{ Err string }
 // GlitchTick advances the boot glitch by one frame.
 type GlitchTick struct{ Frame int }
 
+// ShineTick moves the corona sweep over the wordmark: frames 1..ui.ShineFrames draw the band,
+// any later frame is the rest between sweeps (ux-spec §6.3).
+type ShineTick struct{ Frame int }
+
 // Access is the result of the Umbra AI access check (umbra_ai_access in selector.sh).
 type Access struct{ OK bool }
 

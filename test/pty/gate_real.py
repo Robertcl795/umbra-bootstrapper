@@ -6,6 +6,8 @@ second run that must start from the stored selection and pass again.
 Usage: python3 -I gate_real.py <checkout> <password-file> [user|root|rerun]
   user   a regular user: a real install, then a re-run (Ubuntu with its user)
   root   a fresh distro as root: the account screen, stage 1, the restart point (Arch)
+  resume after the restart: `umbra bootstrap resume` in a terminal opens umbra-setup --resume and
+         stage 2 runs on its run screen to done (Arch)
   rerun  after stage 2: umbra-setup opens with the stored selection and installs again
 Prints one line per check and "gate-real: N ok, M failed"; exits 1 on any failure.
 """
@@ -81,12 +83,24 @@ def root_run(argv, env, password):
     check("root: the password is never drawn", password.encode() not in raw, "the password appeared in the output")
 
 
+def resume_run(_argv, env, _password):
+    # Stage 2 as the new user, in a terminal: the wrapper opens the copy stage 1 left in
+    # ~/.local/bin; sudo is passwordless until finish.sh removes the temporary rule.
+    copy = os.path.join(os.environ["HOME"], ".local", "bin", "umbra-setup")
+    check("resume: stage 1 left a verified umbra-setup in ~/.local/bin", os.access(copy, os.X_OK), copy)
+    steps = [(T + "run", ""), (T + "done", ENTER)]
+    code, text, raw = driver.run(["umbra", "bootstrap", "resume"], steps, env, timeout=2400, settle=0.4)
+    check("resume: stage 2 on umbra-setup's run screen to done, exit 0",
+          code == 0 and titled(raw, "run") and titled(raw, "done") and b"Stage 2" in raw, text[-4000:])
+    check("resume: finish.sh's doctor is the doctor row", b"doctor" in raw.lower() and titled(raw, "done"), text[-2000:])
+
+
 def main():
     checkout, pwfile = sys.argv[1], sys.argv[2]
     mode = sys.argv[3] if len(sys.argv) > 3 else "user"
     password = open(pwfile).read().strip()
     argv = [os.path.join(checkout, "build", "umbra-setup"), "--env-dir", os.path.join(checkout, "env", "wsl")]
-    {"user": user_runs, "rerun": rerun, "root": root_run}[mode](argv, env_for(checkout), password)
+    {"user": user_runs, "rerun": rerun, "root": root_run, "resume": resume_run}[mode](argv, env_for(checkout), password)
     ok = sum(results)
     print(f"gate-real: {ok} ok, {len(results) - ok} failed", flush=True)
     sys.exit(0 if ok == len(results) else 1)
