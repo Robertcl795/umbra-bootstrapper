@@ -260,7 +260,7 @@ pwsh_remove() {
   localappdata || { log_warn "The Windows side is not reachable; nothing removed."; return 0; }
   local p tmp
   while IFS= read -r p; do
-    [ -n "$p" ] && [ -f "$p" ] || continue
+    if [ -z "$p" ] || [ ! -f "$p" ]; then continue; fi
     tmp="$(mktemp)"
     block_strip "$p" >"$tmp"
     cat "$tmp" >"$p"
