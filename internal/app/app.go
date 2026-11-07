@@ -101,6 +101,7 @@ type Model struct {
 	users     []string
 	stored    msgs.Stored
 	touched   bool // the user changed the selection: stored data and defaults no longer apply
+	picked    bool // the user moved the theme cursor: background detection no longer applies
 	ticking   bool
 	pid       int
 	evPath    string
@@ -151,6 +152,27 @@ func (m *Model) maybeResume() tea.Cmd {
 	return m.install()
 }
 
+// background applies the terminal's reply to OSC 11 (G-B4, setup-integration B3). The order is
+// UM_THEME, then the variant a previous run stored, then this reply, then COLORFGBG, then umbra.
+// A light background preselects lux and the theme screen says why; the user's own pick wins.
+func (m *Model) background(dark bool) {
+	if m.d.Env.ThemeSet {
+		return
+	}
+	v := "umbra"
+	if !dark {
+		v = "lux"
+	}
+	m.d.Env.Theme = m.d.Env.Theme.With(v)
+	storedWins := m.stored.Theme != "" && slices.Contains(theme.Variants, m.stored.Theme)
+	m.d.LightNote = !dark && !storedWins
+	if m.picked || storedWins {
+		return
+	}
+	m.d.Sel.Variant = v
+	m.tcur = max(0, slices.Index(theme.Variants, v))
+}
+
 // install validates sudo (once) and starts the run.
 func (m *Model) install() tea.Cmd {
 	m.d.SudoErr = ""
@@ -190,6 +212,9 @@ func (m Model) Init() tea.Cmd {
 	if m.shining {
 		cmds = append(cmds, m.cmds.Shine(1))
 	}
+	if !m.d.Env.ThemeSet {
+		cmds = append(cmds, tea.RequestBackgroundColor) // OSC 11; the reply is a BackgroundColorMsg (G-B4)
+	}
 	return tea.Batch(cmds...)
 }
 
@@ -208,6 +233,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return tm, tea.Batch(cmds...)
 	case tea.WindowSizeMsg:
 		m.w, m.h = msg.Width, msg.Height
+	case tea.BackgroundColorMsg:
+		m.background(msg.IsDark())
 	case msgs.ScanFact:
 		m.setFact(msg)
 	case msgs.Catalog:
@@ -443,7 +470,7 @@ func (m Model) key(k string) (tea.Model, tea.Cmd) {
 	case Theme:
 		m.tcur, a = screens.ThemeKey(k, m.tcur)
 		m.d.Sel.Variant = theme.Variants[m.tcur]
-		m.touched = true
+		m.touched, m.picked = true, true
 	case Review:
 		m.bcur, a = screens.ReviewKey(k, m.bcur, m.d)
 	case MakeDefault:
@@ -790,7 +817,7 @@ func (m Model) Content() string {
 	case Shell:
 		body, keys = screens.ShellView(c, m.d, m.scur), screens.ShellKeys(c)
 	case Theme:
-		body, keys = screens.ThemeView(c, m.tcur), screens.ThemeKeys(c)
+		body, keys = screens.ThemeView(c, m.tcur, m.d.LightNote), screens.ThemeKeys(c)
 	case Review:
 		body, keys = screens.ReviewView(c, m.d, m.bcur), screens.ReviewKeys(c)
 	case Run:

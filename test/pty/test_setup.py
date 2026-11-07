@@ -294,12 +294,26 @@ def h5_titles_drive_the_flow():
           code == 0 and "profile=personal components=packages skip=" in text, text[-1500:])
 
 
+def b1_light_background_preselects_lux():
+    t = "title:Umbra setup · "
+    walk = [(t + "scan ready", ENTER), (t + "profile", ENTER), ("of 11 selected", ENTER), ("No shell setup", ENTER)]
+    code, text, raw = driver.run([BIN], walk + [(t + "theme lux", CTRL_C)], env(UM_THEME=None), timeout=30, bg="rgb:ffff/ffff/ffff")
+    check("B1 a light OSC 11 reply preselects lux and the theme screen says why (G-B4)",
+          b"\x1b]11;?" in raw and "light background, so lux is preselected" in text, text[-1500:])
+    code, text, _ = driver.run([BIN], walk + [(t + "theme umbra", CTRL_C)], env(UM_THEME=None), timeout=30, bg="rgb:1010/0c0c/1c1c")
+    check("B1 a dark reply keeps umbra and says nothing", "lux is preselected" not in text, text[-1500:])
+    code, text, raw = driver.run([BIN], walk + [(t + "theme void", CTRL_C)], env(UM_THEME="void"), timeout=30, bg="rgb:ffff/ffff/ffff")
+    check("B1 UM_THEME wins: no query, void stays", b"\x1b]11;?" not in raw and "lux is preselected" not in text, text[-1500:])
+    code, text, _ = driver.run([BIN], walk + [(t + "theme umbra", CTRL_C)], env(UM_THEME=None), timeout=30)
+    check("B1 no reply (terminal without OSC 11): umbra", code is not None, text[-1500:])
+
+
 if __name__ == "__main__":
     if not os.access(BIN, os.X_OK):
         sys.exit(f"build the binary first: go build -o build/umbra-setup ./cmd/umbra-setup ({BIN})")
     for f in (f1_defaults_dry_run, f2_work_untick_void, f3_cancel, f4_small, f5_no_tty, f6_no_color, f7_spanish, f8_ansi16,
               g1_run_with_sudo_and_doctor, g2_failed_phase, g3_stop_after_phase, g4_rerun_shows_installed,
-              h1_install_opens_umbra_setup, h2_tampered_release_stops, h3_no_release_stops, h4_rerun_finds_the_checkout, h5_titles_drive_the_flow, r1_resume_shows_stage_two, m1_wordmark_sweeps):
+              h1_install_opens_umbra_setup, h2_tampered_release_stops, h3_no_release_stops, h4_rerun_finds_the_checkout, h5_titles_drive_the_flow, r1_resume_shows_stage_two, m1_wordmark_sweeps, b1_light_background_preselects_lux):
         f()
     shutil.rmtree(ISOLATED, ignore_errors=True)
     ok = sum(results)

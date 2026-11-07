@@ -3,6 +3,7 @@ package app
 import (
 	"flag"
 	"fmt"
+	"image/color"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -374,5 +375,48 @@ func TestTitleNamesTheScreenAndState(t *testing.T) {
 			t.Errorf("title %q, want %q", got, w)
 		}
 		m, _ = press(m, "enter")
+	}
+}
+
+// G-B4: the terminal's OSC 11 reply picks the variant unless UM_THEME, a stored pick or the user's
+// own move on the theme screen says otherwise.
+func TestBackgroundReplyPreselectsTheVariant(t *testing.T) {
+	light := tea.BackgroundColorMsg{Color: color.RGBA{R: 0xfa, G: 0xf8, B: 0xff, A: 0xff}}
+	dark := tea.BackgroundColorMsg{Color: color.RGBA{R: 0x10, G: 0x0c, B: 0x1c, A: 0xff}}
+	upd := func(m Model, msg tea.Msg) Model { tm, _ := m.Update(msg); return tm.(Model) }
+
+	m := upd(started(t, fixtureEnv("umbra", theme.TrueColor, "en"), 80, 24), light)
+	if m.d.Sel.Variant != "lux" || !m.d.LightNote {
+		t.Fatalf("light: variant %s, note %v", m.d.Sel.Variant, m.d.LightNote)
+	}
+	m, _ = press(m, "enter", "enter", "enter", "enter")
+	if !strings.Contains(m.Content(), "light background, so lux is preselected") || m.tcur != slices.Index(theme.Variants, "lux") {
+		t.Errorf("theme screen does not say why, or cursor %d", m.tcur)
+	}
+
+	m = upd(started(t, fixtureEnv("lux", theme.TrueColor, "en"), 80, 24), dark) // COLORFGBG said light; OSC 11 is the real color
+	if m.d.Sel.Variant != "umbra" || m.d.LightNote {
+		t.Errorf("dark: variant %s, note %v", m.d.Sel.Variant, m.d.LightNote)
+	}
+
+	env := fixtureEnv("void", theme.TrueColor, "en")
+	env.ThemeSet = true
+	if m = upd(started(t, env, 80, 24), light); m.d.Sel.Variant != "void" || m.d.LightNote {
+		t.Errorf("UM_THEME: variant %s, note %v", m.d.Sel.Variant, m.d.LightNote)
+	}
+	if New(env, Cmds{}).Init() != nil {
+		// Init batches the request only when UM_THEME is unset; with no other commands it is nil.
+		t.Error("UM_THEME set: Init still asks for the background")
+	}
+
+	m = started(t, fixtureEnv("umbra", theme.TrueColor, "en"), 80, 24)
+	m = upd(m, msgs.Stored{Found: true, Theme: "void"})
+	if m = upd(m, light); m.d.Sel.Variant != "void" || m.d.LightNote {
+		t.Errorf("stored pick: variant %s, note %v", m.d.Sel.Variant, m.d.LightNote)
+	}
+
+	m, _ = press(started(t, fixtureEnv("umbra", theme.TrueColor, "en"), 80, 24), "enter", "enter", "enter", "enter", "right") // void
+	if m = upd(m, light); m.d.Sel.Variant != "void" {
+		t.Errorf("user's pick lost to a late reply: %s", m.d.Sel.Variant)
 	}
 }

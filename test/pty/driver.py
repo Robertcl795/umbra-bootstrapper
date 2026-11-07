@@ -162,11 +162,13 @@ def clean(raw: bytes) -> str:
     return ANSI.sub(b"", raw).decode(errors="replace")
 
 
-def run(argv, steps, env, timeout=10, settle=0.15, cwd=None, tee=None):
+def run(argv, steps, env, timeout=10, settle=0.15, cwd=None, tee=None, bg=None):
     """steps: list of (prompt_substring, keys). A prompt matches in the output since the last keys or
     on the current screen once new output has arrived. Returns (exit_code | None, text, raw_bytes);
     text is the ANSI-stripped stream plus the final screen. tee: a path that gets every byte as it
-    arrives, for a run that may end this process (the gate's leave-WSL step)."""
+    arrives, for a run that may end this process (the gate's leave-WSL step). bg: an OSC 11 color
+    ("rgb:ffff/ffff/ffff") sent back when the child asks for the background; None never answers,
+    like a terminal without OSC 11 support."""
     pid, fd = pty.fork()
     if pid == 0:
         rows, cols = int(env.get("LINES", "30")), int(env.get("COLUMNS", "80"))
@@ -202,6 +204,9 @@ def run(argv, steps, env, timeout=10, settle=0.15, cwd=None, tee=None):
             # (powershell.exe, wsl.exe started from WSL) sends one at start and waits for it.
             for _ in range(chunk.count(b"\x1b[6n")):
                 os.write(fd, b"\x1b[%d;%dR" % (screen.r + 1, screen.c + 1))
+            # A background color query (OSC 11 with "?") gets the fake terminal's color (G-B4).
+            if bg is not None and b"\x1b]11;?" in chunk:
+                os.write(fd, b"\x1b]11;" + bg.encode() + b"\x1b\\")
         def matches(want):
             if want.startswith("title:"):  # an OSC 0/2 window title, written whole on each change
                 return bool(re.search(rb"\x1b\][02];" + re.escape(want[6:].encode()) + rb"(?:\x07|\x1b\\)", raw[mark:]))

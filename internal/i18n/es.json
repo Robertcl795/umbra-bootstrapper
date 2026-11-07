@@ -147,6 +147,7 @@
  "theme.ask": "Elige una variante. Toda la pantalla se redibuja con la que está bajo el cursor.",
  "theme.follows": "La siguen: prompt, zsh/fish, fzf, bat, zellij, Ghostty, Neovim.",
  "theme.lux": "claro",
+ "theme.light": "Tu terminal tiene fondo claro, así que lux viene preseleccionado.",
  "theme.others": "Las demás apps reciben los tres archivos de tema.",
  "theme.umbra": "oscuro · por defecto",
  "theme.void": "fondo más oscuro",

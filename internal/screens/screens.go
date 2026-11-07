@@ -46,6 +46,7 @@ type Data struct {
 	Spin         int             // spinner frame
 	Extra        []string        // arguments the app adds (--user for stage 1)
 	Resume       bool            // stage 2: the staged selection runs without asking (--resume)
+	LightNote    bool            // the terminal answered OSC 11 with a light background: lux was preselected
 }
 
 // Selection is what the user picked so far.
@@ -362,7 +363,8 @@ func ComponentsKey(key string, cursor int, d Data) (int, map[string]bool, Action
 var swatchRows = [][]string{{"bgDeep", "bg", "surface", "border", "fgMuted", "fg"}, {"accent", "accent2", "info", "warn", "ok", "error"}}
 
 // ThemeView shows the three variants; the app draws the whole screen in the one under cursor.
-func ThemeView(c ui.Ctx, cursor int) []string {
+// light says the terminal reported a light background, so lux was preselected (G-B4).
+func ThemeView(c ui.Ctx, cursor int, light bool) []string {
 	bw := bodyW(c)
 	cw := (bw - 2) / 3
 	var cards [][]string
@@ -381,6 +383,9 @@ func ThemeView(c ui.Ctx, cursor int) []string {
 	}
 	row := ui.Side(ui.Side(cards[0], cw, cards[1], 1), 2*cw+1, cards[2], 1)
 	out := []string{"", c.Th.B("fg", c.T("theme.ask")), ""}
+	if light {
+		out = append(out[:2], c.Th.R("info", c.T("theme.light")), "")
+	}
 	out = append(out, row...)
 	out = append(out, "", c.Th.R("fgMuted", c.T("theme.follows")), c.Th.R("fgMuted", c.T("theme.others")), "")
 	return append(out, ui.Next(c, "UM_THEME="+theme.Variants[cursor]+" chezmoi init --apply", bw)...)
